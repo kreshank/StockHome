@@ -1,2 +1,3 @@
 # CS3110-Final-Project
-Ryan Wu rw645@cornell.edu
+<p >Ryan Wu rw645@cornell.edu <br>
+<p >Leo Lu ll865@cornell.edu<br>
