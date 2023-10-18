@@ -2,6 +2,3 @@
 
 (** @canonical Stocks.Api *)
 module Api = Stocks__Api
-
-(** @canonical Stocks.Display *)
-module Display = Stocks__Display
