@@ -1,17 +1,22 @@
-### CS-3110 Final Project - StockHome
+# CS-3110 Final Project - StockHome
+This is a program that pulls stock data from an API for a user to manipulate or track. Using data from the API, a user can build a portfolio, track stock prices, save and write configurations, and more. 
 -----------------------------------
 ## Files and Their Purposes
-**Folders** 
-bin - holds executable binaries
-src - holds source code
-test - holds Ounit tests
+### Folders 
+| Folder | Description |
+| ----------- | ----------- |
+| bin | holds executable binaries |
+| src | holds source code |
+| test | holds Ounit tests |
 
-**Files**
-api.ml - contains code relevant to any APIs used to gather data
-display.ml - contains code for the terminal UI
-portfolio.ml - contains module for a data structure that holds multiple stock.t data types
-stock.ml - contains functor that takes a parser module and converts it into a stock.t data type 
-parser.ml - contains code that takes data from a .txt file a parses it into a module
+### Files
+| File | Description |
+| ----------- | ----------- |
+| api.ml | contains code relevant to any APIs used to gather data |
+| display.ml | contains code for the terminal UI |
+| portfolio.ml | contains module for a data structure that holds multiple stock.t data types |
+| stock.ml | contains functor that takes a parser module and converts it into a stock.t data type  | 
+| parser.ml | contains code that takes data from a .txt file a parses it into a module | 
 
 *More detailed documentation is present within the files themselves.*
 
@@ -20,20 +25,28 @@ parser.ml - contains code that takes data from a .txt file a parses it into a mo
 This is the standard Git commit format we will be using to ensure everyone can understand what feature have been added or changed.
 
 ```
-[Summary]: [Added/Changed Features/Functions]
+[Summary]
 
--[Details]
+-[Details (e.g [Added/Changed Features/Functions])]
 -[Name and Email]
 ```
 
 So, an example of this would be:
 
 ```
-Updated API: Implemented pull_yahoo function
+Updated API
 
 - pull_yahoo can now request data from the api and store it in a stock data structure 
 - Leo - ll865@cornell.edu
 ```
+
+## Git Pull and Merge 
+Calling `git merge` will automatically merge any changes you have made into the main branch. Try not to change files other people are working on to prevent merges as much as possible.
+
+Calling `git pull` will pull any changes from the main branch, and you may have to merge instead if prompted. Try to pull before you push or when you begin working on the code.
+
+### PLEASE LET EVERYONE KNOW WHAT YOU ARE CHANGING AHEAD OF TIME
+
 
 ## Makefile
 The Makefile has several commands that can be used, such as:
