@@ -1,1 +1,1 @@
-(*If giving errors, remember to run [dune build]*)
+(** Api.ml, intended for web-scraping Yahoo Finance for stock information, and writing it into a file*)

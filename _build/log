@@ -1,9 +1,9 @@
 # dune build
 # OCAMLPARAM: unset
 # Shared cache: disabled
-# Workspace root: /home/ll865/3110/final_proj/CS3110-Final-Project
+# Workspace root: /home/kreshank/3110/final-project/CS3110-Final-Project
 # Auto-detected concurrency: 16
-$ /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -config > /tmp/dune_d2451b_output
+$ /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -config > /tmp/dune_8e556d_output
 # Dune context:
 #  { name = "default"
 #  ; kind = "default"
@@ -12,41 +12,44 @@ $ /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -config > /tmp/dune_d2451b_outp
 #  ; for_host = None
 #  ; fdo_target_exe = None
 #  ; build_dir = In_build_dir "default"
-#  ; ocaml_bin = External "/home/ll865/.opam/cs3110-2023fa/bin"
-#  ; ocaml = Ok External "/home/ll865/.opam/cs3110-2023fa/bin/ocaml"
-#  ; ocamlc = External "/home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt"
-#  ; ocamlopt = Ok External "/home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt"
-#  ; ocamldep = Ok External "/home/ll865/.opam/cs3110-2023fa/bin/ocamldep.opt"
+#  ; ocaml_bin = External "/home/kreshank/.opam/cs3110-2023fa/bin"
+#  ; ocaml = Ok External "/home/kreshank/.opam/cs3110-2023fa/bin/ocaml"
+#  ; ocamlc = External "/home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt"
+#  ; ocamlopt =
+#      Ok External "/home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt"
+#  ; ocamldep =
+#      Ok External "/home/kreshank/.opam/cs3110-2023fa/bin/ocamldep.opt"
 #  ; ocamlmklib =
-#      Ok External "/home/ll865/.opam/cs3110-2023fa/bin/ocamlmklib.opt"
+#      Ok External "/home/kreshank/.opam/cs3110-2023fa/bin/ocamlmklib.opt"
 #  ; env =
 #      map
 #        { "DUNE_OCAML_HARDCODED" :
-#            "/home/ll865/.opam/cs3110-2023fa/lib/ocaml:/home/ll865/.opam/cs3110-2023fa/lib"
-#        ; "DUNE_OCAML_STDLIB" : "/home/ll865/.opam/cs3110-2023fa/lib/ocaml"
+#            "/home/kreshank/.opam/cs3110-2023fa/lib/ocaml:/home/kreshank/.opam/cs3110-2023fa/lib"
+#        ; "DUNE_OCAML_STDLIB" : "/home/kreshank/.opam/cs3110-2023fa/lib/ocaml"
 #        ; "DUNE_SOURCEROOT" :
-#            "/home/ll865/3110/final_proj/CS3110-Final-Project"
+#            "/home/kreshank/3110/final-project/CS3110-Final-Project"
 #        ; "INSIDE_DUNE" :
-#            "/home/ll865/3110/final_proj/CS3110-Final-Project/_build/default"
+#            "/home/kreshank/3110/final-project/CS3110-Final-Project/_build/default"
 #        ; "OCAMLFIND_IGNORE_DUPS_IN" :
-#            "/home/ll865/3110/final_proj/CS3110-Final-Project/_build/install/default/lib"
+#            "/home/kreshank/3110/final-project/CS3110-Final-Project/_build/install/default/lib"
 #        ; "OCAMLPATH" :
-#            "/home/ll865/3110/final_proj/CS3110-Final-Project/_build/install/default/lib"
+#            "/home/kreshank/3110/final-project/CS3110-Final-Project/_build/install/default/lib"
 #        ; "OCAMLTOP_INCLUDE_PATH" :
-#            "/home/ll865/3110/final_proj/CS3110-Final-Project/_build/install/default/lib/toplevel"
+#            "/home/kreshank/3110/final-project/CS3110-Final-Project/_build/install/default/lib/toplevel"
 #        ; "OCAML_COLOR" : "always"
 #        ; "OPAMCOLOR" : "always"
 #        }
 #  ; findlib_paths =
-#      [ External "/home/ll865/.opam/cs3110-2023fa/lib/ocaml"
-#      ; External "/home/ll865/.opam/cs3110-2023fa/lib"
+#      [ External "/home/kreshank/.opam/cs3110-2023fa/lib/ocaml"
+#      ; External "/home/kreshank/.opam/cs3110-2023fa/lib"
 #      ]
 #  ; natdynlink_supported = true
 #  ; supports_shared_libraries = true
 #  ; ocaml_config =
 #      { version = "5.0.0"
-#      ; standard_library_default = "/home/ll865/.opam/cs3110-2023fa/lib/ocaml"
-#      ; standard_library = "/home/ll865/.opam/cs3110-2023fa/lib/ocaml"
+#      ; standard_library_default =
+#          "/home/kreshank/.opam/cs3110-2023fa/lib/ocaml"
+#      ; standard_library = "/home/kreshank/.opam/cs3110-2023fa/lib/ocaml"
 #      ; standard_runtime = "the_standard_runtime_variable_was_deleted"
 #      ; ccomp_type = "cc"
 #      ; c_compiler = "gcc"
@@ -115,17 +118,26 @@ $ /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -config > /tmp/dune_d2451b_outp
 #      ; windows_unicode = false
 #      }
 #  }
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -o src/.stocks.objs/byte/stocks.cmo -c -impl src/stocks.ml-gen)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Api.cmi -c -intf src/api.mli)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o src/.stocks.objs/native/stocks.cmx -c -impl src/stocks.ml-gen)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Api.cmo -c -impl src/api.ml)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I test/.main.eobjs/byte -I /home/ll865/.opam/cs3110-2023fa/lib/ocaml/unix -I /home/ll865/.opam/cs3110-2023fa/lib/ounit2 -I /home/ll865/.opam/cs3110-2023fa/lib/ounit2/advanced -I /home/ll865/.opam/cs3110-2023fa/lib/seq -I /home/ll865/.opam/cs3110-2023fa/lib/stdlib-shims -I src/.stocks.objs/byte -no-alias-deps -opaque -o test/.main.eobjs/byte/dune__exe__Main.cmi -c -intf test/main.mli)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I bin/.display.eobjs/byte -I src/.stocks.objs/byte -no-alias-deps -opaque -o bin/.display.eobjs/byte/dune__exe__Display.cmi -c -intf bin/display.mli)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o src/stocks.cma src/.stocks.objs/byte/stocks.cmo src/.stocks.objs/byte/stocks__Api.cmo)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/native/stocks__Api.cmx -c -impl src/api.ml)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I test/.main.eobjs/byte -I test/.main.eobjs/native -I /home/ll865/.opam/cs3110-2023fa/lib/ocaml/unix -I /home/ll865/.opam/cs3110-2023fa/lib/ounit2 -I /home/ll865/.opam/cs3110-2023fa/lib/ounit2/advanced -I /home/ll865/.opam/cs3110-2023fa/lib/seq -I /home/ll865/.opam/cs3110-2023fa/lib/stdlib-shims -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -o test/.main.eobjs/native/dune__exe__Main.cmx -c -impl test/main.ml)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o src/stocks.cmxa src/.stocks.objs/native/stocks.cmx src/.stocks.objs/native/stocks__Api.cmx)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I bin/.display.eobjs/byte -I bin/.display.eobjs/native -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -o bin/.display.eobjs/native/dune__exe__Display.cmx -c -impl bin/display.ml)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I src -o src/stocks.cmxs src/stocks.cmxa)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o bin/display.exe src/stocks.cmxa bin/.display.eobjs/native/dune__exe__Display.cmx)
-$ (cd _build/default && /home/ll865/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o test/main.exe src/stocks.cmxa /home/ll865/.opam/cs3110-2023fa/lib/ocaml/unix/unix.cmxa /home/ll865/.opam/cs3110-2023fa/lib/stdlib-shims/stdlib_shims.cmxa /home/ll865/.opam/cs3110-2023fa/lib/ounit2/advanced/oUnitAdvanced.cmxa /home/ll865/.opam/cs3110-2023fa/lib/ounit2/oUnit.cmxa test/.main.eobjs/native/dune__exe__Main.cmx)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -o src/.stocks.objs/byte/stocks.cmo -c -impl src/stocks.ml-gen)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamldep.opt -modules -intf src/parser.mli) > _build/default/src/.stocks.objs/stocks__Parser.intf.d
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamldep.opt -modules -impl src/api.ml) > _build/default/src/.stocks.objs/stocks__Api.impl.d
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamldep.opt -modules -impl src/parser.ml) > _build/default/src/.stocks.objs/stocks__Parser.impl.d
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Api.cmi -c -intf src/api.mli)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Stockdata.cmi -c -intf src/stockdata.mli)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Portfolio.cmi -c -intf src/portfolio.mli)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Parser.cmi -c -intf src/parser.mli)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Stockdata.cmo -c -impl src/stockdata.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -w -49 -nopervasives -nostdlib -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml-gen -no-alias-deps -opaque -o src/.stocks.objs/native/stocks.cmx -c -impl src/stocks.ml-gen)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Portfolio.cmo -c -impl src/portfolio.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Api.cmo -c -impl src/api.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I test/.main.eobjs/byte -I /home/kreshank/.opam/cs3110-2023fa/lib/ocaml/unix -I /home/kreshank/.opam/cs3110-2023fa/lib/ounit2 -I /home/kreshank/.opam/cs3110-2023fa/lib/ounit2/advanced -I /home/kreshank/.opam/cs3110-2023fa/lib/seq -I /home/kreshank/.opam/cs3110-2023fa/lib/stdlib-shims -I src/.stocks.objs/byte -no-alias-deps -opaque -o test/.main.eobjs/byte/dune__exe__Main.cmi -c -intf test/main.mli)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/native/stocks__Stockdata.cmx -c -impl src/stockdata.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -bin-annot -I src/.stocks.objs/byte -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/byte/stocks__Parser.cmo -c -impl src/parser.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/native/stocks__Api.cmx -c -impl src/api.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/native/stocks__Portfolio.cmx -c -impl src/portfolio.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -open Stocks -o src/.stocks.objs/native/stocks__Parser.cmx -c -impl src/parser.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlc.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o src/stocks.cma src/.stocks.objs/byte/stocks.cmo src/.stocks.objs/byte/stocks__Stockdata.cmo src/.stocks.objs/byte/stocks__Portfolio.cmo src/.stocks.objs/byte/stocks__Parser.cmo src/.stocks.objs/byte/stocks__Api.cmo)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -I test/.main.eobjs/byte -I test/.main.eobjs/native -I /home/kreshank/.opam/cs3110-2023fa/lib/ocaml/unix -I /home/kreshank/.opam/cs3110-2023fa/lib/ounit2 -I /home/kreshank/.opam/cs3110-2023fa/lib/ounit2/advanced -I /home/kreshank/.opam/cs3110-2023fa/lib/seq -I /home/kreshank/.opam/cs3110-2023fa/lib/stdlib-shims -I src/.stocks.objs/byte -I src/.stocks.objs/native -intf-suffix .ml -no-alias-deps -opaque -o test/.main.eobjs/native/dune__exe__Main.cmx -c -impl test/main.ml)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -a -o src/stocks.cmxa src/.stocks.objs/native/stocks.cmx src/.stocks.objs/native/stocks__Stockdata.cmx src/.stocks.objs/native/stocks__Portfolio.cmx src/.stocks.objs/native/stocks__Parser.cmx src/.stocks.objs/native/stocks__Api.cmx)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -shared -linkall -I src -o src/stocks.cmxs src/stocks.cmxa)
+$ (cd _build/default && /home/kreshank/.opam/cs3110-2023fa/bin/ocamlopt.opt -w @1..3@5..28@30..39@43@46..47@49..57@61..62@67@69-40 -strict-sequence -strict-formats -short-paths -keep-locs -g -o test/main.exe src/stocks.cmxa /home/kreshank/.opam/cs3110-2023fa/lib/ocaml/unix/unix.cmxa /home/kreshank/.opam/cs3110-2023fa/lib/stdlib-shims/stdlib_shims.cmxa /home/kreshank/.opam/cs3110-2023fa/lib/ounit2/advanced/oUnitAdvanced.cmxa /home/kreshank/.opam/cs3110-2023fa/lib/ounit2/oUnit.cmxa test/.main.eobjs/native/dune__exe__Main.cmx)

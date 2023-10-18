@@ -2,3 +2,12 @@
 
 (** @canonical Stocks.Api *)
 module Api = Stocks__Api
+
+(** @canonical Stocks.Parser *)
+module Parser = Stocks__Parser
+
+(** @canonical Stocks.Portfolio *)
+module Portfolio = Stocks__Portfolio
+
+(** @canonical Stocks.Stockdata *)
+module Stockdata = Stocks__Stockdata
