@@ -6,6 +6,10 @@ module type StockType = sig
   type t
   (** Representation type. *)
 
+  val of_input : string -> string -> float -> date -> float -> float -> t
+  (** [of_input ticker name price date market_cap volume] creates a stock based
+      on input. Mainly used for testing purposes. *)
+
   val ticker : t -> string
   (** Returns ticker of a given stock. *)
 

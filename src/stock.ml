@@ -6,6 +6,10 @@ module type StockType = sig
   type t
   (** Representation type. *)
 
+  val of_input : string -> string -> float -> date -> float -> float -> t
+  (** [of_input ticker name price date market_cap volume] creates a stock based
+      on input. Mainly used for testing purposes. *)
+
   val ticker : t -> string
   (** Returns ticker of a given stock. *)
 
@@ -48,6 +52,10 @@ module Stock = struct
     market_cap : float;
     volume : float;
   }
+
+  let of_input (ticker : string) (name : string) (price : float) (time : date)
+      (market_cap : float) (volume : float) : t =
+    { ticker; name; price; time; market_cap; volume }
 
   let ticker (stk : t) : string = stk.ticker
   let name (stk : t) : string = stk.name
