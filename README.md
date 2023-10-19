@@ -12,11 +12,11 @@ This is a program that pulls stock data from an API for a user to manipulate or 
 ### Files
 | File | Description |
 | ----------- | ----------- |
-| api.ml | contains code relevant to any APIs used to gather data |
-| display.ml | contains code for the terminal UI |
-| portfolio.ml | contains module for a data structure that holds multiple stock.t data types |
-| stock.ml | contains functor that takes a parser module and converts it into a stock.t data type  | 
-| parser.ml | contains code that takes data from a .txt file a parses it into a module | 
+| Scraper.ml | contains code relevant to any APIs used to gather data |
+| Display.ml | contains code for the terminal UI |
+| Portfolio.ml | contains module for a data structure that holds multiple stock.t data types |
+| Stock.ml | contains functor that takes a parser module and converts it into a stock.t data type  | 
+| Parser.ml | contains code that takes data from a .txt file a parses it into a module | 
 
 *More detailed documentation is present within the files themselves.*
 
