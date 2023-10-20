@@ -58,7 +58,7 @@ The Makefile has several commands that can be used, such as:
 - make test: Runs tests in test folder with Ounit2
 - make display: Executes display.ml to create a UI in the terminal for testing and demonstration purposes
 - make build - Calls `dune build`
-- make lines - Returns line count of project
+- make lines - Returns line count of project (run `sudo apt install cloc` first)
 
 And others.
 
