@@ -16,9 +16,9 @@ let stock_tests =
   "Stock.ml Test Suite"
   >::: [
          ( "Tesla Simple Print" >:: fun _ ->
-           print_string (Stock.of_string_simple tsla) );
+           print_string (Stock.to_string_simple tsla) );
          ( "Tesla Detailed Print" >:: fun _ ->
-           print_string (Stock.of_string_detailed tsla) );
+           print_string (Stock.to_string_detailed tsla) );
        ]
 
 (* PARSER TESTS *)
@@ -31,16 +31,16 @@ let parser_tests =
   >::: [
          ( "Simple Parse 1" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "A" simple_map)) );
+             (Stock.to_string_detailed (Parser.to_stock "A" simple_map)) );
          ( "Simple Parse 2" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "AAL" simple_map)) );
+             (Stock.to_string_detailed (Parser.to_stock "AAL" simple_map)) );
          ( "Full Parse 1" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "A" full_map)) );
+             (Stock.to_string_detailed (Parser.to_stock "A" full_map)) );
          ( "Full Parse 2" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "AAPL" full_map)) );
+             (Stock.to_string_detailed (Parser.to_stock "AAPL" full_map)) );
        ]
 
 let portfolio_tests =
@@ -48,7 +48,7 @@ let portfolio_tests =
   >::: [
          ( "Simple Parse 1" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "A" simple_map)) );
+             (Stock.to_string_detailed (Parser.to_stock "A" simple_map)) );
        ]
 
 let _ = run_test_tt_main stock_tests
