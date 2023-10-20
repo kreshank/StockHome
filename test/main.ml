@@ -24,18 +24,25 @@ let tests =
 let _ = run_test_tt_main tests
 
 (* PARSER TESTS *)
-let s1 =
-  ",open,high,low,close,adjclose,volume,ticker\n\
-   2023-10-02,110.9,111.8,109.7,110.9,110.9,1569000,A"
 
 let simple_map = Parser.of_csv "data/stock_info_simple.csv"
+let full_map = Parser.of_csv "data/stock_info.csv"
 
 let tests =
   "parser.ml Test Suite"
   >::: [
-         ( "Simple Parse" >:: fun _ ->
+         ( "Simple Parse 1" >:: fun _ ->
            print_string
              (Stock.of_string_detailed (Parser.to_stock "A" simple_map)) );
+         ( "Simple Parse 2" >:: fun _ ->
+           print_string
+             (Stock.of_string_detailed (Parser.to_stock "AAL" simple_map)) );
+         ( "Full Parse 1" >:: fun _ ->
+           print_string
+             (Stock.of_string_detailed (Parser.to_stock "A" full_map)) );
+         ( "Full Parse 2" >:: fun _ ->
+           print_string
+             (Stock.of_string_detailed (Parser.to_stock "AAPL" full_map)) );
        ]
 
 let _ = run_test_tt_main tests
