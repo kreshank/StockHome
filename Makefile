@@ -14,7 +14,7 @@ utop:
 test:
 	OCAMLRUNPARAM=b dune exec test/main.exe
 
-chat:
+display:
 	OCAMLRUNPARAM=b dune exec bin/main.exe
 
 zip:
