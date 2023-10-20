@@ -1,6 +1,6 @@
 (** Stock.ml - Stores stock information, tickers, current information *)
 
-open Datatypes
+open Date
 
 module type StockType = sig
   type t

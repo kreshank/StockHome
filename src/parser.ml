@@ -1,6 +1,6 @@
 (** Parser.ml - Reads a file input of stock information *)
 
-open Datatypes
+open Date
 open Stock
 
 module type ParserType = sig
