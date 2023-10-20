@@ -77,6 +77,9 @@ module Parser = struct
       close_in input;
       map
 
+  (**Returns Parser.t (slice list map) when given a filename for a csv file.
+     Reads the csv file given and returns an updated map based on the
+     information present in the csv.*)
   let of_csv (file_name : string) : t =
     let map = String_map.empty in
 
@@ -87,6 +90,9 @@ module Parser = struct
       recurse_csv ic map
     with e -> raise e
 
+  (** Given a ticker, returns a Stock representing the current information of
+      the stock present in the parser. Failswith "Ticker Not Found" if ticker is
+      not in Parser*)
   let to_stock (ticker : string) (p : t) : Stock.t =
     let got_slice =
       List.hd
