@@ -5,12 +5,6 @@
 
 open Stock
 
-type portfolio = {
-  balance : float;
-  bank_account : int;
-  followed_stocks : stock list;
-}
-
 type stock = {
   symbol : string;
   price : float;
@@ -34,16 +28,10 @@ module type PortfolioType = sig
       balance. If [amount] is negative and its absolute value exceeds current
       balance, produce a message "Out of balance: [balance + amount] needed"*)
 
-  val update_bant_account : t -> int -> t
+  val update_bank_account : t -> int -> t
   (** Update the current bank account. *)
 
   val remove_stock : t -> string -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
 end
-
-type portfolio = {
-  balance : float;
-  bank_account : int;
-  followed_stocks : stock list;
-}
