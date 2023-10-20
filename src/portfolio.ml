@@ -6,10 +6,10 @@ open Date
 module type PortfolioType = sig
   type t
 
-  val of_string : t -> string
+  val to_string : t -> string
   (* Returns a human-readable string of information of a portfolio*)
 
-  val create_portfolio : float -> int -> t
+  val create_portfolio : int -> t
   (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
 
   val add_stock : t -> Stock.t -> t
@@ -27,8 +27,10 @@ module type PortfolioType = sig
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
 
-  val add_history : t -> Stock.t -> bool -> float -> date -> t
-  (** Add a transaction to the trasaction history. *)
+  val add_history : t -> Stock.t -> bool -> float -> float -> date -> t
+  (** [add_history portfolio stock buy amount price date] adds a transaction to
+      the transaction history. [buy] is 1 if it is buy and 0 if it is sell.
+      [amount] indicates the amount traded, [price] is the price when traded. *)
 end
 
 module Portfolio : PortfolioType = struct
@@ -40,16 +42,16 @@ module Portfolio : PortfolioType = struct
   }
 
   (* Returns a human-readable string of information of a portfolio*)
-  let of_string portfolio =
+  let to_string portfolio =
     "Balance: "
     ^ string_of_float portfolio.balance
     ^ ". Bank account: "
     ^ string_of_int portfolio.bank_account
 
   (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
-  let create_portfolio initial_balance initial_bank_account =
+  let create_portfolio initial_bank_account =
     {
-      balance = initial_balance;
+      balance = 0.0;
       bank_account = initial_bank_account;
       followed_stocks = [];
       transaction_history = [];
@@ -83,6 +85,9 @@ module Portfolio : PortfolioType = struct
     in
     { portfolio with followed_stocks = updated_stocks }
 
-  (** Add a transaction to the trasaction history. *)
-  let add_history = failwith "Unimplemented"
+  (** [add_history portfolio stock buy amount price date] adds a transaction to
+      the transaction history. [buy] is 1 if it is buy and 0 if it is sell.
+      [amount] indicates the amount traded, [price] is the price when traded. *)
+  let add_history portfolio stock buy amount price data =
+    failwith "Unimplemented"
 end
