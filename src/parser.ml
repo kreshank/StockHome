@@ -8,13 +8,13 @@ module type ParserType = sig
   (** Representation type.*)
 
   val of_csv : string -> t
-  (**Returns Parser.t (slice list map) when given a filename for a csv file.
+  (**Returns Parser.t ([slice list map]) when given a filename for a csv file.
      Reads the csv file given and returns an updated map based on the
      information present in the csv.*)
 
   val to_stock : string -> t -> Stock.t
   (** Given a ticker, returns a Stock representing the current information of
-      the stock present in the parser. Failswith "Ticker Not Found" if ticker is
+      the stock present in the parser. Failswith [Ticker Not Found] if ticker is
       not in Parser*)
 end
 
@@ -31,7 +31,7 @@ module Parser = struct
     high : float;
     low : float;
     close : float;
-    adj_float : float;
+    adj_close : float;
     volume : float;
     ticker : string;
   }
@@ -55,7 +55,7 @@ module Parser = struct
         high = float_of_string (List.nth line_list 2);
         low = float_of_string (List.nth line_list 3);
         close = float_of_string (List.nth line_list 4);
-        adj_float = float_of_string (List.nth line_list 5);
+        adj_close = float_of_string (List.nth line_list 5);
         volume = float_of_string (List.nth line_list 6);
         ticker = List.nth line_list 7;
       }
