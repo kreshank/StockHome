@@ -1,12 +1,7 @@
 (* Portfolio.ml - Intended to store portfolio data *)
 
 open Stock
-
-type stock = {
-  symbol : string;
-  price : float;
-  quantity : int;
-}
+open Date
 
 module type PortfolioType = sig
   type t
@@ -17,7 +12,7 @@ module type PortfolioType = sig
   val create_portfolio : float -> int -> t
   (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
 
-  val add_stock : t -> stock -> t
+  val add_stock : t -> Stock.t -> t
   (** Add [stock] to the watchlist of the portfolio*)
 
   val update_balance : t -> float -> t
@@ -28,16 +23,20 @@ module type PortfolioType = sig
   val update_bank_account : t -> int -> t
   (** Update the current bank account. *)
 
-  val remove_stock : t -> stock -> t
+  val remove_stock : t -> Stock.t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
+
+  val add_history : t -> Stock.t -> bool -> float -> date -> t
+  (** Add a transaction to the trasaction history. *)
 end
 
 module Portfolio : PortfolioType = struct
   type t = {
     balance : float;
     bank_account : int;
-    followed_stocks : stock list;
+    followed_stocks : Stock.t list;
+    transaction_history : int list;
   }
 
   (* Returns a human-readable string of information of a portfolio*)
@@ -53,6 +52,7 @@ module Portfolio : PortfolioType = struct
       balance = initial_balance;
       bank_account = initial_bank_account;
       followed_stocks = [];
+      transaction_history = [];
     }
 
   (** Add [stock] to the watchlist of the portfolio*)
@@ -82,4 +82,7 @@ module Portfolio : PortfolioType = struct
       List.filter (fun x -> x <> stock) portfolio.followed_stocks
     in
     { portfolio with followed_stocks = updated_stocks }
+
+  (** Add a transaction to the trasaction history. *)
+  let add_history = failwith "Unimplemented"
 end
