@@ -4,6 +4,9 @@ open Date
 open Stock
 
 module type ParserType = sig
+  type slice
+  (** Type that represents a given stock's info at some time.*)
+
   type t
   (** Representation type.*)
 
@@ -16,6 +19,10 @@ module type ParserType = sig
   (** Given a ticker, returns a Stock representing the current information of
       the stock present in the parser. Failswith [Ticker Not Found] if ticker is
       not in Parser*)
+
+  val slice_list : string -> t -> slice list
+  (** Given a ticker, return the slice list associated with the ticker.
+      Failswith [Ticker Not Found] if ticker is not in Parser *)
 end
 
 module String_map : Map.S with type key = string = Map.Make (struct
@@ -103,5 +110,10 @@ module Parser = struct
 
     Stock.of_input got_slice.ticker got_slice.ticker got_slice.open_price
       got_slice.curr_date 2. got_slice.volume
+
+  let slice_list (ticker : string) (p : t) : slice list =
+    match String_map.find_opt ticker p with
+    | Some s -> s
+    | None -> failwith "Ticker Not Found"
 end
 (* of Parser *)
