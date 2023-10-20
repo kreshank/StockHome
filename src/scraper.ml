@@ -1,7 +1,7 @@
 (** Scraper.ml, intended for web-scraping Yahoo Finance for stock information,
     and writing it into a file*)
 
-open Datatypes
+open Date
 
 module type ScraperType = sig
   type t

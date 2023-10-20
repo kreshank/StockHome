@@ -1,7 +1,7 @@
 (** Scraper.mli, intended for web-scraping and processing Yahoo Finance for
     stock information *)
 
-open Datatypes
+open Date
 open Stock
 
 (** The signature of a web-scraper that looks-up information *)
