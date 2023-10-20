@@ -7,6 +7,8 @@ open Parser
 open Scraper
 open Stock
 
+(* Helper Functions and Printers*)
+
 (* STOCKS TESTS *)
 let tsla =
   Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 19, 23) 698627000000.
@@ -46,10 +48,11 @@ let parser_tests =
 let portfolio_tests =
   "portfolio.ml Test Suite"
   >::: [
-         ( "Simple Parse 1" >:: fun _ ->
-           print_string
-             (Stock.of_string_detailed (Parser.to_stock "A" simple_map)) );
+         ( "Portfolio Creation 1" >:: fun _ ->
+           print_string (Portfolio.to_string (Portfolio.create_portfolio 123))
+         );
        ]
 
 let _ = run_test_tt_main stock_tests
 let _ = run_test_tt_main parser_tests
+let _ = run_test_tt_main portfolio_tests
