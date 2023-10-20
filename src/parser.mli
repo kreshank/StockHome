@@ -3,6 +3,9 @@ open Stock
     into an Ocaml-processable format. *)
 
 module type ParserType = sig
+  type slice
+  (** Type that represents a given stock's info at some time.*)
+
   type t
   (** Representation type.*)
 
@@ -14,6 +17,10 @@ module type ParserType = sig
   val to_stock : string -> t -> Stock.t
   (** Given a ticker, returns a Stock representing the current information of
       the stock present in the parser.*)
+
+  val slice_list : string -> t -> slice list
+  (** Given a ticker, return the slice list associated with the ticker.
+      Failswith [Ticker Not Found] if ticker is not in Parser *)
 end
 
 module Parser : ParserType

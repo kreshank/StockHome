@@ -5,6 +5,7 @@ type date = int * int * int
 
 module type DateType = sig
   exception InvalidDate
+  (** Raised when attempting to input an invalid date. *)
 
   val is_valid : date -> bool
   (** [is_valid date] returns a boolean of if a date is valid or not. *)
