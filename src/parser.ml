@@ -15,14 +15,13 @@ module type ParserType = sig
      Reads the csv file given and returns an updated map based on the
      information present in the csv.*)
 
-  val to_stock : string -> t -> Stock.t
+  val to_stock : string -> t -> Stock.t option
   (** Given a ticker, returns a Stock representing the current information of
-      the stock present in the parser. Failswith [Ticker Not Found] if ticker is
-      not in Parser*)
+      the stock present in the parser. Returns [None] if ticker is not in Parser*)
 
-  val slice_list : string -> t -> slice list
-  (** Given a ticker, return the slice list associated with the ticker.
-      Failswith [Ticker Not Found] if ticker is not in Parser *)
+  val slice_list : string -> t -> slice list option
+  (** Given a ticker, return the slice list associated with the ticker. Returns
+      [None] if ticker is not in Parser *)
 end
 
 module String_map : Map.S with type key = string = Map.Make (struct
@@ -98,22 +97,19 @@ module Parser = struct
     with e -> raise e
 
   (** Given a ticker, returns a Stock representing the current information of
-      the stock present in the parser. Failswith "Ticker Not Found" if ticker is
-      not in Parser*)
-  let to_stock (ticker : string) (p : t) : Stock.t =
-    let got_slice =
-      List.hd
-        (match String_map.find_opt ticker p with
-        | Some s -> s
-        | None -> failwith "Ticker Not Found")
-    in
+      the stock present in the parser. Returns [None] if ticker is not in Parser*)
+  let to_stock (ticker : string) (p : t) : Stock.t option =
+    let slice_list = String_map.find_opt ticker p in
+    if slice_list = None then None
+    else
+      let got_slice = List.hd (Option.get slice_list) in
+      Some
+        (Stock.of_input got_slice.ticker got_slice.ticker got_slice.open_price
+           got_slice.curr_date 2. got_slice.volume)
 
-    Stock.of_input got_slice.ticker got_slice.ticker got_slice.open_price
-      got_slice.curr_date 2. got_slice.volume
-
-  let slice_list (ticker : string) (p : t) : slice list =
-    match String_map.find_opt ticker p with
-    | Some s -> s
-    | None -> failwith "Ticker Not Found"
+  (** Given a ticker, return the slice list associated with the ticker. Returns
+      [None] if ticker is not in Parser *)
+  let slice_list (ticker : string) (p : t) : slice list option =
+    String_map.find_opt ticker p
 end
 (* of Parser *)

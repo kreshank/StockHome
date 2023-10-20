@@ -33,16 +33,20 @@ let parser_tests =
   >::: [
          ( "Simple Parse 1" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "A" simple_map)) );
+             (Stock.of_string_detailed
+                (Option.get (Parser.to_stock "A" simple_map))) );
          ( "Simple Parse 2" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "AAL" simple_map)) );
+             (Stock.of_string_detailed
+                (Option.get (Parser.to_stock "AAL" simple_map))) );
          ( "Full Parse 1" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "A" full_map)) );
+             (Stock.of_string_detailed
+                (Option.get (Parser.to_stock "A" full_map))) );
          ( "Full Parse 2" >:: fun _ ->
            print_string
-             (Stock.of_string_detailed (Parser.to_stock "AAPL" full_map)) );
+             (Stock.of_string_detailed
+                (Option.get (Parser.to_stock "AAPL" full_map))) );
        ]
 
 let portfolio_tests =
