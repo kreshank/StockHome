@@ -111,6 +111,8 @@ module Parser = struct
     Stock.of_input got_slice.ticker got_slice.ticker got_slice.open_price
       got_slice.curr_date 2. got_slice.volume
 
+  (** Given a ticker, return the slice list associated with the ticker.
+      Failswith [Ticker Not Found] if ticker is not in Parser *)
   let slice_list (ticker : string) (p : t) : slice list =
     match String_map.find_opt ticker p with
     | Some s -> s
