@@ -2,12 +2,6 @@
 
 open Stock
 
-type stock = {
-  symbol : string;
-  price : float;
-  quantity : int;
-}
-
 module type PortfolioType = sig
   type t
 
@@ -17,7 +11,7 @@ module type PortfolioType = sig
   val create_portfolio : float -> int -> t
   (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
 
-  val add_stock : t -> stock -> t
+  val add_stock : t -> Stock.t -> t
   (** Add [stock] to the watchlist of the portfolio*)
 
   val update_balance : t -> float -> t
@@ -28,7 +22,7 @@ module type PortfolioType = sig
   val update_bank_account : t -> int -> t
   (** Update the current bank account. *)
 
-  val remove_stock : t -> stock -> t
+  val remove_stock : t -> Stock.t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
 end
@@ -37,7 +31,7 @@ module Portfolio : PortfolioType = struct
   type t = {
     balance : float;
     bank_account : int;
-    followed_stocks : stock list;
+    followed_stocks : Stock.t list;
   }
 
   (* Returns a human-readable string of information of a portfolio*)

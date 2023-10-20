@@ -12,7 +12,7 @@ let tsla =
   Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 19, 23) 698627000000.
     169685075.
 
-let tests =
+let stock_tests =
   "Stock.ml Test Suite"
   >::: [
          ( "Tesla Simple Print" >:: fun _ ->
@@ -21,14 +21,12 @@ let tests =
            print_string (Stock.of_string_detailed tsla) );
        ]
 
-let _ = run_test_tt_main tests
-
 (* PARSER TESTS *)
 
 let simple_map = Parser.of_csv "data/stock_info_simple.csv"
 let full_map = Parser.of_csv "data/stock_info.csv"
 
-let tests =
+let parser_tests =
   "parser.ml Test Suite"
   >::: [
          ( "Simple Parse 1" >:: fun _ ->
@@ -45,4 +43,13 @@ let tests =
              (Stock.of_string_detailed (Parser.to_stock "AAPL" full_map)) );
        ]
 
-let _ = run_test_tt_main tests
+let portfolio_tests =
+  "portfolio.ml Test Suite"
+  >::: [
+         ( "Simple Parse 1" >:: fun _ ->
+           print_string
+             (Stock.of_string_detailed (Parser.to_stock "A" simple_map)) );
+       ]
+
+let _ = run_test_tt_main stock_tests
+let _ = run_test_tt_main parser_tests
