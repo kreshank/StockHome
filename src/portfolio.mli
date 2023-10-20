@@ -4,6 +4,7 @@
    I'll just leave it here since stock is not implemented yet*)
 
 open Stock
+open Date
 
 module type PortfolioType = sig
   type t
@@ -28,4 +29,6 @@ module type PortfolioType = sig
   val remove_stock : t -> Stock.t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
+
+  val add_history : t -> Stock.t -> bool -> float -> date -> t
 end
