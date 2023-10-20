@@ -16,9 +16,9 @@ let stock_tests =
   "Stock.ml Test Suite"
   >::: [
          ( "Tesla Simple Print" >:: fun _ ->
-           print_string (Stock.of_string_simple tsla) );
+           print_string (Stock.to_string_simple tsla) );
          ( "Tesla Detailed Print" >:: fun _ ->
-           print_string (Stock.of_string_detailed tsla) );
+           print_string (Stock.to_string_detailed tsla) );
        ]
 
 (* PARSER TESTS *)

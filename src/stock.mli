@@ -6,6 +6,9 @@ module type StockType = sig
   type t
   (** Representation type. *)
 
+  exception OutOfInterval
+  (** Raised when trying to access invalid time. *)
+
   val of_input : string -> string -> float -> date -> float -> float -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
       on input. Mainly used for testing purposes. *)
@@ -28,18 +31,15 @@ module type StockType = sig
   val volume : t -> float
   (** Returns volume at last time of access. *)
 
-  exception OutOfInterval
-  (** Raised when trying to access invalid time. *)
-
   val average_price : date -> date -> t -> float
   (** Returns average stock price over an interval. If out of range, should
       raise OOB exception. *)
 
-  val of_string_simple : t -> string
+  val to_string_simple : t -> string
   (** Returns a string of the at-a-glance human-readable version of a given
       stock. *)
 
-  val of_string_detailed : t -> string
+  val to_string_detailed : t -> string
   (** Returns a string of a more in-depth summary of a given stock. *)
 end
 
