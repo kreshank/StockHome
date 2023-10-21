@@ -1,0 +1,3 @@
+(executable
+ (name portfolio_test)
+ (libraries stocks ounit2))
