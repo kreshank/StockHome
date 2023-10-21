@@ -15,7 +15,7 @@ test:
 	OCAMLRUNPARAM=b dune exec test/main.exe
 
 display:
-	OCAMLRUNPARAM=b dune exec bin/main.exe
+	OCAMLRUNPARAM=b dune exec bin/display.exe
 
 zip:
 	rm -f stocks.zip
