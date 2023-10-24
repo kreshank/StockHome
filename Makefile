@@ -21,7 +21,7 @@ display:
 
 zip:
 	rm -f stocks.zip
-	zip -r stocks.zip . -x@exclude.lst
+	zip -r stocks.zip .
 
 clean:
 	dune clean
