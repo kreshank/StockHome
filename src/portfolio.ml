@@ -48,8 +48,12 @@ module Portfolio : PortfolioType = struct
     ^ ". Bank account: "
     ^ string_of_int portfolio.bank_account
     ^ ". Followed Stocks: "
-    ^ List.fold_left (fun a b -> a ^ Stock.name b) " " portfolio.followed_stocks
-    ^ "\n"
+    ^ List.fold_left
+        (fun a b -> a ^ " " ^ Stock.name b)
+        " " portfolio.followed_stocks
+    ^ List.fold_left
+        (fun a b -> a ^ Stock.to_string_detailed b)
+        " " portfolio.followed_stocks
 
   (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
   let create_portfolio initial_bank_account =
