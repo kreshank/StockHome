@@ -49,11 +49,9 @@ module Portfolio : PortfolioType = struct
     ^ string_of_int portfolio.bank_account
     ^ ". Followed Stocks: "
     ^ List.fold_left
-        (fun a b -> a ^ " " ^ Stock.name b)
-        " " portfolio.followed_stocks
-    ^ List.fold_left
-        (fun a b -> a ^ Stock.to_string_detailed b)
-        " " portfolio.followed_stocks
+        (fun a b -> a ^ Stock.name b ^ "; ")
+        "" portfolio.followed_stocks
+    ^ "\n"
 
   (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
   let create_portfolio initial_bank_account =
@@ -74,11 +72,15 @@ module Portfolio : PortfolioType = struct
   let update_balance portfolio amount =
     if portfolio.balance +. amount >= 0.0 then (
       print_string
-        ("Balance updated: " ^ string_of_float (portfolio.balance +. amount));
+        ("Balance updated: "
+        ^ string_of_float (portfolio.balance +. amount)
+        ^ "\n");
       { portfolio with balance = portfolio.balance +. amount })
     else (
       print_string
-        ("Still need: " ^ string_of_float (0.0 -. portfolio.balance -. amount));
+        ("Out of balance, still need: "
+        ^ string_of_float (0.0 -. portfolio.balance -. amount)
+        ^ "\n");
       portfolio)
 
   (** Update the current bank account. *)
