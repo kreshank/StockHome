@@ -19,32 +19,26 @@ let aapl =
   Stock.of_input "AAPL" "Apple, Inc." 168.22 (10, 19, 23) 698627000000.
     169685075.
 
-let ptf1 = Portfolio.create_portfolio 123
-let ptf2 = Portfolio.add_stock ptf1 tsla
-let ptf3 = Portfolio.add_stock ptf2 aapl
-let ptf4 = Portfolio.update_balance ptf3 200.0
-let ptf5 = Portfolio.remove_stock ptf4 aapl
-let ptf6 = Portfolio.update_balance ptf5 (-300.)
+let crnl =
+  Stock.of_input "CRNL" "Cornell University" 18.65 (10, 19, 23) 698627000000.
+    169685075.
+
+let buy = Portfolio.Buy
+
+let p1 =
+  Portfolio.(
+    stock_transact Buy crnl 10000.
+      (add_bank_account 400477288577
+         (add_bank_account 300123242123
+            (follow crnl
+               (update_balance 1000000.
+                  (follow aapl (follow tsla (new_portfolio ()))))))))
 
 let portfolio_tests =
   "portfolio.ml Test Suite"
   >::: [
-         ( "Portfolio 1: newly created" >:: fun _ ->
-           print_string
-             ("\n" ^ "Portfolio - newly created: " ^ Portfolio.to_string ptf1)
-         );
-         ( "Portfolio 2: add a stock" >:: fun _ ->
-           print_string
-             ("\n" ^ "Portfolio - add tsla: " ^ Portfolio.to_string ptf2) );
-         ( "Portfolio 2: add a stock" >:: fun _ ->
-           print_string
-             ("\n" ^ "Portfolio - add aapl: " ^ Portfolio.to_string ptf3) );
-         ( "Portfolio 2: add a stock" >:: fun _ ->
-           print_string
-             ("\n" ^ "Portfolio - add balance: " ^ Portfolio.to_string ptf4) );
-         ( "Portfolio 2: add a stock" >:: fun _ ->
-           print_string
-             ("\n" ^ "Portfolio - remove aapl: " ^ Portfolio.to_string ptf5) );
+         ( "Portfolio #1: print" >:: fun _ ->
+           print_string ("\n" ^ "Portfolio #1: " ^ Portfolio.to_string p1) );
        ]
 
 let _ = run_test_tt_main portfolio_tests

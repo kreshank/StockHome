@@ -11,7 +11,7 @@ let rec load (lst : string list) (port : Portfolio.t) (parser : Parser.t) :
       let stock = Parser.to_stock h parser in
       if stock = None then load t port parser
       else
-        let port_u = Portfolio.add_stock port (Option.get stock) in
+        let port_u = Portfolio.follow (Option.get stock) port in
         load t port_u parser
 
 let rec chat (port : Portfolio.t) (pars : Parser.t) =
@@ -29,7 +29,7 @@ let rec chat (port : Portfolio.t) (pars : Parser.t) =
         match Parser.to_stock ticker pars with
         | Some v ->
             print_endline "Added.";
-            Portfolio.add_stock port v
+            Portfolio.follow v port
         | None ->
             print_endline "Invalid Ticker";
             port
@@ -42,7 +42,7 @@ let rec chat (port : Portfolio.t) (pars : Parser.t) =
         match Parser.to_stock ticker pars with
         | Some v ->
             print_endline "Removed.";
-            Portfolio.remove_stock port v
+            Portfolio.unfollow v port
         | None ->
             print_endline "Invalid Ticker";
             port
@@ -61,6 +61,6 @@ let () =
   let data = Parser.of_csv data in
   print_string "Enter tickers to be entered into portfolio (e.g AAPL A MSFT): ";
   let tickers = String.split_on_char ' ' (read_line ()) in
-  let port = load tickers (Portfolio.create_portfolio 0) data in
+  let port = load tickers (Portfolio.new_portfolio ()) data in
   let _ = chat port data in
   print_endline "Bye"

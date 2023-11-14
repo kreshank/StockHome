@@ -6,53 +6,76 @@ open Date
 module type PortfolioType = sig
   type t
 
-  type opt
-  (** Stock options . *)
+  type opt =
+    | Buy
+    | Sell  (** Stock options . *)
 
-  type transaction
+  type transaction = {
+    ticker : string;
+    option : opt;
+    price : float;
+    quantity : float;
+    time : date;
+  }
   (** The type of a transaction. Includes formation (ticker, option, price,
       quantity, time). *)
+
+  exception Out_of_balance of string
+  (** [Out_of_balance] is raised when [portfolio] attempts to spend amount of
+      money that is greater than its current balance. *)
+
+  val new_portfolio : unit -> t
+  (** [new_portfolio ()] creates a new portfolio with initialized fields.*)
+
+  val get_balance : t -> float
+  (** [get_balance portfolio] returns current [balance] of [portfolio]. *)
+
+  val get_stock_holdings : t -> float
+  (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
+
+  val get_bank_accounts : t -> int list
+  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
+
+  val get_followed_stocks : t -> Stock.t list
+  (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
+
+  val get_history : t -> transaction list
+  (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
 
   val to_string : t -> string
   (** Returns a human-readable string of information of a portfolio*)
 
-  val create_portfolio : int -> t
-  (** Create a portfolio with [initial_bank_account].*)
-
-  val follow_stock : t -> Stock.t -> t
+  val follow : Stock.t -> t -> t
   (** Add [stock] to the watchlist of the portfolio*)
 
-  val update_balance : t -> float -> t
-  (** [update_balance portfolio amount] updates the balance of [portfolio] by
-      [amount]. Print out a message to indicate the updated balance. If [amount]
-      is negative and its absolute value exceeds current balance, produce a
-      message "Out of balance: still need [balance + amount]"*)
-
-  val update_bank_account : t -> int -> t
-  (** Update the current bank account. *)
-
-  val remove_stock : t -> Stock.t -> t
+  val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
 
-  val add_history : t -> Stock.t -> bool -> float -> float -> date -> t
-  (** [add_history portfolio stock buy amount price date] adds a transaction to
+  val update_balance : float -> t -> t
+  (** [update_balance amount portfolio] updates [balance] of [portfolio] by
+      [amount]. If the updated balance is negative, it raises [Out_of_balance]
+      exception. *)
+
+  val update_stock_holding : float -> t -> t
+  (** [update_stock_holding amount portfolio] updates [stock_holding] by
+      [amount]. Private method.*)
+
+  val add_bank_account : int -> t -> t
+  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
+      [portfolio]. *)
+
+  val update_history : transaction -> t -> t
+  (** [add_history stock buy amount price date portfolio] adds a transaction to
       the transaction history. [buy] is 1 if it is buy and 0 if it is sell.
       [amount] indicates the amount traded, [price] is the price when traded. *)
 
-  val stock_transact : t -> opt -> Stock.t -> float -> t
-  (** [stock_transaction portfolio option stock quantity] trades [quantity]
+  val stock_transact : opt -> Stock.t -> float -> t -> t
+  (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. *)
 end
 
 module Portfolio : PortfolioType = struct
-  type t = {
-    balance : float;
-    bank_account : int;
-    followed_stocks : Stock.t list;
-    transaction_history : int list;
-  }
-
   type opt =
     | Buy
     | Sell
@@ -62,69 +85,120 @@ module Portfolio : PortfolioType = struct
     option : opt;
     price : float;
     quantity : float;
-    data : date;
+    time : date;
   }
 
-  (* Returns a human-readable string of information of a portfolio*)
-  let to_string portfolio =
-    "\n" ^ "Balance: "
-    ^ string_of_float portfolio.balance
-    ^ ". Bank account: "
-    ^ string_of_int portfolio.bank_account
-    ^ ". Followed Stocks: "
-    ^ List.fold_left
-        (fun a b -> a ^ Stock.name b ^ "; ")
-        "" portfolio.followed_stocks
-    ^ "\n"
+  type t = {
+    balance : float;
+    stock_holding : float;
+    bank_accounts : int list;
+    followed_stocks : Stock.t list;
+    history : transaction list;
+  }
 
-  (** Create a portfolio with [initial_balance] and [initial_bank_account]*)
-  let create_portfolio initial_bank_account =
+  exception Out_of_balance of string
+
+  (** [new_portfolio ()] creates a new portfolio with initialized fields.*)
+  let new_portfolio () =
     {
       balance = 0.0;
-      bank_account = initial_bank_account;
+      stock_holding = 0.0;
+      bank_accounts = [];
       followed_stocks = [];
-      transaction_history = [];
+      history = [];
     }
 
-  (** Add [stock] to the watchlist of the portfolio*)
-  let follow_stock portfolio stock =
-    { portfolio with followed_stocks = stock :: portfolio.followed_stocks }
+  (** [new_transaction stock option quantity time] creates a new transaction
+      record with the given parameters.*)
+  let new_transaction stock option quantity time : transaction =
+    {
+      ticker = Stock.ticker stock;
+      option;
+      price = Stock.price stock;
+      quantity;
+      time;
+    }
 
-  (** Update balance by [amount]. Print out a message to indicate the updated
-      balance. If [amount] is negative and its absolute value exceeds current
-      balance, produce a message "Out of balance: [balance + amount] needed"*)
-  let update_balance portfolio amount =
-    if portfolio.balance +. amount >= 0.0 then (
-      print_string
-        ("Balance updated: "
-        ^ string_of_float (portfolio.balance +. amount)
-        ^ "\n");
-      { portfolio with balance = portfolio.balance +. amount })
-    else (
-      print_string
-        ("Out of balance, still need: "
-        ^ string_of_float (0.0 -. portfolio.balance -. amount)
-        ^ "\n");
-      portfolio)
+  (** [get_balance portfolio] returns current [balance] of [portfolio]. *)
+  let get_balance p = p.balance
 
-  (** Update the current bank account. *)
-  let update_bank_account portfolio x = { portfolio with bank_account = x }
+  (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
+  let get_stock_holdings p = p.stock_holding
 
-  (** Remove a stock from the watchlist. Required: the stock is in the
+  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
+  let get_bank_accounts p = p.bank_accounts
+
+  (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
+  let get_followed_stocks p = p.followed_stocks
+
+  (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
+  let get_history p = p.history
+
+  (** Returns a human-readable string of information of a portfolio*)
+  let to_string p =
+    "\n" ^ " Balance: "
+    ^ string_of_float (get_balance p)
+    ^ "\n" ^ " Stock Holding: "
+    ^ string_of_float (get_stock_holdings p)
+    ^ "\n" ^ " Bank accounts: "
+    ^ List.fold_left
+        (fun a b -> a ^ string_of_int b ^ "; ")
+        "" (get_bank_accounts p)
+    ^ "\n" ^ " Followed Stocks: "
+    ^ List.fold_left
+        (fun a b -> a ^ Stock.name b ^ "; ")
+        "" (get_followed_stocks p)
+    ^ "\n"
+
+  (** Add [stock] to the watchlist of the portfolio. Requires [stock] not in the
       watchlist. *)
-  let remove_stock portfolio stock =
-    let updated_stocks =
-      List.filter (fun x -> x <> stock) portfolio.followed_stocks
-    in
-    { portfolio with followed_stocks = updated_stocks }
+  let follow stock p = { p with followed_stocks = stock :: p.followed_stocks }
 
-  (** [add_history portfolio stock buy amount price date] adds a transaction to
-      the transaction history. [buy] is 1 if it is buy and 0 if it is sell.
-      [amount] indicates the amount traded, [price] is the price when traded. *)
-  let add_history portfolio stock buy amount price data =
-    failwith "Unimplemented"
+  (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
+  let unfollow stock p =
+    let updated = List.filter (fun x -> x <> stock) p.followed_stocks in
+    { p with followed_stocks = updated }
 
-  (** [stock_transaction portfolio option stock quantity] trades [quantity]
-      amount of [stock] by the type of option [option]. *)
-  let stock_transact = failwith "Unimplemented"
+  (** [update_balance portfolio amount] updates [balance] of [portfolio] by
+      [amount]. If the updated balance is negative, it raises [Out_of_balance]
+      exception. *)
+  let update_balance amount p =
+    if p.balance +. amount >= 0.0 then { p with balance = p.balance +. amount }
+    else
+      raise
+        (Out_of_balance
+           ("Out of balance: still need "
+           ^ string_of_float (0.0 -. p.balance -. amount)))
+
+  (** [update_stock_holding amount portfolio] updates [stock_holding] by
+      [amount]. Private method.*)
+  let update_stock_holding amount p =
+    let updated = p.stock_holding +. amount in
+    { p with stock_holding = updated }
+
+  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
+      [portfolio]. *)
+  let add_bank_account x p =
+    let updated = x :: p.bank_accounts in
+    { p with bank_accounts = updated }
+
+  (** [update_history transaction portfolio] adds a transaction to the
+      transaction history. [buy] is 1 if it is buy and 0 if it is sell. [amount]
+      indicates the amount traded, [price] is the price when traded. *)
+  let update_history transaction p =
+    let updated = transaction :: p.history in
+    { p with history = updated }
+
+  (** [stock_transaction option stock quantity portfolio] trades [quantity]
+      amount of [stock] by the type of option [option].*)
+  let stock_transact option stock quantity p =
+    let record = new_transaction stock option quantity (11, 11, 2023) in
+    let amount = Stock.price stock *. quantity in
+    match option with
+    | Buy ->
+        update_history record
+          (update_stock_holding amount (update_balance (-1. *. amount) p))
+    | Sell ->
+        update_history record
+          (update_stock_holding (-1. *. amount) (update_balance amount p))
 end
