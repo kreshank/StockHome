@@ -62,7 +62,7 @@ module Stock = struct
 
   let ticker (stk : t) : string = stk.ticker
   let name (stk : t) : string = stk.name
-  let price (stk : t) : float = stk.price
+  let price ?(time = (0, 0, 0)) (stk : t) : float = stk.price
   let time (stk : t) : date = stk.time
   let market_cap (stk : t) : float = stk.market_cap
   let volume (stk : t) : float = stk.volume
