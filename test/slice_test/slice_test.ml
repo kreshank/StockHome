@@ -17,7 +17,9 @@ let slice_test =
   "slice.ml Test Suite"
   >::: [
          ("AAPL" >:: fun _ -> print_string (Slice.to_string aapl));
+         ("AAPL" >:: fun _ -> print_string (Slice.to_string_detailed aapl));
          ("AAL" >:: fun _ -> print_string (Slice.to_string aal));
+         ("AAL" >:: fun _ -> print_string (Slice.to_string_detailed aal));
        ]
 
 let _ = run_test_tt_main slice_test

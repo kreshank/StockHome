@@ -16,7 +16,7 @@ module type SliceType = sig
     t
   (** Initializes and creates a stock Slice. The only required fields are
       [ticker] and [time], whereas the other fields [open_price], [high], [low],
-      [close_price], [adjclose], and [volume] are optional arguments, set to
+      [adjclose], [close_price], and [volume] are optional arguments, set to
       [0.0] or [0] by default. *)
 
   val ticker : t -> string
@@ -49,7 +49,12 @@ module type SliceType = sig
   (** [time s] returns the timestamp of the *)
 
   val to_string : t -> string
-  (** [to_string s] returns a human readable string representation. *)
+  (** [to_string s] returns a brief, single-line string representation, showing
+      only ticker, date, and closing price. *)
+
+  val to_string_detailed : t -> string
+  (** [to_string_detailed s] returns a detailed string representation that
+      displays all fields of a Slice. *)
 end
 
 module Slice : SliceType

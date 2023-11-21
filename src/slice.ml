@@ -49,7 +49,12 @@ module type SliceType = sig
   (** [time s] returns the timestamp of the *)
 
   val to_string : t -> string
-  (** [to_string s] returns a human readable string representation. *)
+  (** [to_string s] returns a brief, single-line string representation, showing
+      only ticker, date, and closing price. *)
+
+  val to_string_detailed : t -> string
+  (** [to_string_detailed s] returns a detailed string representation that
+      displays all fields of a Slice. *)
 end
 
 module Slice = struct
@@ -102,8 +107,15 @@ module Slice = struct
   (** [time s] returns the timestamp of the *)
   let time s = s.time
 
-  (** [to_string s] returns a human readable string representation. *)
+  (** [to_string s] returns a brief, single-line string representation, showing
+      only ticker, date, and closing price. *)
   let to_string s =
+    Printf.sprintf "%s (%s): $%.5f" s.ticker (Date.to_string s.time)
+      s.close_price
+
+  (** [to_string_detailed s] returns a detailed string representation that
+      displays all fields of a Slice. *)
+  let to_string_detailed s =
     Printf.sprintf
       "\n\
        %s (%s): \n\
