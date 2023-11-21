@@ -30,7 +30,7 @@ module type StockType = sig
   val market_cap : t -> float
   (** Returns market cap at last time of access. *)
 
-  val volume : t -> int
+  val volume : ?time:date -> t -> int
   (** Returns volume at last time of access. *)
 
   val average_price : date -> date -> t -> float
