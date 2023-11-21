@@ -34,7 +34,6 @@ let save_write_tests =
            SaveWrite.save port2;
            assert_equal 200.0 (Portfolio.get_stock_holdings (SaveWrite.load ()))
          );
-         ("clear" >:: fun _ -> SaveWrite.clear ());
        ]
 
 let _ = run_test_tt_main save_write_tests
