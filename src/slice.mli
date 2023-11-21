@@ -9,8 +9,8 @@ module type SliceType = sig
     ?open_price:float ->
     ?high:float ->
     ?low:float ->
-    ?adjclose:float ->
     ?close_price:float ->
+    ?adjclose:float ->
     ?volume:int ->
     date ->
     t
@@ -47,6 +47,14 @@ module type SliceType = sig
 
   val time : t -> date
   (** [time s] returns the timestamp of the *)
+
+  val to_string : t -> string
+  (** [to_string s] returns a brief, single-line string representation, showing
+      only ticker, date, and closing price. *)
+
+  val to_string_detailed : t -> string
+  (** [to_string_detailed s] returns a detailed string representation that
+      displays all fields of a Slice. *)
 end
 
 module Slice : SliceType
