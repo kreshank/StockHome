@@ -1,14 +1,18 @@
 (** Stock.ml - Stores stock information, tickers, current information *)
 
-open Datatypes
+open Date
 
 module type StockType = sig
   type t
   (** Representation type. *)
 
+  exception OutOfInterval
+  (** Raised when trying to access invalid time. *)
+
   val of_input : string -> string -> float -> date -> float -> float -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
-      on input. Mainly used for testing purposes. *)
+      on input. Mainly used for testing purposes. Raises [InvalidDate] if date
+      is invalid.*)
 
   val ticker : t -> string
   (** Returns ticker of a given stock. *)
@@ -28,18 +32,16 @@ module type StockType = sig
   val volume : t -> float
   (** Returns volume at last time of access. *)
 
-  exception OutOfInterval
-  (** Raised when trying to access invalid time. *)
-
   val average_price : date -> date -> t -> float
-  (** Returns average stock price over an interval. If out of range, should
-      raise OOB exception. *)
+  (** [average_price start_date end_date stock] returns average closing stock
+      price over that interval. Raise [InvalidDate] if either date is invalid.
+      Raise [OutOfInterval] if that memory date is unretrievable. *)
 
-  val of_string_simple : t -> string
+  val to_string_simple : t -> string
   (** Returns a string of the at-a-glance human-readable version of a given
       stock. *)
 
-  val of_string_detailed : t -> string
+  val to_string_detailed : t -> string
   (** Returns a string of a more in-depth summary of a given stock. *)
 end
 
@@ -69,11 +71,11 @@ module Stock = struct
   let average_price (start : date) (endt : date) (stk : t) : float =
     failwith "Unimplemented"
 
-  let of_string_simple (stk : t) : string =
+  let to_string_simple (stk : t) : string =
     let rounded_price = Float.round (stk.price *. 100.) /. 100. in
     "\n" ^ stk.ticker ^ " - $" ^ string_of_float rounded_price ^ "\n"
 
-  let of_string_detailed (stk : t) : string =
+  let to_string_detailed (stk : t) : string =
     let rounded_price = Float.round (stk.price *. 100.) /. 100. in
     let rounded_market_cap = Float.round stk.market_cap in
     let rounded_volume = Float.round stk.volume in

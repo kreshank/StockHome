@@ -1,0 +1,35 @@
+---
+# Members of your group.
+group:
+  - name: Ryan Wu
+    netid: rw645
+  - name: Leo Lu
+    netid: ll865
+  - name: Bodong Liu
+    netid: bl576
+  - name: Bhuwan Bhattarai
+    netid: bb623
+# Your PM.
+pm:
+  name: Joseph Ugarte
+  netid: jeu9
+# Set to false if you don't want your gallery entry to be public.
+publish: true
+# Pithy title
+title: "StockHome"
+# OK if this is a Cornell Github link, but public gallery viewers won't be able to see it.
+git-repo: "https://github.coecis.cornell.edu/rw645/CS3110-Final-Project"
+# If you have no demo screencast, replace the url string with an empty string ""
+demo-video-url: ""
+# Write a short, attention-grabbing description of your project.
+desc: >
+  Our project is an interactive stock trading app. This is a program that pulls 
+  real stock data from Yahoo Finance that allows the user to track and add 
+  stocks to their portfolio. The user will be able to track real time stock 
+  prices, save their current portfolios locally, and view analytic data. There 
+  will be a default trading algorithm that can give a rough recommendation of 
+  what to buy.
+
+  Standard visual I/O is supported. In the future, there will be a smoother 
+  graphical interface that allows a graphical representation of the stock price
+  history.

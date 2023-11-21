@@ -1,32 +1,78 @@
 (* Portfolio.mli - Intended to store portfolio data *)
 
-(* Message to who's making stock.ml: This should be from the stock module but
-   I'll just leave it here since stock is not implemented yet*)
-type stock = {
-  symbol : string;
-  price : float;
-  quantity : int;
-}
+open Stock
+open Date
 
-type portfolio = {
-  balance : float;
-  bank_account : int;
-  followed_stocks : stock list;
-}
+module type PortfolioType = sig
+  type t
 
-val create_portfolio : float -> int -> portfolio
-(** Create a portfolio with [initial_balance] and [initial_bank_account]*)
+  type opt =
+    | Buy
+    | Sell  (** Stock options . *)
 
-val add_stock : portfolio -> stock -> portfolio
-(** Add [stock] to the watchlist of the portfolio*)
+  type transaction = {
+    ticker : string;
+    option : opt;
+    price : float;
+    quantity : float;
+    time : date;
+  }
+  (** The type of a transaction. Includes formation (ticker, option, price,
+      quantity, time). *)
 
-val update_balance : portfolio -> float -> portfolio
-(** Update balance by [amount]. Print out a message to indicate the updated
-    balance. If [amount] is negative and its absolute value exceeds current
-    balance, produce a message "Out of balance: [balance + amount] needed"*)
+  exception Out_of_balance of string
+  (** [Out_of_balance] is raised when [portfolio] attempts to spend amount of
+      money that is greater than its current balance. *)
 
-val update_bant_account : portfolio -> int -> portfolio
-(** Update the current bank account. *)
+  val new_portfolio : unit -> t
+  (** [new_portfolio ()] creates a new portfolio with initialized fields.*)
 
-val remove_stock : portfolio -> string -> portfolio
-(** Remove a stock from the watchlist. Required: the stock is in the watchlist. *)
+  val get_balance : t -> float
+  (** [get_balance portfolio] returns current [balance] of [portfolio]. *)
+
+  val get_stock_holdings : t -> float
+  (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
+
+  val get_bank_accounts : t -> int list
+  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
+
+  val get_followed_stocks : t -> Stock.t list
+  (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
+
+  val get_history : t -> transaction list
+  (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
+
+  val to_string : t -> string
+  (** Returns a human-readable string of information of a portfolio*)
+
+  val follow : Stock.t -> t -> t
+  (** Add [stock] to the watchlist of the portfolio*)
+
+  val unfollow : Stock.t -> t -> t
+  (** Remove a stock from the watchlist. Required: the stock is in the
+      watchlist. *)
+
+  val update_balance : float -> t -> t
+  (** [update_balance amount portfolio] updates [balance] of [portfolio] by
+      [amount]. If the updated balance is negative, it raises [Out_of_balance]
+      exception. *)
+
+  val update_stock_holding : float -> t -> t
+  (** [update_stock_holding amount portfolio] updates [stock_holding] by
+      [amount]. Private method.*)
+
+  val add_bank_account : int -> t -> t
+  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
+      [portfolio]. *)
+
+  val update_history : transaction -> t -> t
+  (** [add_history stock buy amount price date portfolio] adds a transaction to
+      the transaction history. [buy] is 1 if it is buy and 0 if it is sell.
+      [amount] indicates the amount traded, [price] is the price when traded. *)
+
+  val stock_transact : opt -> Stock.t -> float -> t -> t
+  (** [stock_transaction option stock quantity portfolio] trades [quantity]
+      amount of [stock] by the type of option [option]. *)
+end
+
+module Portfolio : PortfolioType
