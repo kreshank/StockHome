@@ -6,7 +6,7 @@ open Portfolio
 open Parser
 open Scraper
 open Stock
-open Save_write
+open Savewrite
 
 (* Helper Functions and Printers*)
 
@@ -24,17 +24,16 @@ let port2 = Portfolio.update_stock_holding 200.00 port1
 let save_write_tests =
   "savewrite.ml Test Suite"
   >::: [
-         ("Port empty save" >:: fun _ -> SaveWrite.save empty_port);
-         ( "Port empty load" >:: fun _ ->
+         ( "Port_empty save/load" >:: fun _ ->
+           SaveWrite.save empty_port;
            assert_equal 0.0 (Portfolio.get_balance (SaveWrite.load ())) );
-         ("Port1 save" >:: fun _ -> SaveWrite.save port1);
-         ( "Port1 load" >:: fun _ ->
+         ( "Port1 save/load" >:: fun _ ->
+           SaveWrite.save port1;
            assert_equal 100.0 (Portfolio.get_balance (SaveWrite.load ())) );
-         ("Port2 save" >:: fun _ -> SaveWrite.save port2);
-         ( "Port2 load" >:: fun _ ->
+         ( "Port2 save/load" >:: fun _ ->
+           SaveWrite.save port2;
            assert_equal 200.0 (Portfolio.get_stock_holdings (SaveWrite.load ()))
          );
-         ("clear" >:: fun _ -> SaveWrite.clear ());
        ]
 
 let _ = run_test_tt_main save_write_tests

@@ -4,16 +4,16 @@ open Portfolio
 
 module type SaveWriteType = sig
   val save : Portfolio.t -> unit
-  (** Given a [Portfolio.t], writes to src/savedata.txt the information stored
+  (** Given a [Portfolio.t], writes to data/savedata.txt the information stored
       within the portfolio. Overwrites any existing data.*)
 
   val load : unit -> Portfolio.t
   (** Can be called to return a [Portfolio.t] that contains information stored
-      within [src/savedata.txt]. If no data is present, returns an empty
+      within [data/savedata.txt]. If no data is present, returns an empty
       portfolio.*)
 
   val clear : unit -> unit
-  (** Can be called to clear the saved data within [src/savedata.txt],
+  (** Can be called to clear the saved data within [data/savedata.txt],
       Essentially removes the save.*)
 end
 

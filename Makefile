@@ -23,11 +23,15 @@ test-stock:
 test-slice:
 	OCAMLRUNPARAM=b dune exec test/slice_test/slice_test.exe
 
+test-save-write:
+	OCAMLRUNPARAM=b dune exec test/savewrite_test/savewrite_test.exe -- -runner sequential
+
 test:
 	make test-parser
 	make test-portfolio
 	make test-stock
 	make test-slice
+	make test-save-write
 
 display:
 	OCAMLRUNPARAM=b dune exec bin/display.exe
