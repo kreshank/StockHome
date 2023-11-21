@@ -20,8 +20,9 @@ module type StockType = sig
   val name : t -> string
   (** Returns stock name of a given stock. *)
 
-  val price : t -> float
-  (** Returns last retrieved stock price of a given stock. *)
+  val price : ?time:date -> t -> float
+  (** Returns last retrieved stock price at a given time. If left blank, then
+      defaults to the price at most recent time of access. *)
 
   val time : t -> date
   (** Returns last time of access. *)
