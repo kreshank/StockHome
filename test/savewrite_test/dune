@@ -1,0 +1,3 @@
+(executable
+ (name savewrite_test)
+ (libraries stocks ounit2))
