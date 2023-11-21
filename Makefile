@@ -24,7 +24,7 @@ test-slice:
 	OCAMLRUNPARAM=b dune exec test/slice_test/slice_test.exe
 
 test-save-write:
-	OCAMLRUNPARAM=b dune exec test/savewrite_test/savewrite_test.exe
+	OCAMLRUNPARAM=b dune exec test/savewrite_test/savewrite_test.exe -- -runner sequential
 
 test:
 	make test-parser

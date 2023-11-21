@@ -36,10 +36,11 @@ module SaveWrite : SaveWriteType = struct
     clear ();
 
     let oc = open_out "data/savedata.txt" in
-    output_string oc (input |> Portfolio.get_balance |> string_of_float);
-    output_string oc "\n";
-    output_string oc (input |> Portfolio.get_stock_holdings |> string_of_float);
-    output_string oc "\n";
+    let balance = Printf.sprintf "%f\n" (Portfolio.get_balance input) in
+    let holdings = Printf.sprintf "%f\n" (Portfolio.get_stock_holdings input) in
+
+    output_string oc balance;
+    output_string oc holdings;
     output_string oc "end";
     flush oc;
     close_out oc
