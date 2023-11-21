@@ -2,6 +2,7 @@
 
 open Date
 open Stock
+open Slice
 
 module type ParserType = sig
   type slice
@@ -31,16 +32,7 @@ module String_map : Map.S with type key = string = Map.Make (struct
 end)
 
 module Parser = struct
-  type slice = {
-    open_price : float;
-    curr_date : date;
-    high : float;
-    low : float;
-    close : float;
-    adj_close : float;
-    volume : float;
-    ticker : string;
-  }
+  type slice = Slice.t
 
   type t = slice list String_map.t
   (**Data type t stores information that is provided by the csv and holds it in
@@ -52,21 +44,21 @@ module Parser = struct
     let line_list = String.split_on_char ',' line in
     let date_list = String.split_on_char '-' (List.nth line_list 0) in
     let curr_slice =
-      {
-        open_price = float_of_string (List.nth line_list 1);
-        curr_date =
-          ( int_of_string (List.nth date_list 1),
-            int_of_string (List.nth date_list 2),
-            int_of_string (List.nth date_list 0) );
-        high = float_of_string (List.nth line_list 2);
-        low = float_of_string (List.nth line_list 3);
-        close = float_of_string (List.nth line_list 4);
-        adj_close = float_of_string (List.nth line_list 5);
-        volume = float_of_string (List.nth line_list 6);
-        ticker = List.nth line_list 7;
-      }
+      Slice.make
+        (List.nth line_list 7) (*Ticker*)
+        ~open_price:(float_of_string (List.nth line_list 1))
+        ~high:(float_of_string (List.nth line_list 2))
+        ~low:(float_of_string (List.nth line_list 3))
+        ~close_price:(float_of_string (List.nth line_list 4))
+        ~adjclose:(float_of_string (List.nth line_list 5))
+        ~volume:(int_of_string (List.nth line_list 6))
+        ( int_of_string (List.nth date_list 1),
+          int_of_string (List.nth date_list 2),
+          int_of_string (List.nth date_list 0) )
+      (*Date*)
     in
-    String_map.update curr_slice.ticker
+
+    String_map.update (Slice.ticker curr_slice)
       (fun lst ->
         match lst with
         | Some s -> Some (curr_slice :: s)
@@ -104,8 +96,11 @@ module Parser = struct
     else
       let got_slice = List.hd (Option.get slice_list) in
       Some
-        (Stock.of_input got_slice.ticker got_slice.ticker got_slice.open_price
-           got_slice.curr_date 2. got_slice.volume)
+        (Stock.of_input (Slice.ticker got_slice) (Slice.ticker got_slice)
+           (Slice.open_price got_slice)
+           (Slice.time got_slice) 2.
+           (float_of_int (Slice.volume got_slice)))
+  (*Why is Stock volume still float?*)
 
   (** Given a ticker, return the slice list associated with the ticker. Returns
       [None] if ticker is not in Parser *)
