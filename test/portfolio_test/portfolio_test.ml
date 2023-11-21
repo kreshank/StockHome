@@ -13,15 +13,15 @@ let simple_map = Parser.of_csv "data/stock_info_simple.csv"
 
 let tsla =
   Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 19, 23) 698627000000.
-    169685075.
+    169685075
 
 let aapl =
   Stock.of_input "AAPL" "Apple, Inc." 168.22 (10, 19, 23) 698627000000.
-    169685075.
+    169685075
 
 let crnl =
   Stock.of_input "CRNL" "Cornell University" 18.65 (10, 19, 23) 698627000000.
-    169685075.
+    169685075
 
 let buy = Portfolio.Buy
 

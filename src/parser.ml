@@ -38,7 +38,7 @@ module Parser = struct
     low : float;
     close : float;
     adj_close : float;
-    volume : float;
+    volume : int;
     ticker : string;
   }
 
@@ -62,7 +62,7 @@ module Parser = struct
         low = float_of_string (List.nth line_list 3);
         close = float_of_string (List.nth line_list 4);
         adj_close = float_of_string (List.nth line_list 5);
-        volume = float_of_string (List.nth line_list 6);
+        volume = int_of_string (List.nth line_list 6);
         ticker = List.nth line_list 7;
       }
     in
