@@ -98,8 +98,7 @@ module Parser = struct
       Some
         (Stock.of_input (Slice.ticker got_slice) (Slice.ticker got_slice)
            (Slice.open_price got_slice)
-           (Slice.time got_slice) 2.
-           (float_of_int (Slice.volume got_slice)))
+           (Slice.time got_slice) 2. (Slice.volume got_slice))
   (*Why is Stock volume still float?*)
 
   (** Given a ticker, return the slice list associated with the ticker. Returns
