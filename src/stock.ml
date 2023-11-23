@@ -168,16 +168,37 @@ module Stock = struct
       [second] closing price and [first] opening prices. *)
   let lin_euler (time : date) (first : Slice.t) (second : Slice.t) : float = 0.0
 
-  (**[?handler=LINEAR] case: return a Euler-step estimation of the price of that
-     stock on that date, based on surrounding days.*)
+  (** [?handler=LINEAR] case: return a Euler-step estimation of the price of
+      that stock on that date, based on surrounding days.*)
   let price_h_lin (time : date) (stk : t) : float =
     let first, second = lin_helper time stk.historical in
     if Date.compare (Slice.time first) time = 0 then Slice.close_price first
     else lin_euler time first second
 
+  (** Returns a pair of [(before, after)] where [before] is the first [Slice.t]
+      that is before, or equal to a given date and [after] is the first
+      [Slice.t] that is after, or equal to a given date. Raises
+      [Date.InvalidDate] if either cannot be retrieved. *)
+  let rec avg_helper time (lst : query) (last : Slice.t) : Slice.t * Slice.t =
+    match lst with
+    | [] -> raise Date.InvalidDate
+    | h :: t ->
+        let cmp = Date.compare (Slice.time h) time in
+        if cmp = 0 then (h, h)
+        else if cmp > 0 then avg_helper time t h
+        else (h, last)
+
   (** [?handler=AVERAGE] case: return the average price of the first closing
       price before and the first opening price after [?date].*)
-  let price_h_avg (time : date) (stk : t) : float = failwith "unim"
+  let price_h_avg (time : date) (stk : t) : float =
+    match stk.historical with
+    | [] -> raise Date.InvalidDate
+    | front :: hist ->
+        if Date.compare (front |> Slice.time) time = 0 then
+          raise Date.InvalidDate
+        else
+          let before, after = avg_helper time hist front in
+          (Slice.close_price before +. Slice.close_price after) /. 2.0
 
   (** [?handler=ERROR] case: throw [InvalidDate]. *)
   let price_h_err (time : date) (stk : t) : float = failwith "unim"
