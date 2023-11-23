@@ -25,6 +25,9 @@ module type DateType = sig
       dates. Requires [from] < [to']. Requires [from] and [to'] to be valid
       dates after 1/1/1900. *)
 
+  val prev : date -> date
+  (** Returns the previous valid date. *)
+
   val next : date -> date
   (** Returns the next valid date. *)
 
@@ -32,6 +35,11 @@ module type DateType = sig
   (** Returns the [n]th next valid business date, if [offset] optional field not
       provided, defaults to the next business day. Requires [offset] >= 1 and
       [date] to be valid date after 1/1/1900. *)
+
+  val holiday_list : int -> (string * date) list
+  (** [holiday_list yr] returns the list of stock-market recognized holidays in
+      format [("holiday name", date)]. List is sorted from earliest to latest.
+      Requires valid [yr] input. *)
 
   val to_string : date -> string
   (** Returns a string representation of the date in MM-DD-YYYY. *)
@@ -64,6 +72,18 @@ module Date = struct
     else if m = 2 then 1 <= d && d <= 28 + leap_offset y
     else false
 
+  (** Returns "mm-dd-yyyy" *)
+  let to_string ((m, d, y) : date) : string =
+    string_of_int m ^ "-" ^ string_of_int d ^ "-" ^ string_of_int y
+
+  (** [compare a b] returns value < [0] if [a] < [b], value > [0] if [a] > [b],
+      and value = [0] if [a] = [b].*)
+  let compare ((m1, d1, y1) : date) ((m2, d2, y2) : date) : int =
+    let y_cmp = compare y1 y2 in
+    let m_cmp = compare m1 m2 in
+    let d_cmp = compare d1 d2 in
+    if y_cmp = 0 then if m_cmp = 0 then d_cmp else m_cmp else y_cmp
+
   (** Return days in a year. *)
   let days_in_yr yr : int = 365 + leap_offset yr
 
@@ -93,12 +113,25 @@ module Date = struct
     in
     go_to_yr (m, d, y) 1900 0 - 1
 
-  (** Day Of Week. Requires valid date after 1/1/1900 as input. *)
+  (** Day Of Week. Requires valid date after 1/1/1900 as input. Returns [0] if
+      is monday.*)
   let dow d = day_since_1900 d mod 7
 
+  (** Get number of days between dates. *)
   let diff (from : date) (to' : date) : int =
     day_since_1900 to' - day_since_1900 from
 
+  (** Get previous date. *)
+  let prev ((m, d, y) : date) : date =
+    let decr_day = (m, d - 1, y) in
+    if is_valid decr_day then decr_day
+    else if is_valid (m - 1, 31, y) then (m - 1, 31, y)
+    else if is_valid (m - 1, 30, y) then (m - 1, 30, y)
+    else if is_valid (m - 1, 29, y) then (m - 1, 29, y)
+    else if is_valid (m - 1, 28, y) then (m - 1, 28, y)
+    else (12, 31, y - 1)
+
+  (** Get next date. *)
   let next ((m, d, y) : date) : date =
     let incr_day = (m, d + 1, y) in
     if is_valid incr_day then incr_day
@@ -106,10 +139,85 @@ module Date = struct
       let incr_month = (m + 1, 1, y) in
       if is_valid incr_month then incr_month else (1, 1, y + 1)
 
-  let next_business ?(offset = 1) ((m, d, y) : date) : date = failwith "unimpl"
+  (** Holiday type. *)
+  type holiday =
+    | Fixed of int * int (* m,d *)
+    | Floating of int * int * int (* m,d,# *)
 
-  let to_string ((m, d, y) : date) : string =
-    string_of_int m ^ "-" ^ string_of_int d ^ "-" ^ string_of_int y
+  (** Days that NASDAQ and NYSE are closed, excluding Good Friday. *)
+  let holidays =
+    [
+      ("New Years Day", Fixed (1, 1));
+      ("Martin Luther King Day", Floating (1, 0, 3));
+      ("Presidents Day", Floating (2, 0, 3));
+      ("Memorial Day", Floating (5, 0, 5));
+      ("Juneteenth", Fixed (6, 19));
+      ("Independence Day", Fixed (7, 4));
+      ("Labor Day", Floating (9, 0, 1));
+      ("Thanksgiving", Floating (11, 3, 4));
+      ("Christmas Day", Fixed (12, 25));
+    ]
+
+  (** [easter yr] returns the year of Easter during [yr], according to Gauss's
+      Easter algorithm. *)
+  let easter yr =
+    let a = yr mod 19 in
+    let b = yr mod 4 in
+    let c = yr mod 7 in
+    let p = yr / 100 in
+    let q = (13 + (8 * p)) / 25 in
+    let m = (15 - q + p - (p / 4)) mod 30 in
+    let n = (4 + p - (p / 4)) mod 7 in
+    let d = ((19 * a) + m) mod 30 in
+    let e = (n + (2 * b) + (4 * c) + (6 * d)) mod 7 in
+    let days = 22 + d + e in
+    if d = 29 && e = 6 then (04, 19, yr)
+    else if d = 28 && e = 6 then (04, 18, yr)
+    else if days > 31 then (04, days - 31, yr)
+    else (03, days, yr)
+
+  (** [calc_holiday yr (h_name, holiday)] returns a pair [(h_name, holidate)]
+      where [holidate] is the exact date that a certain holiday during a
+      provided [yr].*)
+  let calc_holiday yr = function
+    | s, Fixed (m, d) -> (s, (m, d, yr))
+    | s, Floating (m, day_of_week, nth) ->
+        let day_of_first = dow (m, 1, yr) in
+        let first = 1 + ((day_of_week - day_of_first + 7) mod 7) in
+        let day = first + (7 * (nth - 1)) in
+        if is_valid (m, day, yr) then (s, (m, day, yr))
+        else (s, (m, day - 7, yr))
+
+  (** [holiday_list yr] returns the list of stock-market recognized holidays in
+      format [("holiday name", date)]. List is sorted from earliest to latest.
+      Requires valid [yr] input. *)
+  let holiday_list yr : (string * date) list =
+    let hlist = List.map (calc_holiday yr) holidays in
+    let hlist_unsorted =
+      ("Good Friday", easter yr |> prev |> prev)
+      :: hlist (* Easter is never observed, but Good Friday is. *)
+    in
+    List.sort (fun (_, a) (_, b) -> compare a b) hlist_unsorted
+
+  (** Return date of next business date. *)
+  let rec next_business ?(offset = 1) ((m, d, y) as time : date) : date =
+    let observation_date = function
+      | _, ((mm, dd, yyyy) as dte) ->
+          let dw = dow dte in
+          if dw = 5 then prev dte else if dw = 6 then next dte else dte
+    in
+    let days_off =
+      List.map observation_date (holiday_list y @ holiday_list (y + 1))
+    in
+    let candidate =
+      if dow time = 4 then time |> next |> next |> next
+      else if dow time = 5 then time |> next |> next
+      else if dow time = 6 then time |> next
+      else time |> next
+    in
+    if List.mem candidate days_off then next_business ~offset candidate
+    else if offset = 1 then candidate
+    else next_business ~offset:(offset - 1) candidate
 
   let of_string (inp : string) : date =
     let splitted = String.split_on_char '-' inp in
@@ -118,11 +226,5 @@ module Date = struct
         let pot = (int_of_string m, int_of_string d, int_of_string y) in
         if is_valid pot then pot else raise InvalidDate
     | _ -> invalid_arg "Wrong date format"
-
-  let compare ((m1, d1, y1) : date) ((m2, d2, y2) : date) : int =
-    let y_cmp = compare y1 y2 in
-    let m_cmp = compare m1 m2 in
-    let d_cmp = compare d1 d2 in
-    if y_cmp = 0 then if m_cmp = 0 then d_cmp else m_cmp else y_cmp
 end
 (* of Date.ml *)

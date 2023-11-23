@@ -25,6 +25,9 @@ module type DateType = sig
       dates. Requires [from] < [to']. Requires [from] and [to'] to be valid
       dates after 1/1/1900. *)
 
+  val prev : date -> date
+  (** Returns the previous valid date. *)
+
   val next : date -> date
   (** Returns the next valid date. *)
 
@@ -32,6 +35,11 @@ module type DateType = sig
   (** Returns the [n]th next valid business date, if [offset] optional field not
       provided, defaults to the next business day. Requires [offset] >= 1 and
       [date] to be valid date after 1/1/1900. *)
+
+  val holiday_list : int -> (string * date) list
+  (** [holiday_list yr] returns the list of stock-market recognized holidays in
+      format [("holiday name", date)]. List is sorted from earliest to latest.
+      Requires valid [yr] input. *)
 
   val to_string : date -> string
   (** Returns a string representation of the date in MM-DD-YYYY. *)
