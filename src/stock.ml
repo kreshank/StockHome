@@ -164,15 +164,13 @@ module Stock = struct
         if Date.compare (Slice.time first) time <= 0 then (first, second)
         else lin_helper time (second :: t)
 
-  let date_diff (from : date) (to' : date) : int = 1
-
   (** Performs result of euler step estimation for [field_of stk], based off
       [second] closing price and [first] opening prices. [first] is the
       [Slice.t] before or equal to a date. *)
   let lin_euler (field_of : Slice.t -> 'a) (time : date) (first : Slice.t)
       (second : Slice.t) : 'a =
     (field_of first -. field_of second)
-    *. float_of_int (date_diff (Slice.time second) (Slice.time first))
+    *. float_of_int (Date.diff (Slice.time second) (Slice.time first))
   (* TODO: Can improve this to be a regression of sorts *)
 
   (** [?handler=LINEAR] case: return a Euler-step estimation of [field_of stk]
