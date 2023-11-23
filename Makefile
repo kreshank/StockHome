@@ -11,6 +11,9 @@ code:
 utop:
 	OCAMLRUNPARAM=b dune utop src
 
+test-date:
+	OCAMLRUNPARAM=b dune exec test/date_test/date_test.exe
+
 test-parser:
 	OCAMLRUNPARAM=b dune exec test/parser_test/parser_test.exe
 
