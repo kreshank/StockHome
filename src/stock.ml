@@ -4,16 +4,22 @@ open Date
 open Slice
 
 module type StockType = sig
+  type query = Slice.t list
+
+  type cfg =
+    | DEFAULT
+    | PREVIOUS
+    | LINEAR
+    | AVERAGE
+    | ERROR
+
   type t
   (** Representation type. *)
 
-  exception OutOfInterval
-  (** Raised when trying to access invalid time. *)
-
   val of_input : string -> string -> float -> date -> float -> int -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
-      on input. Mainly used for testing purposes. Raises [InvalidDate] if date
-      is invalid.*)
+      on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
+      date is invalid.*)
 
   val ticker : t -> string
   (** Returns ticker of a given stock. *)
@@ -21,9 +27,31 @@ module type StockType = sig
   val name : t -> string
   (** Returns stock name of a given stock. *)
 
-  val price : ?time:date -> t -> float
-  (** Returns last retrieved stock price at a given time. If left blank, then
-      defaults to the price at most recent time of access. *)
+  val price : ?time:date -> ?handler:cfg -> t -> float
+  (** [price ?time ?handler stk] returns the closing (or most recent) price of
+      the stock at inputted time. [?time] defaults to the most recently accessed
+      time of this stock. [?handler] defaults to [PREVIOUS] style. [?handler]
+      specifies how to proceed in the case that that [?time] falls on a weekend
+      or holiday, when the market is not open. If [?time] optional field is
+      provided, it must be a valid [date]. Always raises [Date.InvalidDate] when
+      requesting date before stock creation date.
+      - If [?time] is a day that the stock market is open, then
+        [price ?time stk = price ?time ?handler stk] and will return the price
+        at that date.
+      - If [?time] is a day in the future, not yet retrievable, then
+        [Date.InvalidDate] is thrown.
+      - If [?time] is a holiday or weekend, return value is dependent on
+        [?handler] setting:
+      - [?handler=PREVIOUS] case: return the non-adjusted closing price of the
+        stock of the first day before or on [?time].
+      - [?handler=LINEAR] case: return a Euler-step estimation of the closing
+        price of that stock on [?time], based on previous two days. Raises
+        [InvalidDate] if unable to access the first two days before or on
+        [?time].
+      - [?handler=AVERAGE] case: return the average closing-price of the first
+        day before and the first day after [?date].
+      - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
+        weekends. *)
 
   val time : t -> date
   (** Returns last time of access. *)
@@ -31,13 +59,43 @@ module type StockType = sig
   val market_cap : t -> float
   (** Returns market cap at last time of access. *)
 
-  val volume : ?time:date -> t -> int
-  (** Returns volume at last time of access. *)
+  val volume : ?time:date -> ?handler:cfg -> t -> int
+  (** [volume ?time ?handler stk] returns the volume of the stock at inputted
+      time. [?time] defaults to the most recently accessed time of this stock.
+      [?handler] defaults to [PREVIOUS] style. [?handler] specifies how to
+      proceed in the case that that [?time] falls on a weekend or holiday, when
+      the market is not open. If [?time] optional field is provided, it must be
+      a valid [date]. Always raises [Date.InvalidDate] when requesting date
+      before stock creation date.
+      - If [?time] is a day that the stock market is open, then
+        [volume ?time stk = volume ?time ?handler stk] and will return the
+        volume at that date.
+      - If [?time] is a day in the future, not yet retrievable, then
+        [Date.InvalidDate] is thrown.
+      - If [?time] is a holiday or weekend, return value is dependent on
+        [?handler] setting:
+      - [?handler=PREVIOUS] case: return the stock volume of the first day
+        before or on [?time].
+      - [?handler=LINEAR] case: return a Euler-step estimation of the volume of
+        that stock on [?time], based on previous two days. Raises
+        [Date.InvalidDate] if unable to access the first two days before or on
+        [?time].
+      - [?handler=AVERAGE] case: return the average volume of the first day
+        before and the first day after [?date].
+      - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
+        weekends. *)
 
-  val average_price : date -> date -> t -> float
-  (** [average_price start_date end_date stock] returns average closing stock
-      price over that interval. Raise [InvalidDate] if either date is invalid.
-      Raise [OutOfInterval] if that memory date is unretrievable. *)
+  val historical : t -> query
+  (** [historical stk] returns the list of historical information of given
+      stock. *)
+
+  val query : date -> date -> t -> query
+  (** [query start endt stk] returns the list of historical information between
+      [start] and [endt] inclusive. *)
+
+  val average_price : query -> t -> float
+  (** [average_price range stk] returns average closing stock price over an
+      inputted range. *)
 
   val to_string : t -> string
   (** [to_string s] returns a single-line brief string representation of a given
@@ -49,11 +107,17 @@ end
 
 module Stock = struct
   type query = Slice.t list
-  (** TODO: Should decide whether I want to make this a list, or rather a map
-     for better access times: Analysis below.
-        - Price:  O(N)/O(1) --> O(logN)
-        - Query:  O(N)
-      *)
+
+  (* TODO: Should decide whether I want to make this a list, or rather a map for
+     better access times: Analysis below. - Price: O(N)/O(1) --> O(logN) -
+     Query: O(N) *)
+
+  type cfg =
+    | DEFAULT
+    | PREVIOUS
+    | LINEAR
+    | AVERAGE
+    | ERROR
 
   type t = {
     ticker : string;
@@ -64,57 +128,154 @@ module Stock = struct
     volume : int;
     historical : query;
   }
+  (** Rep type *)
 
+  (** Make Stock.t from inputs. *)
   let of_input (ticker : string) (name : string) (price : float) (time : date)
       (market_cap : float) (volume : int) : t =
     { ticker; name; price; time; market_cap; volume; historical = [] }
 
+  (** Return ticker. *)
   let ticker (stk : t) : string = stk.ticker
+
+  (** Return name. *)
   let name (stk : t) : string = stk.name
-  (** TODO: what to do if time is valid, but we don't have a datapoint? get the
-     most recent time? 
-        - There are a few options here.
-            (1) Toss out an error; date is not a true datapoint
-                - This is a bad solution, but it is indeed an easy one
-            (2) We can use the prices of the closest date
-                - If we take this approach, it's important to return a pair
-                  of [(date, price)], so we can check that this is indeed 
-                  the date that we want to be grabbing. 
-            (3) We can do extrapolation/interpolation by performing Euler step
-                estimations or some other estimation methods (trend line
-                analysis). 
-                - This is a bit more involved, but this should also provide a 
-                  more usable and useful input for algorithms
-            (4) We raise an error and later on, we disallow users to look for 
-                weekend times.
-            (5) I create an optional argument and type, and let the user choose
-                between all the options we can think of. This way, default will
-                toss an error if it doesn't exist. *)
-  let price ?(time = (-1, -1, -1)) (stk : t) : float =
-    if Date.is_valid time then stk.price else stk.price
+
+  (** Returns first [Slice.t] that is before, or equal to a given date. *)
+  let rec prev_helper (time : date) (lst : query) : Slice.t =
+    match lst with
+    | [] -> raise Date.InvalidDate
+    | h :: t ->
+        if Date.compare (Slice.time h) time <= 0 then h else prev_helper time t
+
+  (** [?handler=PREVIOUS] case: return the most recent non-adjusted closing day
+      price of the stock. Raises [InvalidDate] if requesting date before stock
+      creation date.*)
+  let price_h_prev (time : date) (stk : t) : float =
+    prev_helper time stk.historical |> Slice.close_price
+
+  (** Returns a pair of [(first,second)] where [first] is the first [Slice.t]
+      that is before, or equal to a given date. *)
+  let rec lin_helper (time : date) (lst : query) : Slice.t * Slice.t =
+    match lst with
+    | [] -> raise Date.InvalidDate
+    | [ x ] -> raise Date.InvalidDate
+    | first :: second :: t ->
+        if Date.compare (Slice.time first) time <= 0 then (first, second)
+        else lin_helper time (second :: t)
+
+  (** Performs result of euler step estimation of a day's prices, based off
+      [second] closing price and [first] opening prices. *)
+  let lin_euler (time : date) (first : Slice.t) (second : Slice.t) : float = 0.0
+
+  (**[?handler=LINEAR] case: return a Euler-step estimation of the price of that
+     stock on that date, based on surrounding days.*)
+  let price_h_lin (time : date) (stk : t) : float =
+    let first, second = lin_helper time stk.historical in
+    if Date.compare (Slice.time first) time = 0 then Slice.close_price first
+    else lin_euler time first second
+
+  (** [?handler=AVERAGE] case: return the average price of the first closing
+      price before and the first opening price after [?date].*)
+  let price_h_avg (time : date) (stk : t) : float = failwith "unim"
+
+  (** [?handler=ERROR] case: throw [InvalidDate]. *)
+  let price_h_err (time : date) (stk : t) : float = failwith "unim"
+
+  (** [?handler=DEFAULT] case: defaults to [PREVIOUS]. *)
+  let price_h_def (time : date) (stk : t) : float = price_h_prev time stk
+
+  (** [price ?time ?handler stk] returns the closing (or most recent) price of
+      the stock at inputted time. [?time] defaults to the most recently accessed
+      time of this stock. [?handler] defaults to [PREVIOUS] style. [?handler]
+      specifies how to proceed in the case that that [?time] falls on a weekend
+      or holiday, when the market is not open. If [?time] optional field is
+      provided, it must be a valid [date]. Always raises [Date.InvalidDate] when
+      requesting date before stock creation date.
+      - If [?time] is a day that the stock market is open, then
+        [price ?time stk = price ?time ?handler stk] and will return the price
+        at that date.
+      - If [?time] is a day in the future, not yet retrievable, then
+        [Date.InvalidDate] is thrown.
+      - If [?time] is a holiday or weekend, return value is dependent on
+        [?handler] setting:
+      - [?handler=PREVIOUS] case: return the non-adjusted closing price of the
+        stock of the first day before or on [?time].
+      - [?handler=LINEAR] case: return a Euler-step estimation of the closing
+        price of that stock on [?time], based on previous two days. Raises
+        [InvalidDate] if unable to access the first two days before or on
+        [?time].
+      - [?handler=AVERAGE] case: return the average closing-price of the first
+        day before and the first day after [?date].
+      - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
+        weekends. *)
+  let price ?(time = (-1, -1, -1)) ?(handler = DEFAULT) (stk : t) : float =
+    if Date.is_valid time then
+      if handler = PREVIOUS then price_h_prev time stk
+      else if handler = LINEAR then price_h_lin time stk
+      else if handler = AVERAGE then price_h_avg time stk
+      else if handler = ERROR then price_h_err time stk
+      else price_h_def time stk
+    else stk.price
 
   let time (stk : t) : date = stk.time
   let market_cap (stk : t) : float = stk.market_cap
-  let volume ?(time = (-1, -1, -1)) (stk : t) : int = stk.volume
-  (** TODO: See above TODO regarding price. *)
 
+  (** [volume ?time ?handler stk] returns the volume of the stock at inputted
+      time. [?time] defaults to the most recently accessed time of this stock.
+      [?handler] defaults to [PREVIOUS] style. [?handler] specifies how to
+      proceed in the case that that [?time] falls on a weekend or holiday, when
+      the market is not open. If [?time] optional field is provided, it must be
+      a valid [date]. Always raises [Date.InvalidDate] when requesting date
+      before stock creation date.
+      - If [?time] is a day that the stock market is open, then
+        [volume ?time stk = volume ?time ?handler stk] and will return the
+        volume at that date.
+      - If [?time] is a day in the future, not yet retrievable, then
+        [Date.InvalidDate] is thrown.
+      - If [?time] is a holiday or weekend, return value is dependent on
+        [?handler] setting:
+      - [?handler=PREVIOUS] case: return the stock volume of the first day
+        before or on [?time].
+      - [?handler=LINEAR] case: return a Euler-step estimation of the volume of
+        that stock on [?time], based on previous two days. Raises
+        [Date.InvalidDate] if unable to access the first two days before or on
+        [?time].
+      - [?handler=AVERAGE] case: return the average volume of the first day
+        before and the first day after [?date].
+      - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
+        weekends. *)
+  let volume ?(time = (-1, -1, -1)) ?(handler = DEFAULT) (stk : t) : int =
+    stk.volume
+
+  (** [historical stk] returns the list of historical information of given
+      stock. *)
   let historical (stk : t) : query = stk.historical
-  let query (start : date) (endt : date) (stk : t) : query = 
-    let in_range slice = 
-      (Date.compare start (Slice.time slice) <= 0) 
-      && (Date.compare (Slice.time slice) endt <= 0) 
-    in 
+
+  (** [query start endt stk] returns the list of historical information between
+      [start] and [endt] inclusive. *)
+  let query (start : date) (endt : date) (stk : t) : query =
+    let in_range slice =
+      Date.compare start (Slice.time slice) <= 0
+      && Date.compare (Slice.time slice) endt <= 0
+    in
     List.filter in_range stk.historical
 
-  exception OutOfInterval
+  (** [average_price range stk] returns average closing stock price over an
+      inputted range. *)
+  let average_price (lst : query) (stk : t) : float =
+    let sum =
+      List.fold_left (fun acc a -> acc +. Slice.close_price a) 0.0 lst
+    in
+    sum /. float_of_int (List.length lst)
 
-  let average_price (start : date) (endt : date) (stk : t) : float =
-    failwith "Unimplemented"
-
+  (** [to_string s] returns a single-line brief string representation of a given
+      stock. *)
   let to_string (stk : t) : string =
     Printf.sprintf "%s (%s): $%.5f" stk.ticker (Date.to_string stk.time)
       stk.price
 
+  (** Returns a string of a more in-depth summary of a given stock. *)
   let to_string_detailed (stk : t) : string =
     Printf.sprintf
       "\n\
