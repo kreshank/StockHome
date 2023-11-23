@@ -164,9 +164,14 @@ module Stock = struct
         if Date.compare (Slice.time first) time <= 0 then (first, second)
         else lin_helper time (second :: t)
 
+  let date_diff (from : date) (to' : date) : int = 1
+
   (** Performs result of euler step estimation of a day's prices, based off
-      [second] closing price and [first] opening prices. *)
-  let lin_euler (time : date) (first : Slice.t) (second : Slice.t) : float = 0.0
+      [second] closing price and [first] opening prices. [first] is the
+      [Slice.t] before or equal to a date. *)
+  let lin_euler (time : date) (first : Slice.t) (second : Slice.t) : float =
+    (Slice.close_price first -. Slice.close_price second)
+    *. float_of_int (date_diff (Slice.time second) (Slice.time first))
 
   (** [?handler=LINEAR] case: return a Euler-step estimation of the price of
       that stock on that date, based on surrounding days.*)
