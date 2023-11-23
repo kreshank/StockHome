@@ -46,7 +46,7 @@ module type StockType = sig
         stock of the first day before or on [?time].
       - [?handler=LINEAR] case: return a Euler-step estimation of the closing
         price of that stock on [?time], based on previous two days. Raises
-        [InvalidDate] if unable to access the first two days before or on
+        [Date.InvalidDate] if unable to access the first two days before or on
         [?time].
       - [?handler=AVERAGE] case: return the average closing-price of the first
         day before and the first day after [?date].
@@ -149,8 +149,8 @@ module Stock = struct
         if Date.compare (Slice.time h) time <= 0 then h else prev_helper time t
 
   (** [?handler=PREVIOUS] case: return the most recent non-adjusted closing day
-      price of the stock. Raises [InvalidDate] if requesting date before stock
-      creation date.*)
+      price of the stock. Raises [Date.InvalidDate] if requesting date before
+      stock creation date.*)
   let price_h_prev (time : date) (stk : t) : float =
     prev_helper time stk.historical |> Slice.close_price
 
@@ -200,8 +200,21 @@ module Stock = struct
           let before, after = avg_helper time hist front in
           (Slice.close_price before +. Slice.close_price after) /. 2.0
 
-  (** [?handler=ERROR] case: throw [InvalidDate]. *)
-  let price_h_err (time : date) (stk : t) : float = failwith "unim"
+  (** Returns a slice of the queried time, if found, otherwise raise
+      [Date.InvalidDate]. *)
+  let rec err_helper (time : date) (lst : query) : Slice.t =
+    match lst with
+    | [] -> raise Date.InvalidDate
+    | h :: t ->
+        let cmp = Date.compare (Slice.time h) time in
+        if cmp = 0 then h
+        else if cmp < 0 then raise Date.InvalidDate
+        else err_helper time t
+
+  (** [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
+      weekends. *)
+  let price_h_err (time : date) (stk : t) : float =
+    err_helper time stk.historical |> Slice.close_price
 
   (** [?handler=DEFAULT] case: defaults to [PREVIOUS]. *)
   let price_h_def (time : date) (stk : t) : float = price_h_prev time stk
