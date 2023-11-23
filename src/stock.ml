@@ -148,11 +148,11 @@ module Stock = struct
     | h :: t ->
         if Date.compare (Slice.time h) time <= 0 then h else prev_helper time t
 
-  (** [?handler=PREVIOUS] case: return the most recent non-adjusted closing day
-      price of the stock. Raises [Date.InvalidDate] if requesting date before
-      stock creation date.*)
-  let price_h_prev (time : date) (stk : t) : float =
-    prev_helper time stk.historical |> Slice.close_price
+  (** [?handler=PREVIOUS] case: returns [field_of stk] where [stk] is the first
+      day before or on [?time]. Raises [Date.InvalidDate] if requesting date
+      before stock creation date.*)
+  let get_h_prev (field_of : Slice.t -> 'a) (time : date) (stk : t) : 'a =
+    prev_helper time stk.historical |> field_of
 
   (** Returns a pair of [(first,second)] where [first] is the first [Slice.t]
       that is before, or equal to a given date. *)
@@ -166,19 +166,21 @@ module Stock = struct
 
   let date_diff (from : date) (to' : date) : int = 1
 
-  (** Performs result of euler step estimation of a day's prices, based off
+  (** Performs result of euler step estimation for [field_of stk], based off
       [second] closing price and [first] opening prices. [first] is the
       [Slice.t] before or equal to a date. *)
-  let lin_euler (time : date) (first : Slice.t) (second : Slice.t) : float =
-    (Slice.close_price first -. Slice.close_price second)
+  let lin_euler (field_of : Slice.t -> 'a) (time : date) (first : Slice.t)
+      (second : Slice.t) : 'a =
+    (field_of first -. field_of second)
     *. float_of_int (date_diff (Slice.time second) (Slice.time first))
+  (* TODO: Can improve this to be a regression of sorts *)
 
-  (** [?handler=LINEAR] case: return a Euler-step estimation of the price of
-      that stock on that date, based on surrounding days.*)
-  let price_h_lin (time : date) (stk : t) : float =
+  (** [?handler=LINEAR] case: return a Euler-step estimation of [field_of stk]
+      of that stock on that date, based on surrounding days.*)
+  let get_h_lin (field_of : Slice.t -> 'a) (time : date) (stk : t) : 'a =
     let first, second = lin_helper time stk.historical in
-    if Date.compare (Slice.time first) time = 0 then Slice.close_price first
-    else lin_euler time first second
+    if Date.compare (Slice.time first) time = 0 then field_of first
+    else lin_euler field_of time first second
 
   (** Returns a pair of [(before, after)] where [before] is the first [Slice.t]
       that is before, or equal to a given date and [after] is the first
@@ -193,9 +195,10 @@ module Stock = struct
         else if cmp > 0 then avg_helper time t h
         else (h, last)
 
-  (** [?handler=AVERAGE] case: return the average price of the first closing
-      price before and the first opening price after [?date].*)
-  let price_h_avg (time : date) (stk : t) : float =
+  (** [?handler=AVERAGE] case: return the average of [field_of before] and
+      [field_of after], where [before] and [after] are the first days before and
+      after [?date].*)
+  let get_h_avg (field_of : Slice.t -> 'a) (time : date) (stk : t) : 'a =
     match stk.historical with
     | [] -> raise Date.InvalidDate
     | front :: hist ->
@@ -203,7 +206,7 @@ module Stock = struct
           raise Date.InvalidDate
         else
           let before, after = avg_helper time hist front in
-          (Slice.close_price before +. Slice.close_price after) /. 2.0
+          (field_of before +. field_of after) /. 2.0
 
   (** Returns a slice of the queried time, if found, otherwise raise
       [Date.InvalidDate]. *)
@@ -218,11 +221,12 @@ module Stock = struct
 
   (** [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
       weekends. *)
-  let price_h_err (time : date) (stk : t) : float =
-    err_helper time stk.historical |> Slice.close_price
+  let get_h_err (field_of : Slice.t -> 'a) (time : date) (stk : t) : 'a =
+    err_helper time stk.historical |> field_of
 
   (** [?handler=DEFAULT] case: defaults to [PREVIOUS]. *)
-  let price_h_def (time : date) (stk : t) : float = price_h_prev time stk
+  let get_h_def (field_of : Slice.t -> 'a) (time : date) (stk : t) : 'a =
+    get_h_prev field_of time stk
 
   (** [price ?time ?handler stk] returns the closing (or most recent) price of
       the stock at inputted time. [?time] defaults to the most recently accessed
@@ -250,11 +254,11 @@ module Stock = struct
         weekends. *)
   let price ?(time = (-1, -1, -1)) ?(handler = DEFAULT) (stk : t) : float =
     if Date.is_valid time then
-      if handler = PREVIOUS then price_h_prev time stk
-      else if handler = LINEAR then price_h_lin time stk
-      else if handler = AVERAGE then price_h_avg time stk
-      else if handler = ERROR then price_h_err time stk
-      else price_h_def time stk
+      if handler = PREVIOUS then get_h_prev Slice.close_price time stk
+      else if handler = LINEAR then get_h_lin Slice.close_price time stk
+      else if handler = AVERAGE then get_h_avg Slice.close_price time stk
+      else if handler = ERROR then get_h_err Slice.close_price time stk
+      else get_h_def Slice.close_price time stk
     else stk.price
 
   let time (stk : t) : date = stk.time
@@ -285,7 +289,16 @@ module Stock = struct
       - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
         weekends. *)
   let volume ?(time = (-1, -1, -1)) ?(handler = DEFAULT) (stk : t) : int =
-    stk.volume
+    if Date.is_valid time then
+      let volume_float stk = Slice.volume stk |> float_of_int in
+      if handler = PREVIOUS then get_h_prev Slice.volume time stk
+      else if handler = LINEAR then
+        int_of_float (get_h_lin volume_float time stk)
+      else if handler = AVERAGE then
+        int_of_float (get_h_avg volume_float time stk)
+      else if handler = ERROR then get_h_err Slice.volume time stk
+      else get_h_def Slice.volume time stk
+    else stk.volume
 
   (** [historical stk] returns the list of historical information of given
       stock. *)
