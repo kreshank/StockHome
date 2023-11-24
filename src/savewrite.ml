@@ -2,6 +2,8 @@
     portfolios. Used to ensure data can be saved when the program is closed. *)
 
 open Portfolio
+open Stock
+open Date
 
 module type SaveWriteType = sig
   val save : Portfolio.t -> unit
@@ -30,6 +32,24 @@ let save_BA (input : Portfolio.t) : string =
 
     String.sub bank_accounts 0 (String.length bank_accounts - 1) ^ "\n"
 
+let save_FS (input : Portfolio.t) : string =
+  if Portfolio.get_followed_stocks input = [] then "end\n"
+  else
+    List.fold_left
+      (fun acc x ->
+        Stock.ticker x ^ ";" ^ Stock.name x ^ ";"
+        ^ string_of_float (Stock.price x)
+        ^ ";"
+        ^ Date.to_string (Stock.time x)
+        ^ ";"
+        ^ string_of_float (Stock.market_cap x)
+        ^ ";"
+        ^ string_of_int (Stock.volume x)
+        ^ "\n" ^ acc)
+      ""
+      (Portfolio.get_followed_stocks input)
+    ^ "end\n"
+
 let load_BA (input : string) (port : Portfolio.t) : Portfolio.t =
   if input = "empty" then port
   else
@@ -38,6 +58,20 @@ let load_BA (input : string) (port : Portfolio.t) : Portfolio.t =
         (String.split_on_char ' ' input |> List.map (fun x -> int_of_string x))
     in
     List.fold_left (fun acc x -> Portfolio.add_bank_account x acc) port line
+
+let rec load_FS (input : in_channel) (port : Portfolio.t) : Portfolio.t =
+  let line = input_line input in
+  if line = "end" then port
+  else
+    let data = String.split_on_char ';' line in
+    let stock =
+      Stock.of_input (List.nth data 0) (List.nth data 1)
+        (float_of_string (List.nth data 2))
+        (Date.of_string (List.nth data 3))
+        (float_of_string (List.nth data 4))
+        (int_of_string (List.nth data 5))
+    in
+    Portfolio.follow stock (load_FS input port)
 
 (*____________________________________________________________________________*)
 
@@ -49,6 +83,7 @@ module SaveWrite : SaveWriteType = struct
     Printf.fprintf oc "%s\n" "0.0";
     Printf.fprintf oc "%s\n" "0.0";
     output_string oc "empty\n";
+    output_string oc "end\n";
 
     flush oc;
     close_out oc
@@ -62,10 +97,12 @@ module SaveWrite : SaveWriteType = struct
     let balance = Printf.sprintf "%f\n" (Portfolio.get_balance input) in
     let holdings = Printf.sprintf "%f\n" (Portfolio.get_stock_holdings input) in
     let bank_accounts = save_BA input in
+    let stocks = save_FS input in
 
     output_string oc balance;
     output_string oc holdings;
     output_string oc bank_accounts;
+    output_string oc stocks;
     output_string oc "end";
 
     flush oc;
@@ -84,12 +121,12 @@ module SaveWrite : SaveWriteType = struct
       let line_three = input_line ic in
 
       let port =
-        close_in ic;
         port
         |> Portfolio.update_balance line_one
         |> Portfolio.update_stock_holding line_two
-        |> load_BA line_three
+        |> load_BA line_three |> load_FS ic
       in
+      close_in ic;
       port
     with End_of_file ->
       print_string "closed";
