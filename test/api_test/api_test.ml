@@ -12,6 +12,7 @@ let api_tests =
   >::: [
          ( "run historical.py" >:: fun _ ->
            ignore (API.historical [ "aapl"; "msft"; "wow" ]) );
+         ("run current.py" >:: fun _ -> ignore (API.current "aapl"));
        ]
 
 let _ = run_test_tt_main api_tests
