@@ -11,6 +11,13 @@ code:
 utop:
 	OCAMLRUNPARAM=b dune utop src
 
+dependencies:
+	pip3 install yahoo_fin
+	pip3 install --force-reinstall -v "pandas==1.5.3"
+
+test-api:
+	OCAMLRUNPARAM=b dune exec test/api_test/api_test.exe -- -runner sequential
+
 test-date:
 	OCAMLRUNPARAM=b dune exec test/date_test/date_test.exe
 

@@ -1,7 +1,10 @@
 (** Data.ml - Holds Date functions. *)
 
 type date = int * int * int
+
 (* Representation type of a date: MM-DD-YYYY format. *)
+type time = int * int * int
+(* Representation type of a time: HH:MM:SS. *)
 
 module type DateType = sig
   exception InvalidDate
@@ -44,6 +47,9 @@ module type DateType = sig
   val to_string : date -> string
   (** Returns a string representation of the date in MM-DD-YYYY. *)
 
+  val t_to_string : time -> string
+  (** Returns a string representation of the time in HH:MM:SS. *)
+
   val of_string : string -> date
   (** Parses a string into a date. Raises [InvalidDate] if not valid date,
       raises [Invalid_argument] if not in correct MM-DD-YYYY format. *)
@@ -74,7 +80,7 @@ module Date = struct
 
   (** Returns "mm-dd-yyyy" *)
   let to_string ((m, d, y) : date) : string =
-    string_of_int m ^ "-" ^ string_of_int d ^ "-" ^ string_of_int y
+    Printf.sprintf "%02i-%02i-%02i" m d y
 
   (** [compare a b] returns value < [0] if [a] < [b], value > [0] if [a] > [b],
       and value = [0] if [a] = [b].*)
@@ -218,6 +224,8 @@ module Date = struct
     if List.mem candidate days_off then next_business ~offset candidate
     else if offset = 1 then candidate
     else next_business ~offset:(offset - 1) candidate
+
+  let t_to_string ((h, m, s) : time) = Printf.sprintf "%02i:%02i:%02i" h m s
 
   let of_string (inp : string) : date =
     let splitted = String.split_on_char '-' inp in
