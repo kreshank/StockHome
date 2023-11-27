@@ -1,3 +1,6 @@
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
 import argparse
 import yahoo_fin.stock_info as yf
 import pandas as pd

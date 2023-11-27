@@ -1,15 +1,12 @@
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
-
 import argparse
 import yahoo_fin.stock_info as yf
 import pandas as pd
-import datetime
 import time
+import datetime
 import os
 
 # Process command line args
-parser = argparse.ArgumentParser("Current Data Scraper")
+parser = argparse.ArgumentParser("Income Statement Scraper")
 parser.add_argument("ticker", metavar = "T", nargs=1, help="input ticker")
 args = parser.parse_args()
 
@@ -23,11 +20,8 @@ prefix = "data/stock_info/" + tkr
 if not os.path.exists(prefix):
   os.makedirs(prefix)
 
-frame = yf.get_quote_table(tkr, False)
-frame.loc[-1] = ["Timestamp", datetime.datetime.now().strftime("%m-%d-%Y, %H:%M:%S")]
-frame.index = frame.index + 1
-frame.sort_index(inplace = True)
-frame.to_csv(prefix + "/" + tkr + "_cur.csv", index=False)
+frame = yf.get_income_statement(tkr)
+pd.Dataframe.from_dict(frame).to_csv(prefix + "/" + tkr + "_income.csv", index=False)
 
 end = time.time()
 

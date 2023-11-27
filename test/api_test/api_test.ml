@@ -10,9 +10,10 @@ open Api
 let api_tests =
   "api.ml Test Suite"
   >::: [
-         ( "run historical.py" >:: fun _ ->
-           ignore (API.historical [ "aapl"; "msft"; "wow" ]) );
-         ("run current.py" >:: fun _ -> ignore (API.current "aapl"));
+         ("historical.py" >:: fun _ -> ignore (API.historical [ "aapl" ]));
+         ("current.py" >:: fun _ -> ignore (API.current "aapl"));
+         ("stats.py" >:: fun _ -> ignore (API.stats "aapl"));
+         ("stats_val.py" >:: fun _ -> ignore (API.stats_valuation "aapl"));
        ]
 
 let _ = run_test_tt_main api_tests
