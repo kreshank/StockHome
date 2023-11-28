@@ -12,8 +12,7 @@ open Stock
 let simple_map = Parser.of_csv "data/stock_info_simple.csv"
 
 let tsla =
-  Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 19, 23) 698627000000.
-    169685075
+  Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 19, 23) 698627000000. 123432
 
 let aapl =
   Stock.of_input "AAPL" "Apple, Inc." 168.22 (10, 19, 23) 698627000000.

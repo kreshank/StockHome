@@ -24,6 +24,12 @@ module type PortfolioType = sig
   (** [Out_of_balance] is raised when [portfolio] attempts to spend amount of
       money that is greater than its current balance. *)
 
+  val opt_to_string : opt -> string
+  (** [opt_to_string option] prints a readable string of [option]. *)
+
+  val opt_of_string : string -> opt
+  (** [opt_of_string str] returns [opt] based on the input [str]. *)
+
   val new_portfolio : unit -> t
   (** [new_portfolio ()] creates a new portfolio with initialized fields.*)
 
