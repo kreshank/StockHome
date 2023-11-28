@@ -1,2 +1,3 @@
 (library
- (name stocks))
+ (name stocks)
+ (libraries bogue))
