@@ -1,9 +1,11 @@
 (*To test GUI, run [make gui] in terminal*)
 
 open Bogue
+open Stocks
 open Stock
 open Portfolio
 open Date
+open Text_input
 module W = Widget
 module L = Layout
 
@@ -34,8 +36,20 @@ let main () =
     L.tower_of_w ~name:"watch list container" [ sample_stock_label ]
   in
 
+  let text_input = W.text_input ~text:"" ~prompt:"Enter Company Ticker" () in
+
+  let portfolio_container =
+    L.tower_of_w ~name:"portfolio container" [ text_input ]
+  in
+
   let main_container =
-    L.tower ~name:"main_container" [ heading_container; second_tier_container ]
+    L.tower ~name:"main_container"
+      [
+        heading_container;
+        second_tier_container;
+        watch_list_container;
+        portfolio_container;
+      ]
   in
 
   let board = Bogue.of_layout main_container in
