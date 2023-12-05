@@ -1,11 +1,9 @@
 (*To test GUI, run [make gui] in terminal*)
-
 open Bogue
 open Stocks
 open Stock
 open Portfolio
 open Date
-open Text_input
 module W = Widget
 module L = Layout
 
@@ -22,24 +20,36 @@ let main () =
   let watch_lst_label = W.label "Watch List" in
   let portfolio_lst_label = W.label "My Portfolio" in
   let sample_stock_label = W.label stock_string in
-  let portfolio_stocks = W.label "Portfolio Stocks" in
+  let portfolio_stocks = W.label "" in
 
   (* create main containers *)
   let heading_container =
-    L.flat_of_w ~name:"heading container" [ title_label; date_label ]
+    L.flat ~name:"heading container"
+      [ L.resident title_label; L.resident date_label ]
   in
   let second_tier_container =
-    L.flat_of_w ~name:"second tier container"
-      [ watch_lst_label; portfolio_lst_label ]
+    L.flat ~name:"second tier container"
+      [ L.resident watch_lst_label; L.resident portfolio_lst_label ]
   in
   let watch_list_container =
-    L.tower_of_w ~name:"watch list container" [ sample_stock_label ]
+    L.tower ~name:"watch list container" [ L.resident sample_stock_label ]
+  in
+
+  let action input label _ =
+    let text = W.get_text input in
+    (* Leo, take the ticker from text and return a string representation of the
+       stock that the ticker in [text] refers to. Just make another let
+       statement that equals the string. I'm still trying to figure out how to
+       make it show to the screen when the user presses enter. *)
+    W.set_text label text
   in
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Company Ticker" () in
+  let c = W.connect text_input portfolio_stocks action Trigger.[ key_up ] in
 
   let portfolio_container =
-    L.tower_of_w ~name:"portfolio container" [ text_input ]
+    L.tower ~name:"portfolio container"
+      [ L.resident ~w:400 text_input; L.resident ~w:400 portfolio_stocks ]
   in
 
   let main_container =
@@ -52,7 +62,7 @@ let main () =
       ]
   in
 
-  let board = Bogue.of_layout main_container in
+  let board = Bogue.make [ c ] [ main_container ] in
   Bogue.run board
 
 let () =
