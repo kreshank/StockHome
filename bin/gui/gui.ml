@@ -1,3 +1,5 @@
+(*To test GUI, run [make gui] in terminal*)
+
 open Bogue
 open Stock
 open Portfolio

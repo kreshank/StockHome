@@ -14,6 +14,7 @@ utop:
 dependencies:
 	pip3 install yahoo_fin
 	pip3 install --force-reinstall -v "pandas==1.5.3"
+	opam install bogue
 
 test-api:
 	OCAMLRUNPARAM=b dune exec test/api_test/api_test.exe -- -runner sequential
@@ -44,7 +45,10 @@ test:
 	make test-save-write
 
 display:
-	OCAMLRUNPARAM=b dune exec bin/display.exe
+	OCAMLRUNPARAM=b dune exec bin/display/display.exe
+
+gui:
+	OCAMLRUNPARAM=b dune exec bin/gui/gui.exe
 
 zip:
 	rm -f stocks.zip
