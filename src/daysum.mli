@@ -59,7 +59,7 @@ module type DaySumType = sig
   (** [forward_div_yield] returns the forward dividend and yield percentage in
       format [(dividend_price, yield)], where yield is in percentage. *)
 
-  val market_cap : t -> int
+  val market_cap : t -> float
   (** [market_cap ds] returns market cap of the stock. *)
 
   val open_price : t -> float

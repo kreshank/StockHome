@@ -54,6 +54,10 @@ module type DateType = sig
   (** Parses a string into a date. Raises [InvalidDate] if not valid date,
       raises [Invalid_argument] if not in correct MM-DD-YYYY format. *)
 
+  val t_of_string : string -> time
+  (** Parses a string into a time. Raises [Invalid_argument] if not in correct
+      HH-MM-SS format. *)
+
   val compare : date -> date -> int
   (** [compare x y] returns [0] if [x] is equal to [y], a negative integer if
       [x] is less than [y], and a positive integer if [x] is greater than [y].*)
@@ -234,5 +238,13 @@ module Date = struct
         let pot = (int_of_string m, int_of_string d, int_of_string y) in
         if is_valid pot then pot else raise InvalidDate
     | _ -> invalid_arg "Wrong date format"
+
+  let t_of_string (inp : string) : time =
+    let splitted = String.split_on_char ':' inp in
+    match splitted with
+    | [ h; m; s ] ->
+        let pot = (int_of_string h, int_of_string m, int_of_string s) in
+        pot
+    | _ -> invalid_arg "Wrong time format"
 end
 (* of Date.ml *)

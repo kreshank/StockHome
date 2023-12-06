@@ -59,7 +59,7 @@ module type DaySumType = sig
   (** [forward_div_yield] returns the forward dividend and yield percentage in
       format [(dividend_price, yield)], where yield is in percentage. *)
 
-  val market_cap : t -> int
+  val market_cap : t -> float
   (** [market_cap ds] returns market cap of the stock. *)
 
   val open_price : t -> float
@@ -98,7 +98,7 @@ module DaySum : DaySumType = struct
     earnings_date : date * date;
     ex_date : date;
     forward_div_yield : float * float;
-    market_cap : int;
+    market_cap : float;
     open_price : float;
     pe_ratio_ttm : float;
     prev_close : float;
@@ -108,10 +108,126 @@ module DaySum : DaySumType = struct
 
   exception MalformedFile
 
+  (** Grab the value, ignore label. *)
+  let get_val ic =
+    let str = input_line ic in
+    try List.nth (String.split_on_char ',' str) 1
+    with e -> raise MalformedFile
+
+  let get_val_float ic = get_val ic |> float_of_string
+
+  (** Split input string to a range pair, given a regex*)
+  let splitify reg str =
+    let r = Str.regexp reg in
+    let lst = Str.split r str in
+    (List.hd lst, List.nth lst 1)
+
+  let read_string_date str =
+    match Str.(split (regexp "[, ]+") str) with
+    | [ m; d; y ] ->
+        let mm =
+          match m with
+          | "Jan" -> 1
+          | "Feb" -> 2
+          | "Mar" -> 3
+          | "Apr" -> 4
+          | "May" -> 5
+          | "Jun" -> 6
+          | "Jul" -> 7
+          | "Aug" -> 8
+          | "Sep" -> 9
+          | "Oct" -> 10
+          | "Nov" -> 11
+          | _ -> 12
+        in
+        (mm, int_of_string d, int_of_string y)
+    | _ -> raise Date.InvalidDate
+
+  let read_mc str =
+    match Str.(split_delim (regexp "[MBT]") str) with
+    | [ amt; mbt ] ->
+        let mult =
+          match mbt with
+          | "M" -> 1_000_000.0
+          | "B" -> 1_000_000_000.0
+          | "T" -> 1_000_000_000_000.0
+          | _ -> raise (Failure "Market Wrong format")
+        in
+        float_of_string amt *. mult
+    | _ -> raise MalformedFile
+
   (** [load_from file_addr] processes a file_addr into a day summary value.
       Requires the file to exist. Raises [MalformedFile] is file is in the
       incorrect format. *)
-  let load_from file_addr = failwith "unimpl"
+  let load_from file_addr =
+    try
+      let ic = open_in file_addr in
+      let tkr =
+        begin
+          try List.hd (String.split_on_char '_' file_addr)
+          with e -> raise MalformedFile
+        end
+      in
+      (* ignore CSV labels *)
+      let _ = input_line ic in
+      (* read time*)
+      let temp = splitify ", " (get_val ic) in
+      let timestamp =
+        (fst temp |> Date.of_string, snd temp |> Date.t_of_string)
+      in
+      let targ_est_1y = get_val_float ic in
+      let temp = splitify " - " (get_val ic) in
+      let week_range_52w =
+        (fst temp |> float_of_string, snd temp |> float_of_string)
+      in
+      let temp = splitify " x " (get_val ic) in
+      let ask = (fst temp |> float_of_string, snd temp |> int_of_string) in
+      let avg_day_vol = get_val_float ic |> int_of_float in
+      let beta_5y_mly = get_val_float ic in
+      let temp = splitify " x " (get_val ic) in
+      let bid = (fst temp |> float_of_string, snd temp |> int_of_string) in
+      let temp = splitify " - " (get_val ic) in
+      let day_range =
+        (fst temp |> float_of_string, snd temp |> float_of_string)
+      in
+      let eps_ttm = get_val_float ic in
+      let temp = splitify " - " (get_val ic) in
+      let earnings_date =
+        (fst temp |> read_string_date, snd temp |> read_string_date)
+      in
+      let ex_date = get_val ic |> read_string_date in
+      let temp = splitify "[ (%)]+" (get_val ic) in
+      let forward_div_yield =
+        (fst temp |> float_of_string, snd temp |> float_of_string)
+      in
+      let market_cap = get_val ic |> read_mc in
+      let open_price = get_val_float ic in
+      let pe_ratio_ttm = get_val_float ic in
+      let prev_close = get_val_float ic in
+      let quote_price = get_val_float ic in
+      let volume = get_val_float ic |> int_of_float in
+      {
+        tkr;
+        timestamp;
+        targ_est_1y;
+        week_range_52w;
+        ask;
+        avg_day_vol;
+        beta_5y_mly;
+        bid;
+        day_range;
+        eps_ttm;
+        earnings_date;
+        ex_date;
+        forward_div_yield;
+        market_cap;
+        open_price;
+        pe_ratio_ttm;
+        prev_close;
+        quote_price;
+        volume;
+      }
+    with e -> raise e
 
   (** [ticker ds] returns the ticker val associated with [ds]. *)
   let ticker ds = ds.tkr
