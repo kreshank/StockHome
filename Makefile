@@ -46,6 +46,9 @@ test:
 	make test-stock
 	make test-slice
 	make test-save-write
+	make test-api
+	make test-daysum
+	make test-date
 
 display:
 	OCAMLRUNPARAM=b dune exec bin/display/display.exe
