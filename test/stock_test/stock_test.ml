@@ -11,8 +11,9 @@ open Stock
 
 (* STOCKS TESTS *)
 let tsla =
-  Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 19, 23) 698627000000.
-    169685075
+  Stock.of_input "TSLA" "Tesla, Inc." 220.11
+    ((10, 19, 23), (0, 0, 0))
+    698627000000. 169685075
 
 let stock_tests =
   "Stock.ml Test Suite"

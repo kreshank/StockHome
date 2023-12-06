@@ -5,7 +5,7 @@ open Stock
 open Slice
 
 module type ParserType = sig
-  type slice
+  type slice = Slice.t
   (** Type that represents a given stock's info at some time.*)
 
   type t
@@ -98,7 +98,8 @@ module Parser = struct
       Some
         (Stock.of_input (Slice.ticker got_slice) (Slice.ticker got_slice)
            (Slice.open_price got_slice)
-           (Slice.time got_slice) 2. (Slice.volume got_slice))
+           (Slice.time got_slice, (0, 0, 0))
+           2. (Slice.volume got_slice))
   (*Why is Stock volume still float?*)
 
   (** Given a ticker, return the slice list associated with the ticker. Returns

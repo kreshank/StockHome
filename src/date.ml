@@ -84,7 +84,7 @@ module Date = struct
 
   (** Returns "mm-dd-yyyy" *)
   let to_string ((m, d, y) : date) : string =
-    Printf.sprintf "%02i-%02i-%02i" m d y
+    Printf.sprintf "%02i-%02i-%04i" m d y
 
   (** [compare a b] returns value < [0] if [a] < [b], value > [0] if [a] > [b],
       and value = [0] if [a] = [b].*)

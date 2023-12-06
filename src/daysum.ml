@@ -1,5 +1,9 @@
 open Date
 
+(** DaySum is a module that contains the values from parsing a file
+    [data/stock/ticker/ticker_cur.csv]. Contains a loader, to_string, and
+    getters for all relevant values. *)
+
 module type DaySumType = sig
   type t
   (** Representation type *)
@@ -82,8 +86,15 @@ module type DaySumType = sig
   val to_string : t -> string
   (** [to_string ds] returns a string format of the data. *)
 end
+(* end of DaySumType *)
 
 module DaySum : DaySumType = struct
+  (* TODO: Change fields all to optionals to account for possibility of N/A
+     fields. Known N/A fields are [bid], [ask], [PE_ratio], [forward div],
+     [ex-dividend date], [1y target est]. Perhaps we reject a file if it's
+     missing any of: open, close, day range, week range, volume, avg volume,
+     earnings. *)
+
   type t = {
     tkr : string;
     timestamp : date * time;

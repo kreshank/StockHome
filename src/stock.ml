@@ -2,6 +2,8 @@
 
 open Date
 open Slice
+open Daysum
+open Api
 
 module type StockType = sig
   type query = Slice.t list
@@ -16,10 +18,17 @@ module type StockType = sig
   type t
   (** Representation type. *)
 
-  val of_input : string -> string -> float -> date -> float -> int -> t
+  exception UnretrievableStock of string
+
+  val of_input : string -> string -> float -> date * time -> float -> int -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
       on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
       date is invalid.*)
+
+  val update : t -> t
+  (** [update stk] returns a stock with ONLY the current data updated. i.e.,
+      historical data will not be changed in any way. If there was error
+      grabbing stock info, will return an unmodified [stk]. *)
 
   val ticker : t -> string
   (** Returns ticker of a given stock. *)
@@ -53,7 +62,7 @@ module type StockType = sig
       - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
         weekends. *)
 
-  val time : t -> date
+  val time : t -> date * time
   (** Returns last time of access. *)
 
   val market_cap : t -> float
@@ -123,17 +132,106 @@ module Stock = struct
     ticker : string;
     name : string;
     price : float;
-    time : date;
+    time : date * time;
+    cur_data : DaySum.t option;
     market_cap : float;
     volume : int;
     historical : query;
   }
   (** Rep type *)
 
+  exception UnretrievableStock of string
+
   (** Make Stock.t from inputs. *)
-  let of_input (ticker : string) (name : string) (price : float) (time : date)
-      (market_cap : float) (volume : int) : t =
-    { ticker; name; price; time; market_cap; volume; historical = [] }
+  let of_input (ticker : string) (name : string) (price : float)
+      (time : date * time) (market_cap : float) (volume : int) : t =
+    {
+      ticker;
+      name;
+      price;
+      time;
+      cur_data = None;
+      market_cap;
+      volume;
+      historical = [];
+    }
+
+  (** [update stk] returns a stock with ONLY the current data updated. i.e.,
+      historical data will not be changed in any way. If there was error
+      grabbing stock info, will return an unmodified [stk]. *)
+  let update (stk : t) : t =
+    if try API.current stk.ticker = 0 with e -> raise e then
+      let cur_data =
+        DaySum.load_from
+          (Printf.sprintf "data/stock_info/%s/%s_cur.csv" stk.ticker stk.ticker)
+      in
+
+      {
+        stk with
+        time = DaySum.timestamp cur_data;
+        price = DaySum.quote_price cur_data;
+        cur_data = Some cur_data;
+        market_cap = DaySum.market_cap cur_data;
+        volume = DaySum.volume cur_data;
+      }
+    else stk
+
+  (** Read a line into a slice. *)
+  let parse_line str : Slice.t =
+    let splitted = Str.(split (regexp ",") str) in
+    match splitted with
+    | [ dt; op; hi; lo; cl; adcl; vol; ticker ] ->
+        let temp = Str.(split (regexp "-") dt) in
+        let date =
+          match temp with
+          | [ y; m; d ] -> (int_of_string m, int_of_string m, int_of_string y)
+          | _ -> raise (UnretrievableStock "Historical is misformatted")
+        in
+        let open_price = float_of_string op in
+        let high = float_of_string hi in
+        let low = float_of_string lo in
+        let close_price = float_of_string cl in
+        let adjclose = float_of_string adcl in
+        let volume = int_of_string vol in
+        Slice.make ticker ~open_price ~high ~low ~close_price ~adjclose ~volume
+          date
+    | _ -> raise (UnretrievableStock "Historical is misformatted.")
+
+  (** [make ticker] returns a new stock type, loading both historical and
+      current data fresh for the first time. *)
+  let make (ticker : string) : t =
+    if try API.historical [ ticker ] = 0 with e -> raise e then
+      try
+        let ic =
+          open_in
+            (Printf.sprintf "data/stock_info/%s/%s_hist.csv" ticker ticker)
+        in
+        (* ignore csv labels *)
+        let _ = input_line ic in
+        let rec create_hist acc =
+          try
+            let res = parse_line (input_line ic) in
+            create_hist (res :: acc)
+          with End_of_file ->
+            close_in ic;
+            acc
+        in
+        let historical = create_hist [] in
+        let temp =
+          {
+            ticker;
+            name = ticker;
+            time = ((1, 1, 2020), (0, 0, 0));
+            price = 0.;
+            cur_data = None;
+            market_cap = 0.;
+            volume = 0;
+            historical;
+          }
+        in
+        update temp
+      with e -> raise (UnretrievableStock ticker)
+    else raise (UnretrievableStock ticker)
 
   (** Return ticker. *)
   let ticker (stk : t) : string = stk.ticker
@@ -259,7 +357,7 @@ module Stock = struct
       else get_h_def Slice.close_price time stk
     else stk.price
 
-  let time (stk : t) : date = stk.time
+  let time (stk : t) : date * time = stk.time
   let market_cap (stk : t) : float = stk.market_cap
 
   (** [volume ?time ?handler stk] returns the volume of the stock at inputted
@@ -322,17 +420,20 @@ module Stock = struct
   (** [to_string s] returns a single-line brief string representation of a given
       stock. *)
   let to_string (stk : t) : string =
-    Printf.sprintf "%s (%s): $%.5f" stk.ticker (Date.to_string stk.time)
+    Printf.sprintf "%s (%s): $%.5f" stk.ticker
+      (Date.to_string (fst stk.time))
       stk.price
 
   (** Returns a string of a more in-depth summary of a given stock. *)
   let to_string_detailed (stk : t) : string =
     Printf.sprintf
       "\n\
-       %s - %s (%s): \n\
+       %s - %s (%s, %s): \n\
        \tCurrent Price: $%.7f \n\
        \tVolume: %i \n\
-       \tMarket Cap: $%.2f" stk.ticker stk.name (Date.to_string stk.time)
+       \tMarket Cap: $%.2f" stk.ticker stk.name
+      (fst stk.time |> Date.to_string)
+      (snd stk.time |> Date.t_to_string)
       stk.price stk.volume stk.market_cap
 end
 (* of Stock*)

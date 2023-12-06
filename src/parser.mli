@@ -1,9 +1,11 @@
 open Stock
+
+open Slice
 (** A parser that can process a text file (csv) of stock information and pack
     into an Ocaml-processable format. *)
 
 module type ParserType = sig
-  type slice
+  type slice = Slice.t
   (** Type that represents a given stock's info at some time.*)
 
   type t
