@@ -232,7 +232,7 @@ module Date = struct
   let t_to_string ((h, m, s) : time) = Printf.sprintf "%02i:%02i:%02i" h m s
 
   let of_string (inp : string) : date =
-    let splitted = String.split_on_char '-' inp in
+    let splitted = String.split_on_char '-' (String.trim inp) in
     match splitted with
     | [ m; d; y ] ->
         let pot = (int_of_string m, int_of_string d, int_of_string y) in
@@ -240,7 +240,7 @@ module Date = struct
     | _ -> invalid_arg "Wrong date format"
 
   let t_of_string (inp : string) : time =
-    let splitted = String.split_on_char ':' inp in
+    let splitted = String.split_on_char ':' (String.trim inp) in
     match splitted with
     | [ h; m; s ] ->
         let pot = (int_of_string h, int_of_string m, int_of_string s) in

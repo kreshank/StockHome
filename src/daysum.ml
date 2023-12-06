@@ -111,7 +111,16 @@ module DaySum : DaySumType = struct
   (** Grab the value, ignore label. *)
   let get_val ic =
     let str = input_line ic in
-    try List.nth (String.split_on_char ',' str) 1
+    try
+      match String.split_on_char ',' str with
+      | _ :: t ->
+          let return_val =
+            List.fold_left
+              (fun acc elt -> if acc <> "" then acc ^ "," ^ elt else acc ^ elt)
+              "" t
+          in
+          return_val
+      | _ -> raise MalformedFile
     with e -> raise MalformedFile
 
   let get_val_float ic = get_val ic |> float_of_string
@@ -123,7 +132,7 @@ module DaySum : DaySumType = struct
     (List.hd lst, List.nth lst 1)
 
   let read_string_date str =
-    match Str.(split (regexp "[, ]+") str) with
+    match Str.(split (regexp {|[, "]+|}) str) with
     | [ m; d; y ] ->
         let mm =
           match m with
@@ -144,14 +153,14 @@ module DaySum : DaySumType = struct
     | _ -> raise Date.InvalidDate
 
   let read_mc str =
-    match Str.(split_delim (regexp "[MBT]") str) with
-    | [ amt; mbt ] ->
+    match Str.(split (regexp "[MBT]") str) with
+    | amt :: _ ->
         let mult =
-          match mbt with
+          match Str.last_chars str 1 with
           | "M" -> 1_000_000.0
           | "B" -> 1_000_000_000.0
           | "T" -> 1_000_000_000_000.0
-          | _ -> raise (Failure "Market Wrong format")
+          | _ -> 1.0
         in
         float_of_string amt *. mult
     | _ -> raise MalformedFile
@@ -164,14 +173,14 @@ module DaySum : DaySumType = struct
       let ic = open_in file_addr in
       let tkr =
         begin
-          try List.hd (String.split_on_char '_' file_addr)
+          try List.nth Str.(split (regexp {|/|}) file_addr) 2
           with e -> raise MalformedFile
         end
       in
       (* ignore CSV labels *)
       let _ = input_line ic in
       (* read time*)
-      let temp = splitify ", " (get_val ic) in
+      let temp = splitify {|[, "]+|} (get_val ic) in
       let timestamp =
         (fst temp |> Date.of_string, snd temp |> Date.t_of_string)
       in
@@ -191,11 +200,12 @@ module DaySum : DaySumType = struct
         (fst temp |> float_of_string, snd temp |> float_of_string)
       in
       let eps_ttm = get_val_float ic in
-      let temp = splitify " - " (get_val ic) in
+      let temp = splitify {|\( - \)\|"|} (get_val ic) in
       let earnings_date =
         (fst temp |> read_string_date, snd temp |> read_string_date)
       in
-      let ex_date = get_val ic |> read_string_date in
+      let temp = Str.(split (regexp {|"|}) (get_val ic)) |> List.hd in
+      let ex_date = temp |> read_string_date in
       let temp = splitify "[ (%)]+" (get_val ic) in
       let forward_div_yield =
         (fst temp |> float_of_string, snd temp |> float_of_string)
@@ -298,5 +308,78 @@ module DaySum : DaySumType = struct
   let volume ds = ds.volume
 
   (** [to_string ds] returns a string format of the data. *)
-  let to_string ds = ""
+  let to_string ds =
+    match ds with
+    | {
+     tkr;
+     timestamp;
+     targ_est_1y;
+     week_range_52w;
+     ask;
+     avg_day_vol;
+     beta_5y_mly;
+     bid;
+     day_range;
+     eps_ttm;
+     earnings_date;
+     ex_date;
+     forward_div_yield;
+     market_cap;
+     open_price;
+     pe_ratio_ttm;
+     prev_close;
+     quote_price;
+     volume;
+    } ->
+        Printf.sprintf
+          "%s (retrieved %s, %s) - \n\
+          \        \n\
+           \tPrevious Close:\t\t%.02f\n\
+          \        \n\
+           \tOpen:\t\t\t%.02f\n\
+          \        \n\
+           \tQuote Price:\t\t%#f\n\
+          \        \n\
+           \tBid:\t\t\t%.02f x %i\n\
+          \        \n\
+           \tAsk:\t\t\t%.02f x %i\n\
+          \        \n\
+           \tDay's Range:\t\t%.02f - %.02f\n\
+          \        \n\
+           \t52 Week Range:\t\t%.02f - %.02f\n\
+          \        \n\
+           \tVolume:\t\t\t%#i\n\
+          \        \n\
+           \tAvg. Volume:\t\t%#i\n\
+          \        \n\
+           \tMarket Cap:\t\t%#.02f\n\
+          \        \n\
+           \tBeta (5Y Monthly):\t%.02f\n\
+          \        \n\
+           \tPE Ratio (TTM):\t\t%.02f\n\
+          \        \n\
+           \tEPS (TTM):\t\t%.02f\n\
+          \        \n\
+           \tEarnings Date:\t\t%s - %s\n\
+          \        \n\
+           \tForward Div & Yield:\t%.02f (%.02f%%)\n\
+          \        \n\
+           \tEx-Dividend Date:\t%s\n\
+          \        \n\
+           \t1Y Target Estimate:\t%.02f\n\
+          \        " tkr
+          (fst timestamp |> Date.to_string)
+          (snd timestamp |> Date.t_to_string)
+          prev_close open_price quote_price (fst bid) (snd bid) (fst ask)
+          (snd ask) (fst day_range) (snd day_range) (fst week_range_52w)
+          (snd week_range_52w) volume avg_day_vol market_cap beta_5y_mly
+          pe_ratio_ttm eps_ttm
+          (fst earnings_date |> Date.to_string)
+          (snd earnings_date |> Date.to_string)
+          (fst forward_div_yield) (snd forward_div_yield)
+          (ex_date |> Date.to_string)
+          targ_est_1y
+        |> String.map (function
+             | '_' -> ','
+             | char -> char)
 end
