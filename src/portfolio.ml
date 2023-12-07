@@ -51,8 +51,18 @@ module type PortfolioType = sig
   val to_string : t -> string
   (** Returns a human-readable string of information of a portfolio*)
 
+  val stock_detail : t -> string
+  (** Returns a human-readable string of information of the stocks of a
+      portfolio*)
+
   val follow : Stock.t -> t -> t
   (** Add [stock] to the watchlist of the portfolio*)
+
+  val update_stocks : t -> t
+  (** Update stocks in a portfolio*)
+
+  val isempty : t -> bool
+  (**Checks if a port is empty*)
 
   val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
@@ -165,13 +175,30 @@ module Portfolio : PortfolioType = struct
         "" (get_bank_accounts p)
     ^ "\n" ^ " Followed Stocks: "
     ^ List.fold_left
-        (fun a b -> a ^ Stock.name b ^ "; ")
+        (fun a b -> if a = "" then Stock.name b else Stock.name b ^ ", " ^ a)
         "" (get_followed_stocks p)
+    ^ "\n"
+
+  (** Returns a human-readable string of information of a portfolio*)
+  let stock_detail p =
+    List.fold_left
+      (fun acc x ->
+        if acc = "" then Stock.to_string x else Stock.to_string x ^ "\n" ^ acc)
+      "" (get_followed_stocks p)
     ^ "\n"
 
   (** Add [stock] to the watchlist of the portfolio. Requires [stock] not in the
       watchlist. *)
   let follow stock p = { p with followed_stocks = stock :: p.followed_stocks }
+
+  (**Update all stocks in a portfolio*)
+  let update_stocks p =
+    let stocks = p.followed_stocks in
+    let newport = new_portfolio () in
+    List.fold_left (fun acc x -> follow (Stock.update x) acc) newport stocks
+
+  (**Checks if port is empty*)
+  let isempty p = p.followed_stocks = []
 
   (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
   let unfollow stock p =

@@ -51,8 +51,18 @@ module type PortfolioType = sig
   val to_string : t -> string
   (** Returns a human-readable string of information of a portfolio*)
 
+  val stock_detail : t -> string
+  (** Returns a human-readable string of information of the stocks of a
+      portfolio*)
+
   val follow : Stock.t -> t -> t
   (** Add [stock] to the watchlist of the portfolio*)
+
+  val update_stocks : t -> t
+  (** Update stocks in a portfolio*)
+
+  val isempty : t -> bool
+  (**Checks if a port is empty*)
 
   val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the

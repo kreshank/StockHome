@@ -12,6 +12,8 @@ utop:
 	OCAMLRUNPARAM=b dune utop src
 
 dependencies:
+	sudo apt install python3
+	sudo apt install python3-pip
 	pip3 install yahoo_fin
 	pip3 install --force-reinstall -v "pandas==1.5.3"
 	opam install bogue
