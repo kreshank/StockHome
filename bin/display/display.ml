@@ -1,4 +1,4 @@
-open Stocks
+open Stockhome
 open Parser
 open Stock
 open Portfolio

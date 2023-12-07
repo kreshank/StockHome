@@ -1,6 +1,6 @@
 (*To test GUI, run [make gui] in terminal*)
 open Bogue
-open Stocks
+open Stockhome
 open Stock
 open Portfolio
 open Date

@@ -1,3 +1,3 @@
 (executable
  (name gui)
- (libraries stocks bogue))
+ (libraries stockhome bogue))
