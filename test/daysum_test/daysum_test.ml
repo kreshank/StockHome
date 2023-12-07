@@ -1,7 +1,7 @@
 (*If giving errors, remember to run [dune build]*)
 
 open OUnit2
-open Stocks
+open Stockhome
 open Daysum
 
 (* Helper Functions and Printers*)

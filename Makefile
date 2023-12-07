@@ -17,6 +17,7 @@ dependencies:
 	pip3 install yahoo_fin
 	pip3 install --force-reinstall -v "pandas==1.5.3"
 	opam install bogue
+	opam install odoc
 
 test-daysum:
 	OCAMLRUNPARAM=b dune exec test/daysum_test/daysum_test.exe -- -runner sequential
@@ -70,3 +71,8 @@ lines:
 	make clean
 	cloc --by-file --include-lang=OCaml .
 
+doc:
+	dune build @doc
+
+opendoc: doc
+	@bash opendoc.sh	

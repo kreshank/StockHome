@@ -1,3 +1,4 @@
 (library
- (name stocks)
+ (name stockhome)
+ (public_name Stockhome)
  (libraries bogue))
