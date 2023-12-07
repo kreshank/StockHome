@@ -14,6 +14,10 @@ let date_tests =
          ("day 184" >:: fun _ -> assert_equal 184 (Date.doy (07, 03, 2017)));
          ("dow : monday" >:: fun _ -> assert_equal 0 (Date.dow (07, 03, 2017)));
          ("dow : sunday" >:: fun _ -> assert_equal 6 (Date.dow (01, 01, 2023)));
+         ( "is valid : 10-19-23" >:: fun _ ->
+           assert_equal true (Date.is_valid (10, 19, 2023)) );
+         ( "is valid : \"10-19-23\"" >:: fun _ ->
+           assert_equal (10, 19, 2023) Date.(of_string "10-19-2023") );
          ( "date difference" >:: fun _ ->
            assert_equal ~printer:string_of_int 8527
              (Date.diff (02, 27, 1994) (07, 03, 2017)) );

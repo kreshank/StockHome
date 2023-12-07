@@ -16,6 +16,9 @@ dependencies:
 	pip3 install --force-reinstall -v "pandas==1.5.3"
 	opam install bogue
 
+test-daysum:
+	OCAMLRUNPARAM=b dune exec test/daysum_test/daysum_test.exe -- -runner sequential
+
 test-api:
 	OCAMLRUNPARAM=b dune exec test/api_test/api_test.exe -- -runner sequential
 
@@ -29,7 +32,7 @@ test-portfolio:
 	OCAMLRUNPARAM=b dune exec test/portfolio_test/portfolio_test.exe
 
 test-stock:
-	OCAMLRUNPARAM=b dune exec test/stock_test/stock_test.exe
+	OCAMLRUNPARAM=b dune exec test/stock_test/stock_test.exe -- -runner sequential
 
 test-slice:
 	OCAMLRUNPARAM=b dune exec test/slice_test/slice_test.exe
@@ -43,6 +46,9 @@ test:
 	make test-stock
 	make test-slice
 	make test-save-write
+	make test-api
+	make test-daysum
+	make test-date
 
 display:
 	OCAMLRUNPARAM=b dune exec bin/display/display.exe

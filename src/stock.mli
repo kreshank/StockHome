@@ -2,6 +2,7 @@
 
 open Date
 open Slice
+open Daysum
 
 module type StockType = sig
   type query = Slice.t list
@@ -16,10 +17,21 @@ module type StockType = sig
   type t
   (** Representation type. *)
 
-  val of_input : string -> string -> float -> date -> float -> int -> t
+  exception UnretrievableStock of string
+
+  val of_input : string -> string -> float -> date * time -> float -> int -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
       on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
       date is invalid.*)
+
+  val make : string -> t
+  (** [make ticker] returns a new stock type, loading both historical and
+      current data fresh for the first time. *)
+
+  val update : t -> t
+  (** [update stk] returns a stock with ONLY the current data updated. i.e.,
+      historical data will not be changed in any way. If there was error
+      grabbing stock info, will return an unmodified [stk]. *)
 
   val ticker : t -> string
   (** Returns ticker of a given stock. *)
@@ -46,15 +58,18 @@ module type StockType = sig
         stock of the first day before or on [?time].
       - [?handler=LINEAR] case: return a Euler-step estimation of the closing
         price of that stock on [?time], based on previous two days. Raises
-        [InvalidDate] if unable to access the first two days before or on
+        [Date.InvalidDate] if unable to access the first two days before or on
         [?time].
       - [?handler=AVERAGE] case: return the average closing-price of the first
         day before and the first day after [?date].
       - [?handler=ERROR] case: raises [Date.InvalidDate] for all holidays and
         weekends. *)
 
-  val time : t -> date
+  val time : t -> date * time
   (** Returns last time of access. *)
+
+  val cur_data : t -> DaySum.t option
+  (** Returns current data summary. *)
 
   val market_cap : t -> float
   (** Returns market cap at last time of access. *)

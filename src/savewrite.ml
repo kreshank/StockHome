@@ -40,7 +40,9 @@ let save_FS (input : Portfolio.t) : string =
         Stock.ticker x ^ ";" ^ Stock.name x ^ ";"
         ^ string_of_float (Stock.price x)
         ^ ";"
-        ^ Date.to_string (Stock.time x)
+        ^ Date.to_string (Stock.time x |> fst)
+        ^ ";"
+        ^ Date.t_to_string (Stock.time x |> snd)
         ^ ";"
         ^ string_of_float (Stock.market_cap x)
         ^ ";"
@@ -77,16 +79,18 @@ let load_BA (input : string) (port : Portfolio.t) : Portfolio.t =
 let rec load_FS (input : in_channel) (port : Portfolio.t) : Portfolio.t =
   let line = input_line input in
   if line = "end" then port
-  else
-    let data = String.split_on_char ';' line in
+  else begin
+    let data = Str.(split (regexp ";") line) in
     let stock =
-      Stock.of_input (List.nth data 0) (List.nth data 1)
-        (float_of_string (List.nth data 2))
-        (Date.of_string (List.nth data 3))
-        (float_of_string (List.nth data 4))
-        (int_of_string (List.nth data 5))
+      match data with
+      | [ ticker; name; price; date; time; mc; volume ] ->
+          Stock.of_input ticker name (float_of_string price)
+            (Date.of_string date, Date.t_of_string time)
+            (float_of_string mc) (int_of_string volume)
+      | _ -> raise (Failure "File reading failed.")
     in
     Portfolio.follow stock (load_FS input port)
+  end
 
 let rec load_TH (input : in_channel) (port : Portfolio.t) : Portfolio.t =
   let line = input_line input in

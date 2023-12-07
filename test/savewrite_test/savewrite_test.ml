@@ -18,12 +18,14 @@ let full_map = Parser.of_csv "data/stock_info.csv"
 
 (* Example Stocks *)
 let tsla =
-  Stock.of_input "TSLA" "Tesla, Inc." 220.11 (10, 10, 2010) 698627000000.
-    169685075
+  Stock.of_input "TSLA" "Tesla, Inc." 220.11
+    ((10, 19, 2023), (0, 0, 0))
+    698627000000. 169685075
 
 let cock =
-  Stock.of_input "cock" "cock, Inc." 220.11 (10, 10, 2010) 698627000000.
-    169685075
+  Stock.of_input "cock" "cock, Inc." 220.11
+    ((10, 10, 2010), (0, 0, 0))
+    698627000000. 169685075
 
 let buy : Portfolio.transaction =
   {
