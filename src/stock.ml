@@ -25,6 +25,10 @@ module type StockType = sig
       on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
       date is invalid.*)
 
+  val make : string -> t
+  (** [make ticker] returns a new stock type, loading both historical and
+      current data fresh for the first time. *)
+
   val update : t -> t
   (** [update stk] returns a stock with ONLY the current data updated. i.e.,
       historical data will not be changed in any way. If there was error
@@ -64,6 +68,9 @@ module type StockType = sig
 
   val time : t -> date * time
   (** Returns last time of access. *)
+
+  val cur_data : t -> DaySum.t option
+  (** Returns current data summary. *)
 
   val market_cap : t -> float
   (** Returns market cap at last time of access. *)
@@ -202,9 +209,11 @@ module Stock = struct
   let make (ticker : string) : t =
     if try API.historical [ ticker ] = 0 with e -> raise e then
       try
+        let tkr_lower = String.lowercase_ascii ticker in
+        let tkr_upper = String.uppercase_ascii ticker in
         let ic =
           open_in
-            (Printf.sprintf "data/stock_info/%s/%s_hist.csv" ticker ticker)
+            (Printf.sprintf "data/stock_info/%s/%s_hist.csv" tkr_lower tkr_lower)
         in
         (* ignore csv labels *)
         let _ = input_line ic in
@@ -219,8 +228,8 @@ module Stock = struct
         let historical = create_hist [] in
         let temp =
           {
-            ticker;
-            name = ticker;
+            ticker = tkr_upper;
+            name = tkr_upper;
             time = ((1, 1, 2020), (0, 0, 0));
             price = 0.;
             cur_data = None;
@@ -230,8 +239,8 @@ module Stock = struct
           }
         in
         update temp
-      with e -> raise (UnretrievableStock ticker)
-    else raise (UnretrievableStock ticker)
+      with e -> raise e
+    else raise (UnretrievableStock "pooint 2")
 
   (** Return ticker. *)
   let ticker (stk : t) : string = stk.ticker
@@ -358,6 +367,7 @@ module Stock = struct
     else stk.price
 
   let time (stk : t) : date * time = stk.time
+  let cur_data (stk : t) : DaySum.t option = stk.cur_data
   let market_cap (stk : t) : float = stk.market_cap
 
   (** [volume ?time ?handler stk] returns the volume of the stock at inputted

@@ -2,6 +2,7 @@
 
 open Date
 open Slice
+open Daysum
 
 module type StockType = sig
   type query = Slice.t list
@@ -22,6 +23,10 @@ module type StockType = sig
   (** [of_input ticker name price date market_cap volume] creates a stock based
       on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
       date is invalid.*)
+
+  val make : string -> t
+  (** [make ticker] returns a new stock type, loading both historical and
+      current data fresh for the first time. *)
 
   val update : t -> t
   (** [update stk] returns a stock with ONLY the current data updated. i.e.,
@@ -62,6 +67,9 @@ module type StockType = sig
 
   val time : t -> date * time
   (** Returns last time of access. *)
+
+  val cur_data : t -> DaySum.t option
+  (** Returns current data summary. *)
 
   val market_cap : t -> float
   (** Returns market cap at last time of access. *)
