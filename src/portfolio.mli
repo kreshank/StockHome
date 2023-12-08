@@ -61,6 +61,10 @@ module type PortfolioType = sig
       will simply update the entry with most recent informatino. If [stock]
       isn't in follow list, will generate and insert in follow list. *)
 
+  val follow_lazy : Stock.t -> t -> t
+  (**Follows the ticker without updating the stock with current information.
+     Used to make save/write faster*)
+
   val update_stocks : t -> t
   (** Update stocks in a portfolio*)
 
