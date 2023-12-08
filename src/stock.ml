@@ -430,8 +430,9 @@ module Stock = struct
   (** [to_string s] returns a single-line brief string representation of a given
       stock. *)
   let to_string (stk : t) : string =
-    Printf.sprintf "%s (%s): $%.5f" stk.ticker
-      (Date.to_string (fst stk.time))
+    Printf.sprintf "%s (%s, %s): $%.5f" stk.ticker
+      (fst stk.time |> Date.to_string)
+      (snd stk.time |> Date.t_to_string)
       stk.price
 
   (** Returns a string of a more in-depth summary of a given stock. *)
@@ -439,11 +440,15 @@ module Stock = struct
     Printf.sprintf
       "\n\
        %s - %s (%s, %s): \n\
-       \tCurrent Price: $%.7f \n\
-       \tVolume: %i \n\
-       \tMarket Cap: $%.2f" stk.ticker stk.name
+       \tCurrent Price: $%#.7f \n\
+       \tVolume: %#i \n\
+       \tMarket Cap: $%#i" stk.ticker stk.name
       (fst stk.time |> Date.to_string)
       (snd stk.time |> Date.t_to_string)
-      stk.price stk.volume stk.market_cap
+      stk.price stk.volume
+      (stk.market_cap |> int_of_float)
+    |> String.map (function
+         | '_' -> ','
+         | char -> char)
 end
 (* of Stock*)

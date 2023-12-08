@@ -344,47 +344,31 @@ module DaySum : DaySumType = struct
     } ->
         Printf.sprintf
           "%s (retrieved %s, %s) - \n\
-          \        \n\
            \tPrevious Close:\t\t%.02f\n\
-          \        \n\
            \tOpen:\t\t\t%.02f\n\
-          \        \n\
            \tQuote Price:\t\t%#f\n\
-          \        \n\
            \tBid:\t\t\t%.02f x %i\n\
-          \        \n\
            \tAsk:\t\t\t%.02f x %i\n\
-          \        \n\
            \tDay's Range:\t\t%.02f - %.02f\n\
-          \        \n\
            \t52 Week Range:\t\t%.02f - %.02f\n\
-          \        \n\
            \tVolume:\t\t\t%#i\n\
-          \        \n\
            \tAvg. Volume:\t\t%#i\n\
-          \        \n\
-           \tMarket Cap:\t\t%#.02f\n\
-          \        \n\
+           \tMarket Cap:\t\t%#i\n\
            \tBeta (5Y Monthly):\t%.02f\n\
-          \        \n\
            \tPE Ratio (TTM):\t\t%.02f\n\
-          \        \n\
            \tEPS (TTM):\t\t%.02f\n\
-          \        \n\
            \tEarnings Date:\t\t%s - %s\n\
-          \        \n\
            \tForward Div & Yield:\t%.02f (%.02f%%)\n\
-          \        \n\
            \tEx-Dividend Date:\t%s\n\
-          \        \n\
            \t1Y Target Estimate:\t%.02f\n\
           \        " tkr
           (fst timestamp |> Date.to_string)
           (snd timestamp |> Date.t_to_string)
           prev_close open_price quote_price (fst bid) (snd bid) (fst ask)
           (snd ask) (fst day_range) (snd day_range) (fst week_range_52w)
-          (snd week_range_52w) volume avg_day_vol market_cap beta_5y_mly
-          pe_ratio_ttm eps_ttm
+          (snd week_range_52w) volume avg_day_vol
+          (market_cap |> int_of_float)
+          beta_5y_mly pe_ratio_ttm eps_ttm
           (fst earnings_date |> Date.to_string)
           (snd earnings_date |> Date.to_string)
           (fst forward_div_yield) (snd forward_div_yield)
