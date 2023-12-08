@@ -161,14 +161,14 @@ let main () =
 
   (*let stock_list = L.tower ~name:"stock_list" [ L.resident ~w:400
     stock_details ] in*)
-  let stock_list =
-    L.tower ~clip:true ~scale_content:true ~name:"stock_list"
+  let followed_stocks =
+    L.tower ~clip:true ~scale_content:true ~name:"followed_stocks"
       [ L.resident ~w:400 stock_details ]
   in
 
   let tabs =
     Tabs.create ~slide:Avar.Right ~name:"StockHome"
-      [ ("Add Stocks", main_container); ("Stock List", stock_list) ]
+      [ ("Add Stocks", main_container); ("Followed Stocks", followed_stocks) ]
   in
 
   let board = Bogue.make [] [ tabs ] in
