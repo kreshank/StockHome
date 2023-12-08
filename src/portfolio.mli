@@ -61,8 +61,10 @@ module type PortfolioType = sig
       will simply update the entry with most recent informatino. If [stock]
       isn't in follow list, will generate and insert in follow list. *)
 
-  val update_stocks : t -> t
-  (** Update stocks in a portfolio*)
+  val update_stocks : t -> t * float list
+  (** [update_stocks portfolio] returns a pair of
+      [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
+      between new states of each [stock] and old state of each [stock]. *)
 
   val isempty : t -> bool
   (**Checks if a port is empty*)

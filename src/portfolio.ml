@@ -61,8 +61,10 @@ module type PortfolioType = sig
       will simply update the entry with most recent informatino. If [stock]
       isn't in follow list, will generate and insert in follow list. *)
 
-  val update_stocks : t -> t
-  (** Update stocks in a portfolio*)
+  val update_stocks : t -> t * float list
+  (** [update_stocks portfolio] returns a pair of
+      [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
+      between new states of each [stock] and old state of each [stock]. *)
 
   val isempty : t -> bool
   (**Checks if a port is empty*)
@@ -193,7 +195,7 @@ module Portfolio : PortfolioType = struct
 
   (** [follow tkr p] returns [(follow_list, stock)]. Searches follow list for
       [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
-      will simply update the entry with most recent informatino. If [stock]
+      will simply update the entry with most recent information. If [stock]
       isn't in follow list, will generate and insert in follow list. *)
   let follow tkr p =
     let rec new_watch followed_stocks =
@@ -203,6 +205,7 @@ module Portfolio : PortfolioType = struct
           ([ inserted ], inserted)
       | h :: t ->
           let cmp = String.compare (Stock.ticker h) tkr in
+
           if cmp = 0 then
             let inserted = Stock.update h in
             (inserted :: t, inserted)
@@ -216,13 +219,17 @@ module Portfolio : PortfolioType = struct
     let followed_stocks, inserted = new_watch p.followed_stocks in
     ({ p with followed_stocks }, inserted)
 
-  (**Update all stocks in a portfolio*)
+  (** [update_stocks portfolio] returns a pair of
+      [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
+      between new states of each [stock] and old state of each [stock]. *)
   let update_stocks p =
     let stocks = p.followed_stocks in
-    let newport = new_portfolio () in
-    List.fold_left
-      (fun acc x -> follow (Stock.ticker x) acc |> fst)
-      newport stocks
+    let generate (oldport, diff) x =
+      let newport, upd_stock = follow (Stock.ticker x) oldport in
+      (newport, (Stock.price upd_stock -. Stock.price x) :: diff)
+    in
+    let new_p, diff_list = List.fold_left generate (p, []) stocks in
+    (new_p, List.rev diff_list)
 
   (**Checks if port is empty*)
   let isempty p = p.followed_stocks = []
