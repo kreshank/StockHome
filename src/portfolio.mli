@@ -55,8 +55,11 @@ module type PortfolioType = sig
   (** Returns a human-readable string of information of the stocks of a
       portfolio*)
 
-  val follow : Stock.t -> t -> t
-  (** Add [stock] to the watchlist of the portfolio*)
+  val follow : string -> t -> t * Stock.t
+  (** [follow tkr p] returns [(new_port, stock)]. Searches follow list for
+      [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
+      will simply update the entry with most recent informatino. If [stock]
+      isn't in follow list, will generate and insert in follow list. *)
 
   val update_stocks : t -> t
   (** Update stocks in a portfolio*)

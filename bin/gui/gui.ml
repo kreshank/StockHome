@@ -9,15 +9,29 @@ open Savewrite
 module W = Widget
 module L = Layout
 
+(** Issue thread -
+    - #1) Calling savewrite every action is lazy... leads to long load times
+    - #1.a) Can resolve perhaps by storing the port state, and only saving on
+      close. *)
+
 let main () =
   let oldport = SaveWrite.load () in
   let port = Portfolio.update_stocks oldport in
 
-  let time = Date.to_string (fst (Stock.time (Stock.make "A"))) in
-
   (* create label widgets for heading *)
   let title_label = W.label ~size:30 "OCAML STOCKS" in
-  let date_label = W.label ~size:30 ("Date: " ^ time) in
+
+  let date_label = W.label ~size:30 "Date Time" in
+
+  let _ =
+    let now = Unix.time () |> Unix.localtime in
+    let date, time =
+      ( (now.tm_mon + 1, now.tm_mday, now.tm_year + 1900),
+        (now.tm_hour, now.tm_min, now.tm_sec) )
+    in
+    W.set_text date_label
+      (Printf.sprintf "%s %s" (Date.to_string date) (Date.t_to_string time))
+  in
 
   let prompt_message = W.label "Input Ticker Below" in
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
@@ -47,17 +61,16 @@ let main () =
   (*Add button for new stocks, adds to portfolio*)
   let button_add = W.button ~border_radius:10 "Add" in
   let click _ =
-    let text = String.uppercase_ascii (W.get_text text_input) in
+    let text = String.uppercase_ascii (W.get_text text_input |> String.trim) in
     let output =
       try
-        let port = SaveWrite.load () in
-        let stock = Stock.make text in
-        let port = Portfolio.follow stock port in
-        SaveWrite.save port;
-        W.set_text followed_stocks_label (Portfolio.to_string port);
-        W.set_text stock_details (Portfolio.stock_detail port);
+        let port_from_file = SaveWrite.load () in
+        let port_updated, stock = Portfolio.follow text port_from_file in
+        SaveWrite.save port_updated;
+        W.set_text followed_stocks_label (Portfolio.to_string port_updated);
+        W.set_text stock_details (Portfolio.stock_detail port_updated);
         Stock.to_string stock
-      with e -> "Invalid Ticker/ Error Parsing"
+      with e -> "Invalid Ticker / Error Parsing"
     in
     W.set_text portfolio_stocks output
   in

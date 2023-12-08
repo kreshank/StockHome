@@ -32,7 +32,7 @@ frame.to_csv(prefix + "/" + tkr + "_cur.csv", index=False)
 end = time.time()
 
 # Time sanity check
-label = "\n\n[Current] Time to read and write: "
+label = "\n\n[Current] Time to read and write " + tkr +  ": "
 time_of_execution = str(end - start)
 
 print (label + time_of_execution)

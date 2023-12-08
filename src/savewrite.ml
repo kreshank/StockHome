@@ -81,15 +81,16 @@ let rec load_FS (input : in_channel) (port : Portfolio.t) : Portfolio.t =
   if line = "end" then port
   else begin
     let data = Str.(split (regexp ";") line) in
-    let stock =
-      match data with
-      | [ ticker; name; price; date; time; mc; volume ] ->
+    (*let stock =*)
+    match data with
+    | [ ticker; name; price; date; time; mc; volume ] ->
+        let stock =
           Stock.of_input ticker name (float_of_string price)
             (Date.of_string date, Date.t_of_string time)
             (float_of_string mc) (int_of_string volume)
-      | _ -> raise (Failure "File reading failed.")
-    in
-    Portfolio.follow stock (load_FS input port)
+        in
+        Portfolio.follow ticker (load_FS input port) |> fst
+    | _ -> raise (Failure "File reading failed.")
   end
 
 let rec load_TH (input : in_channel) (port : Portfolio.t) : Portfolio.t =

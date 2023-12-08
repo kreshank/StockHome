@@ -55,8 +55,11 @@ module type PortfolioType = sig
   (** Returns a human-readable string of information of the stocks of a
       portfolio*)
 
-  val follow : Stock.t -> t -> t
-  (** Add [stock] to the watchlist of the portfolio*)
+  val follow : string -> t -> t * Stock.t
+  (** [follow tkr p] returns [(new_port, stock)]. Searches follow list for
+      [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
+      will simply update the entry with most recent informatino. If [stock]
+      isn't in follow list, will generate and insert in follow list. *)
 
   val update_stocks : t -> t
   (** Update stocks in a portfolio*)
@@ -111,6 +114,7 @@ module Portfolio : PortfolioType = struct
     followed_stocks : Stock.t list;
     history : transaction list;
   }
+  (** We enforce that followed_stocks is always sorted by ticker. *)
 
   exception Out_of_balance of string
 
@@ -187,15 +191,38 @@ module Portfolio : PortfolioType = struct
       "" (get_followed_stocks p)
     ^ "\n"
 
-  (** Add [stock] to the watchlist of the portfolio. Requires [stock] not in the
-      watchlist. *)
-  let follow stock p = { p with followed_stocks = stock :: p.followed_stocks }
+  (** [follow tkr p] returns [(follow_list, stock)]. Searches follow list for
+      [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
+      will simply update the entry with most recent informatino. If [stock]
+      isn't in follow list, will generate and insert in follow list. *)
+  let follow tkr p =
+    let rec new_watch followed_stocks =
+      match followed_stocks with
+      | [] ->
+          let inserted = Stock.make tkr in
+          ([ inserted ], inserted)
+      | h :: t ->
+          let cmp = String.compare (Stock.ticker h) tkr in
+          if cmp = 0 then
+            let inserted = Stock.update h in
+            (inserted :: t, inserted)
+          else if cmp > 0 then
+            let res = new_watch t in
+            (h :: fst res, snd res)
+          else
+            let inserted = Stock.make tkr in
+            (inserted :: h :: t, inserted)
+    in
+    let followed_stocks, inserted = new_watch p.followed_stocks in
+    ({ p with followed_stocks }, inserted)
 
   (**Update all stocks in a portfolio*)
   let update_stocks p =
     let stocks = p.followed_stocks in
     let newport = new_portfolio () in
-    List.fold_left (fun acc x -> follow (Stock.update x) acc) newport stocks
+    List.fold_left
+      (fun acc x -> follow (Stock.ticker x) acc |> fst)
+      newport stocks
 
   (**Checks if port is empty*)
   let isempty p = p.followed_stocks = []

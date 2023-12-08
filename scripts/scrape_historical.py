@@ -29,7 +29,7 @@ for ticker in args.tickers:
 end = time.time()
 
 # Time sanity check
-label = "\n\n[Historical] Time to read in " + str(len(args.tickers)) + " tickers: "
+label = "\n\n[Historical] Time to read in " + str((args.tickers)) + " tickers: "
 time_of_execution = str(end - start)
 
 print (label + time_of_execution)

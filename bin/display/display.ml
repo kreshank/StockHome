@@ -11,8 +11,8 @@ let rec load (lst : string list) (port : Portfolio.t) (parser : Parser.t) :
       let stock = Parser.to_stock h parser in
       if stock = None then load t port parser
       else
-        let port_u = Portfolio.follow (Option.get stock) port in
-        load t port_u parser
+        let port_u = Portfolio.follow (Option.get stock |> Stock.ticker) port in
+        load t (fst port_u) parser
 
 let rec chat (port : Portfolio.t) (pars : Parser.t) =
   print_string
@@ -29,7 +29,7 @@ let rec chat (port : Portfolio.t) (pars : Parser.t) =
         match Parser.to_stock ticker pars with
         | Some v ->
             print_endline "Added.";
-            Portfolio.follow v port
+            Portfolio.follow (Stock.ticker v) port |> fst
         | None ->
             print_endline "Invalid Ticker";
             port
