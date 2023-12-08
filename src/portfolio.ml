@@ -61,6 +61,10 @@ module type PortfolioType = sig
       will simply update the entry with most recent informatino. If [stock]
       isn't in follow list, will generate and insert in follow list. *)
 
+  val follow_lazy : Stock.t -> t -> t
+  (**Follows the ticker without updating the stock with current information.
+     Used to make save/write faster*)
+
   val update_stocks : t -> t * float list
   (** [update_stocks portfolio] returns a pair of
       [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
@@ -218,6 +222,10 @@ module Portfolio : PortfolioType = struct
     in
     let followed_stocks, inserted = new_watch p.followed_stocks in
     ({ p with followed_stocks }, inserted)
+
+  (**Follows the ticker without updating the stock with current information.
+     Used to make save/write faster*)
+  let follow_lazy tkr p = { p with followed_stocks = tkr :: p.followed_stocks }
 
   (** [update_stocks portfolio] returns a pair of
       [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
