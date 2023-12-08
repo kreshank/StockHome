@@ -13,6 +13,8 @@ module L = Layout
 (** Issue thread -
     - #1) Calling savewrite every action is lazy... [EDIT: RESOLVED - rw]
     - #2) Heavy front loading is annoying...
+
+    -------- Use promises to not stall everything
     - #3) Front loads twice because of updating [EDIT: SEMI-RESOLVED - rw]...
 
     -------- Perhaps fill with placeholders, only update when necessary
@@ -23,7 +25,8 @@ module L = Layout
 
 let port = ref (SaveWrite.load ())
 
-(** Return list of List.t for followed stocks. *)
+(** Return list of List.t for followed stocks. Enables toggle between different
+    display details. *)
 let clickable_stock_list =
   let following = Portfolio.get_followed_stocks !port in
   let rec stock_to_resident stk =
@@ -51,6 +54,13 @@ let clickable_stock_list =
     |> L.make_clip ~h:75 ~scrollbar:false
   in
   List.map stock_to_resident following
+
+(** Button that updates all stocks in the follow_list of given portfolio. *)
+let button_update pf =
+  let button = W.button ~border_radius:10 "update" in
+  let click _ = port := Portfolio.update_stocks !port |> fst in
+  W.on_click ~click button;
+  button
 
 let main () =
   (* create label widgets for heading *)
@@ -111,7 +121,7 @@ let main () =
   in
   W.on_click ~click button_add;
 
-  (*Button that clears the portfolio*)
+  (* Button that clears the portfolio*)
   let button_clear = W.button ~border_radius:10 "Clear" in
   let click _ =
     SaveWrite.clear ();
@@ -124,7 +134,11 @@ let main () =
   (*Row of buttons*)
   let buttons =
     L.flat ~name:"button row"
-      [ L.resident ~w:100 button_add; L.resident ~w:100 button_clear ]
+      [
+        L.resident ~w:100 button_add;
+        L.resident ~w:100 (button_update port);
+        L.resident ~w:100 button_clear;
+      ]
   in
 
   let portfolio_container =
