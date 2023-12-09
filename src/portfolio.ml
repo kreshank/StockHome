@@ -235,7 +235,9 @@ module Portfolio : PortfolioType = struct
           let inserted = Stock.make tkr in
           ([ inserted ], inserted)
       | h :: t ->
-          let cmp = String.compare (Stock.ticker h) tkr in
+          let cmp =
+            String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
+          in
 
           if cmp = 0 then
             let inserted = Stock.update h in
