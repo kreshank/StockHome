@@ -18,9 +18,10 @@ module L = Layout
 
     -------- Perhaps fill with placeholders, only update when necessary
     - #4) Barebone interface
-    - #5) Detailed summary doesn't fit completely on gui space... make dynamic!
-    - #6) Stock_list displays in reverse order
+    - #5) Detailed summary doesn't fit [EDIT: RESOLVED - rw]
+    - #6) Stock_list displays in reverse order [EDIT: RESOLVED - rw]
     - #7) Stock_list doesn't update [EDIT: RESOLVED - rw]
+    - #8) Selecting which stock to inspect takes a while (hitreg or delay?)
     - #n) *)
 
 let port = ref (SaveWrite.load ()) (* Global Portfolio State. *)
