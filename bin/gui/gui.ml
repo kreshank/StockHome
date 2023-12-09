@@ -212,7 +212,8 @@ let main () =
       W.set_text stock_details (Portfolio.stock_detail !port);
       L.hide_window stock_detail_l
     in
-    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:clear_following "Clear"
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:clear_following
+      "Clear"
   in
 
   (* Button that trades stocks. *)
@@ -263,13 +264,6 @@ let main () =
   let main_container =
     L.tower ~name:"main_container"
       [ heading_container; second_tier_container; portfolio_container ]
-  in
-
-  (*let stock_list = L.tower ~name:"stock_list" [ L.resident ~w:400
-    stock_details ] in*)
-  let followed_stocks =
-    L.tower ~clip:true ~scale_content:true ~name:"followed_stocks"
-      [ L.resident ~w:400 stock_details ]
   in
 
   (* The trade tab. *)
