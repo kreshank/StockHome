@@ -78,7 +78,7 @@ let main () =
   in
 
   let prompt_message = W.label "Input Ticker Below" in
-  let trade_opt_message = W.label "Input Option Below: buy/sell"
+  let trade_opt_message = W.label "Input Option Below: buy/sell" in
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
   (*fix*)
