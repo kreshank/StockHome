@@ -57,8 +57,17 @@ let clickable_stock_list () =
 
 (** Button that updates all stocks in the follow_list of given portfolio. *)
 let button_update pf =
-  let button = W.button ~border_radius:10 "Update" in
+  let button = W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Update" in
   let click _ = port := Portfolio.update_stocks !port |> fst in
+  W.on_click ~click button;
+  button
+
+(** Button that adds $100 to the balance everytime it is pressed. *)
+let button_deposit =
+  let button =
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
+  in
+  let click _ = port := Portfolio.update_balance 100. !port in
   W.on_click ~click button;
   button
 
@@ -105,7 +114,7 @@ let main () =
 
   (* create main containers *)
   let heading_container =
-    L.tower ~name:"heading container"
+    L.flat ~name:"heading container" ~hmargin:30 ~align:Draw.Center
       [ L.resident title_label; L.resident date_label ]
   in
   let second_tier_container =
@@ -121,7 +130,7 @@ let main () =
   let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
 
   (*Add button for new stocks, adds to portfolio*)
-  let button_add = W.button ~border_radius:10 "Add" in
+  let button_add = W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Add" in
   let click _ =
     let text = String.uppercase_ascii (W.get_text text_input |> String.trim) in
     let output =
@@ -142,7 +151,9 @@ let main () =
   W.on_click ~click button_add;
 
   (* Button that clears the portfolio*)
-  let button_clear = W.button ~border_radius:10 "Clear" in
+  let button_clear =
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Clear"
+  in
   let click _ =
     SaveWrite.clear ();
     port := Portfolio.new_portfolio ();
@@ -182,12 +193,13 @@ let main () =
         L.resident ~w:100 button_add;
         L.resident ~w:100 (button_update port);
         L.resident ~w:100 button_clear;
+        L.resident ~w:100 button_deposit;
         (* L.resident ~w:100 button_trade; *)
       ]
   in
 
   let portfolio_container =
-    L.tower ~name:"portfolio container"
+    L.tower ~name:"portfolio container" ~align:Draw.Center
       [
         prompt;
         L.resident ~w:400 text_input;
