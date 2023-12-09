@@ -3,6 +3,7 @@
 
 open Stock
 open Date
+open Unix
 
 module type PortfolioType = sig
   type t
@@ -100,9 +101,10 @@ module type PortfolioType = sig
   (** [stock_transact option stock quantity portfolio] trades [quantity] amount
       of [stock] by the type of option [option]. *)
 
-  val ticker_transact : string -> string -> float -> t -> t
-  (** [ticker_transact option stock quantity portfolio] trades [quantity] amount
-      of [stock] by the type of option [option].*)
+  val ticker_transact : string -> string -> string -> t -> t
+  (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [opt_str].
+      Requires: no input should be empty. *)
 end
 
 module Portfolio : PortfolioType

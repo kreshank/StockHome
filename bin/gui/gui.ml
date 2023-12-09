@@ -78,8 +78,12 @@ let main () =
   in
 
   let prompt_message = W.label "Input Ticker Below" in
-  let trade_opt_message = W.label "Input Option Below: buy/sell" in
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
+
+  (* Prompt for the trade tab. *)
+  let trade_opt_message = W.label "Input Option Below: buy/sell" in
+  let trade_ticker_message = W.label "Input Ticker Below" in
+  let trade_amt_message = W.label "Input Quantity Below" in
 
   (*fix*)
   let portfolio_lst_label = W.label "My Portfolio:" in
@@ -103,6 +107,7 @@ let main () =
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
 
+  (* Text input for trade tab. *)
   let trade_opt_input = W.text_input ~text:"" ~prompt:"Enter Option Type" () in
   let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
   let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
@@ -139,7 +144,27 @@ let main () =
   W.on_click ~click button_clear;
 
   (* Button that trades stocks. *)
-  (* let button_trade = W.button ~border_radius:10 "Trade" in let click _ = *)
+  let button_trade = W.button ~border_radius:10 "Trade" in
+  let click _ =
+    let text_opt =
+      String.lowercase_ascii (W.get_text trade_opt_input |> String.trim)
+    in
+    let text_ticker =
+      String.uppercase_ascii (W.get_text trade_ticker_input |> String.trim)
+    in
+    let text_amt = W.get_text trade_amt_input |> String.trim in
+    let output =
+      try
+        let port_updated =
+          Portfolio.ticker_transact text_opt text_ticker text_amt !port
+        in
+        port := port_updated;
+        text_opt ^ " " ^ text_amt ^ " stocks of " ^ text_ticker
+      with e -> "Invalid Input"
+    in
+    W.set_text portfolio_stocks output
+  in
+  W.on_click ~click button_trade;
 
   (*Row of buttons*)
   let buttons =
@@ -174,9 +199,27 @@ let main () =
       [ L.resident ~w:400 stock_details ]
   in
 
+  (* The trade tab. *)
+  let trade_stocks =
+    L.tower ~name:"followed_stocks"
+      [
+        L.resident trade_opt_message;
+        L.resident trade_opt_input;
+        L.resident trade_ticker_message;
+        L.resident trade_ticker_input;
+        L.resident trade_amt_message;
+        L.resident trade_amt_input;
+        L.resident ~w:200 button_trade;
+      ]
+  in
+
   let tabs =
     Tabs.create ~slide:Avar.Right ~name:"StockHome"
-      [ ("Add Stocks", main_container); ("Followed Stocks", followed_stocks) ]
+      [
+        ("Add Stocks", main_container);
+        ("Followed Stocks", followed_stocks);
+        ("Trade Stocks", trade_stocks);
+      ]
   in
 
   let board = Bogue.make [] [ tabs ] in

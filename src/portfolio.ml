@@ -3,6 +3,7 @@
 
 open Stock
 open Date
+open Unix
 
 module type PortfolioType = sig
   type t
@@ -100,9 +101,10 @@ module type PortfolioType = sig
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. *)
 
-  val ticker_transact : string -> string -> float -> t -> t
-  (** [ticker_transact option stock quantity portfolio] trades [quantity] amount
-      of [stock] by the type of option [option].*)
+  val ticker_transact : string -> string -> string -> t -> t
+  (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [opt_str].
+      Requires: no input should be empty. *)
 end
 
 module Portfolio : PortfolioType = struct
@@ -140,7 +142,7 @@ module Portfolio : PortfolioType = struct
     match str with
     | "buy" -> Buy
     | "sell" -> Sell
-    | _ -> raise (Invalid_argument "Input not defined.")
+    | _ -> raise (Invalid_argument "Option should only be buy/sell")
 
   (** [new_portfolio ()] creates a new portfolio with initialized fields.*)
   let new_portfolio () =
@@ -283,10 +285,21 @@ module Portfolio : PortfolioType = struct
     let updated = transaction :: p.history in
     { p with history = updated }
 
+  (* [get_current_date ()] returns the system date in format (MM, DD, YYYY)*)
+  let get_current_date () =
+    let current_time = time () in
+    let tm = localtime current_time in
+    let month =
+      tm.tm_mon + 1 (* Adding 1 to match conventional month numbers *)
+    in
+    let day = tm.tm_mday in
+    let year = tm.tm_year + 1900 (* Year is the number of years since 1900 *) in
+    (month, day, year)
+
   (** [stock_transact option stock quantity portfolio] trades [quantity] amount
       of [stock] by the type of option [option].*)
   let stock_transact option stock quantity p =
-    let record = new_transaction stock option quantity (11, 11, 2023) in
+    let record = new_transaction stock option quantity (get_current_date ()) in
     let amount = Stock.price stock *. quantity in
     match option with
     | Buy ->
@@ -296,10 +309,14 @@ module Portfolio : PortfolioType = struct
         update_history record
           (update_stock_holding (-1. *. amount) (update_balance amount p))
 
-  (** [stock_ticker_transact opt_str ticker quantity portfolio] trades
-      [quantity] amount of [stock] of ticker [ticker] by the type of option
-      [opt_str].*)
+  (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [opt_str].
+      Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
+    if opt_str = "" || ticker = "" || quantity = "" then
+      raise (Invalid_argument "Arguments should not be empty");
     let stock = Stock.make ticker in
-    stock_transact (opt_of_string opt_str) stock quantity p
+    let opt = opt_of_string opt_str in
+    let amt = float_of_string quantity in
+    stock_transact opt stock amt p
 end
