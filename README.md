@@ -1,14 +1,14 @@
 # CS-3110 Final Project - StockHome
 This is a OCaml/Python program that pulls stock data from the yahoo finance API for a user to manipulate or track. Using data from the API, a user can build a portfolio, track stock data, save and write configurations, and more. 
 -----------------------------------
-![alt text](https://github.coecis.cornell.edu/rw645/StockHome/tree/main/Screenshot.png?raw=true "The Home Page")
+![Screenshot](https://media.github.coecis.cornell.edu/user/15874/files/305d40b0-78d7-404e-9523-9967292e382a)
 
 ## Install 
 First, download the source code. 
 Then, run `make dependencies`. 
 Then, run `make gui`. 
 
-*For more details check `INSTALL.md`*
+*For more details, check `INSTALL.md`.*
 
 ## Makefile
 The Makefile has several commands that can be used, such as:
