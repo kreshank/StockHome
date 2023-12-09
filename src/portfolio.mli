@@ -44,7 +44,7 @@ module type PortfolioType = sig
   val get_followed_stocks : t -> Stock.t list
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
 
-  val get_bought_stocks : t -> string * float list
+  val get_bought_stocks : t -> (string * float) list
   (** [get_bought_stocks portfolio] returns [bought_stocks] of [portfolio]. *)
 
   val get_history : t -> transaction list
