@@ -153,7 +153,7 @@ module Stock = struct
   let of_input (ticker : string) (name : string) (price : float)
       (time : date * time) (market_cap : float) (volume : int) : t =
     {
-      ticker;
+      ticker = String.uppercase_ascii ticker;
       name;
       price;
       time;
@@ -167,14 +167,16 @@ module Stock = struct
       historical data will not be changed in any way. If there was error
       grabbing stock info, will return an unmodified [stk]. *)
   let update (stk : t) : t =
-    if try API.current stk.ticker = 0 with e -> raise e then
+    let tkr_lower = String.lowercase_ascii stk.ticker in
+    if try API.current tkr_lower = 0 with e -> raise e then
       let cur_data =
         DaySum.load_from
-          (Printf.sprintf "data/stock_info/%s/%s_cur.csv" stk.ticker stk.ticker)
+          (Printf.sprintf "data/stock_info/%s/%s_cur.csv" tkr_lower tkr_lower)
       in
 
       {
         stk with
+        ticker = String.uppercase_ascii stk.ticker;
         time = DaySum.timestamp cur_data;
         price = DaySum.quote_price cur_data;
         cur_data = Some cur_data;
@@ -204,13 +206,23 @@ module Stock = struct
           date
     | _ -> raise (UnretrievableStock "Historical is misformatted.")
 
+  (* Current issues: can throw in a valid ticker (for a currency or market),
+     will result in an error. *)
+
   (** [make ticker] returns a new stock type, loading both historical and
       current data fresh for the first time. *)
   let make (ticker : string) : t =
-    if try API.historical [ ticker ] = 0 with e -> raise e then
+    let tkr_lower = String.lowercase_ascii ticker in
+    let tkr_upper = String.uppercase_ascii ticker in
+    if
+      tkr_lower
+      <> Str.(global_replace (regexp {|[\$\^\\\.\*\+\?\{\}-]+|}) "" tkr_lower)
+    then
+      raise
+        (UnretrievableStock
+           (Printf.sprintf "%s is not a valid ticker." tkr_upper))
+    else if try API.historical [ tkr_lower ] = 0 with e -> raise e then
       try
-        let tkr_lower = String.lowercase_ascii ticker in
-        let tkr_upper = String.uppercase_ascii ticker in
         let ic =
           open_in
             (Printf.sprintf "data/stock_info/%s/%s_hist.csv" tkr_lower tkr_lower)
@@ -240,7 +252,10 @@ module Stock = struct
         in
         update temp
       with e -> raise e
-    else raise (UnretrievableStock "pooint 2")
+    else
+      raise
+        (UnretrievableStock
+           (Printf.sprintf "%s is not a valid ticker." tkr_upper))
 
   (** Return ticker. *)
   let ticker (stk : t) : string = stk.ticker
