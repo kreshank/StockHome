@@ -99,6 +99,15 @@ let _ = L.hide_window stock_detail_l
 
 (* ------------------- Main ------------------- *)
 
+(** Button that adds $100 to the balance everytime it is pressed. *)
+let button_deposit =
+  let button =
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
+  in
+  let click _ = port := Portfolio.update_balance 100. !port in
+  W.on_click ~click button;
+  button
+
 let main () =
   (* create label widgets for heading *)
   let title_label = W.label ~size:30 "OCAML STOCKS" in
@@ -142,7 +151,7 @@ let main () =
 
   (* create main containers *)
   let heading_container =
-    L.tower ~name:"heading container"
+    L.flat ~name:"heading container" ~hmargin:30 ~align:Draw.Center
       [ L.resident title_label; L.resident date_label ]
   in
   let second_tier_container =
@@ -182,7 +191,7 @@ let main () =
       in
       W.set_text portfolio_stocks output
     in
-    W.button ~border_radius:10 ~action:add_stock "Add"
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:add_stock "Add"
   in
 
   (* Button that updates all stocks in the follow_list of given portfolio. *)
@@ -203,7 +212,7 @@ let main () =
       W.set_text stock_details (Portfolio.stock_detail !port);
       L.hide_window stock_detail_l
     in
-    W.button ~border_radius:10 ~action:clear_following "Clear"
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:clear_following "Clear"
   in
 
   (* Button that trades stocks. *)
@@ -236,12 +245,13 @@ let main () =
         L.resident ~w:100 button_add;
         L.resident ~w:100 button_update;
         L.resident ~w:100 button_clear;
+        L.resident ~w:100 button_deposit;
         (* L.resident ~w:100 button_trade; *)
       ]
   in
 
   let portfolio_container =
-    L.tower ~name:"portfolio container"
+    L.tower ~name:"portfolio container" ~align:Draw.Center
       [
         prompt;
         L.resident ~w:400 text_input;
@@ -253,6 +263,13 @@ let main () =
   let main_container =
     L.tower ~name:"main_container"
       [ heading_container; second_tier_container; portfolio_container ]
+  in
+
+  (*let stock_list = L.tower ~name:"stock_list" [ L.resident ~w:400
+    stock_details ] in*)
+  let followed_stocks =
+    L.tower ~clip:true ~scale_content:true ~name:"followed_stocks"
+      [ L.resident ~w:400 stock_details ]
   in
 
   (* The trade tab. *)

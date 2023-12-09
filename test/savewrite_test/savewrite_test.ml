@@ -95,7 +95,7 @@ let save_write_tests =
            SaveWrite.save port9;
            assert_equal sell
              (List.nth (Portfolio.get_history (SaveWrite.load ())) 1) );
-         (*("Clear" >:: fun _ -> SaveWrite.clear ());*)
+         ("Clear" >:: fun _ -> SaveWrite.clear ());
        ]
 
 let _ = run_test_tt_main save_write_tests

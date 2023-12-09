@@ -47,6 +47,9 @@ module type PortfolioType = sig
   val get_followed_stocks : t -> Stock.t list
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
 
+  val get_bought_stocks : t -> (string * float) list
+  (** [get_bought_stocks portfolio] returns [bought_stocks] of [portfolio]. *)
+
   val get_history : t -> transaction list
   (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
 
@@ -86,11 +89,18 @@ module type PortfolioType = sig
 
   val update_stock_holding : float -> t -> t
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
-      [amount]. Private method.*)
+      [amount].*)
 
   val add_bank_account : int -> t -> t
   (** [add_bank_account bank_account portfolio] adds [bank_account] to the
       [portfolio]. *)
+
+  val update_bought_stocks : string -> float -> t -> t
+  (** [update_bought_stocks ticker quantity portfolio] updates [bought_stocks].
+      If [ticker] is not in [bought_stocks], it will be added into the list. If
+      [ticker] is already in [bought_stocks], its [quantity] will change
+      accordingly. The updated [quantity] should always be not less than 0, and
+      the list is sorted based off [ticker].*)
 
   val update_history : transaction -> t -> t
   (** [add_history stock buy amount price date portfolio] adds a transaction to
@@ -99,7 +109,8 @@ module type PortfolioType = sig
 
   val stock_transact : opt -> Stock.t -> float -> t -> t
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
-      amount of [stock] by the type of option [option]. *)
+      amount of [stock] by the type of option [option]. Raises error if: the
+      portfolio is out of balance, or out of stock holdings*)
 
   val ticker_transact : string -> string -> string -> t -> t
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
@@ -124,6 +135,7 @@ module Portfolio : PortfolioType = struct
     balance : float;
     stock_holding : float;
     bank_accounts : int list;
+    bought_stocks : (string * float) list;
     followed_stocks : Stock.t list;
     history : transaction list;
   }
@@ -150,6 +162,7 @@ module Portfolio : PortfolioType = struct
       balance = 0.0;
       stock_holding = 0.0;
       bank_accounts = [];
+      bought_stocks = [];
       followed_stocks = [];
       history = [];
     }
@@ -177,20 +190,27 @@ module Portfolio : PortfolioType = struct
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
   let get_followed_stocks p = p.followed_stocks
 
+  (** [get_bought_stocks portfolio] returns [bought_stocks] of [portfolio]. *)
+  let get_bought_stocks p = p.bought_stocks
+
   (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
   let get_history p = p.history
 
   (** Returns a human-readable string of information of a portfolio*)
   let to_string p =
-    "\n" ^ " Balance: "
+    " Balance: "
     ^ string_of_float (get_balance p)
-    ^ "\n" ^ " Stock Holding: "
+    ^ "\n" ^ " Stock holding: "
     ^ string_of_float (get_stock_holdings p)
     ^ "\n" ^ " Bank accounts: "
     ^ List.fold_left
         (fun a b -> a ^ string_of_int b ^ "; ")
         "" (get_bank_accounts p)
-    ^ "\n" ^ " Followed Stocks: "
+    ^ "\n" ^ " Stocks bought: "
+    ^ List.fold_left
+        (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+        "" (get_bought_stocks p)
+    ^ "\n" ^ " Followed stocks: "
     ^ List.fold_left
         (fun a b -> if a = "" then Stock.name b else Stock.name b ^ ", " ^ a)
         "" (get_followed_stocks p)
@@ -262,11 +282,7 @@ module Portfolio : PortfolioType = struct
       exception. *)
   let update_balance amount p =
     if p.balance +. amount >= 0.0 then { p with balance = p.balance +. amount }
-    else
-      raise
-        (Out_of_balance
-           ("Out of balance: still need "
-           ^ string_of_float (0.0 -. p.balance -. amount)))
+    else raise (Out_of_balance "Out of balance. ")
 
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
       [amount]. Private method.*)
@@ -279,6 +295,36 @@ module Portfolio : PortfolioType = struct
   let add_bank_account x p =
     let updated = x :: p.bank_accounts in
     { p with bank_accounts = updated }
+
+  (** [update_bought_stocks ticker quantity portfolio] updates [bought_stocks].
+      If [ticker] is not in [bought_stocks], it will be added sinto the list,
+      and the list will sort based off [ticker]. If [ticker] is already in
+      [bought_stocks], its [quantity] will change accordingly, but it cannot be
+      less than 0. Requires: [ticker] must be all caps.*)
+  let update_bought_stocks ticker quantity p =
+    let bought_stocks = get_bought_stocks p in
+    match List.assoc_opt ticker bought_stocks with
+    | Some old_quantity ->
+        let new_quantity = old_quantity +. quantity in
+        if new_quantity < 0.0 then
+          invalid_arg "New quantity cannot be less than 0."
+        else
+          let updated_stocks =
+            List.map
+              (fun (k, v) -> if k = ticker then (k, new_quantity) else (k, v))
+              bought_stocks
+          in
+          { p with bought_stocks = updated_stocks }
+    | None ->
+        let new_quantity = quantity in
+        if new_quantity < 0.0 then
+          invalid_arg "New quantity cannot be less than 0."
+        else
+          let new_stocks = (ticker, new_quantity) :: bought_stocks in
+          let sorted_stocks =
+            List.sort (fun (k1, _) (k2, _) -> String.compare k1 k2) new_stocks
+          in
+          { p with bought_stocks = sorted_stocks }
 
   (** [update_history transaction portfolio] adds a transaction to the
       transaction history. [buy] is 1 if it is buy and 0 if it is sell. [amount]
@@ -305,20 +351,26 @@ module Portfolio : PortfolioType = struct
     let amount = Stock.price stock *. quantity in
     match option with
     | Buy ->
-        update_history record
-          (update_stock_holding amount (update_balance (-1. *. amount) p))
+        p
+        |> update_balance (-1. *. amount)
+        |> update_bought_stocks (Stock.ticker stock) quantity
+        |> update_stock_holding amount
+        |> update_history record
     | Sell ->
-        update_history record
-          (update_stock_holding (-1. *. amount) (update_balance amount p))
+        p |> update_balance amount
+        |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
+        |> update_stock_holding (-1. *. amount)
+        |> update_history record
 
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
       amount of [stock] of ticker [ticker] by the type of option [opt_str].
       Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
     if opt_str = "" || ticker = "" || quantity = "" then
-      raise (Invalid_argument "Arguments should not be empty");
+      raise (Invalid_argument "Arguments should not be empty.");
     let stock = Stock.make ticker in
-    let opt = opt_of_string opt_str in
+    let opt = opt_of_string (String.lowercase_ascii opt_str) in
+    (* ^ changed*)
     let amt = float_of_string quantity in
     stock_transact opt stock amt p
 end
