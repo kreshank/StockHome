@@ -3,7 +3,6 @@
 open OUnit2
 open Stockhome
 open Portfolio
-open Scraper
 open Stock
 
 (* Helper Functions and Printers*)

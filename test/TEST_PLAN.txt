@@ -1,0 +1,83 @@
+PREFACE
+
+Out test suite is fractured to allow for testing of specific parts 
+of the program and for multiple people to work on tests at the same time,
+which means there is no "main file" to put the test plan comment in. 
+Therefore, we have included a text file in the test folder which explains
+the reasoning behind the tests instead. 
+
+There are a total of 52 test cases as of now, which can be seen by 
+running [make test] then adding the test cases together. Since a lot of
+the code deals with real time information, there are instances where we
+opt to display the information instead of asserting it to some value.
+
+We have tests for all compilation units, the details of which are 
+discussed below. 
+
+API TESTS
+
+The [api] module, which primarly deals with the python scripts that pull
+information from the Yahoo Finance API. The tests call the python scripts,
+which displays relevant data through the terminal for manual testing. All
+functions tested from the module are used within the rest of the program, 
+which is why some of the other functions are ommited (glass-box). The tests 
+demonstrate the correctness of the system since each function used 
+correctly pulls information from the API. 
+
+DATE TESTS
+
+The [date] module primarly deals with the datatype date, which is 
+self-explanatory. This module is tested using OUnit and black box testing.
+The tests represents various dates in time, including holidays and leap
+years, and checks if the system accurately understands if certain dates 
+are valid or not. This demonstrates the correctness of the system since 
+it checks the ability of the [date] module to process regular dates and
+edge cases. 
+
+DAYSUM TESTS 
+
+The [daysum] module deals with the processing of detailed stock 
+information for one day, which includes data not stored within 
+[slice] datatypes. The module is tested using OUnit and black box 
+testing, where information is pulled and checked for correctness from
+an example csv stored in the data folder. This demonstrates the 
+correctness of the system because the example csv is created in the same 
+way as it is within the program, so ensuring that the module works with it
+proves that it also works within the program. 
+
+PORTFOLIO TESTS
+
+The [portfolio] module implements a datatype that is designed to store
+stocks and other information relevant to the user. This modules is
+tested using ????
+
+SAVEWRITE TESTS
+
+The [savewrite] module is a module that deals with the saving and loading
+of portfolios. This module is tested using OUnit and black box testing, 
+where example portfolios are created, then saved and loaded. The tests 
+handle edge cases, such as situations where the portfolio is missing data
+values. This demonstrates the correctness of the system because each 
+function, save() clear() load() are tested extensively with many different
+portfolios, simulating many of the possible portfolios that a user can
+create.
+
+SLICE TESTS 
+
+The [slice] module holds a datatype that represents a stock's information
+at a given point in time. This module is tested manually with glass box 
+testing, since the datatype is very simple and is primarly used to store
+information. By printing the information to the terminal, we can check
+its correctness easily. This demonstrates the correctness of the system
+since for any input, we can visually confirm the functionality of the
+module. 
+
+STOCK TESTS 
+
+The [stock] module holds a datatype that represents a given stock and all
+its relevant information. This module is manually tested with glass box
+testing, since the datatype is very simple and is primarly used to store
+information. By printing the information to the terminal, we can check
+its correctness easily. This demonstrates the correctness of the system
+since for any input, we can visually confirm the functionality of the
+module. 
