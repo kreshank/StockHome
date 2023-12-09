@@ -184,7 +184,9 @@ module DaySum : DaySumType = struct
       let ic = open_in file_addr in
       let tkr =
         begin
-          try List.nth Str.(split (regexp {|/|}) file_addr) 2
+          try
+            List.nth Str.(split (regexp {|/|}) file_addr) 2
+            |> String.uppercase_ascii
           with e -> raise MalformedFile
         end
       in
