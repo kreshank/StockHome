@@ -136,6 +136,7 @@ let main () =
       with e -> "Invalid Ticker / Error Parsing"
     in
     W.set_text portfolio_stocks output;
+    (*W.set_text text_input "";This crashes the gui*)
     ignore (clickable_stock_list ())
   in
   W.on_click ~click button_add;
