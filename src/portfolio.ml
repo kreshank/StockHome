@@ -100,7 +100,7 @@ module type PortfolioType = sig
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. *)
 
-  val ticker_transact : opt -> string -> float -> t -> t
+  val ticker_transact : string -> string -> float -> t -> t
   (** [ticker_transact option stock quantity portfolio] trades [quantity] amount
       of [stock] by the type of option [option].*)
 end
@@ -296,9 +296,10 @@ module Portfolio : PortfolioType = struct
         update_history record
           (update_stock_holding (-1. *. amount) (update_balance amount p))
 
-  (** [stock_ticker_transact option ticker quantity portfolio] trades [quantity]
-      amount of [stock] of ticker [ticker] by the type of option [option].*)
-  let ticker_transact option ticker quantity p =
+  (** [stock_ticker_transact opt_str ticker quantity portfolio] trades
+      [quantity] amount of [stock] of ticker [ticker] by the type of option
+      [opt_str].*)
+  let ticker_transact opt_str ticker quantity p =
     let stock = Stock.make ticker in
-    stock_transact option stock quantity p
+    stock_transact (opt_of_string opt_str) stock quantity p
 end

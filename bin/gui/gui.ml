@@ -78,6 +78,7 @@ let main () =
   in
 
   let prompt_message = W.label "Input Ticker Below" in
+  let trade_opt_message = W.label "Input Option Below: buy/sell"
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
   (*fix*)
@@ -101,6 +102,10 @@ let main () =
   in
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
+
+  let trade_opt_input = W.text_input ~text:"" ~prompt:"Enter Option Type" () in
+  let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
+  let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
 
   (*Add button for new stocks, adds to portfolio*)
   let button_add = W.button ~border_radius:10 "Add" in
@@ -133,6 +138,9 @@ let main () =
   in
   W.on_click ~click button_clear;
 
+  (* Button that trades stocks. *)
+  (* let button_trade = W.button ~border_radius:10 "Trade" in let click _ = *)
+
   (*Row of buttons*)
   let buttons =
     L.flat ~name:"button row"
@@ -140,6 +148,7 @@ let main () =
         L.resident ~w:100 button_add;
         L.resident ~w:100 (button_update port);
         L.resident ~w:100 button_clear;
+        (* L.resident ~w:100 button_trade; *)
       ]
   in
 
