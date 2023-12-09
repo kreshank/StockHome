@@ -72,7 +72,7 @@ module type PortfolioType = sig
       between new states of each [stock] and old state of each [stock]. *)
 
   val isempty : t -> bool
-  (**Checks if a port is empty*)
+  (**Checks if a portfolio is empty.*)
 
   val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
@@ -245,7 +245,7 @@ module Portfolio : PortfolioType = struct
     let new_p, diff_list = List.fold_left generate (p, []) stocks in
     (new_p, List.rev diff_list)
 
-  (**Checks if port is empty*)
+  (**Checks if a portfolio is empty.*)
   let isempty p = p.followed_stocks = []
 
   (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
