@@ -198,11 +198,19 @@ module Portfolio : PortfolioType = struct
 
   (** Returns a human-readable string of information of a portfolio*)
   let to_string p =
-    "\n" ^ " Balance: "
+    " Balance: "
     ^ string_of_float (get_balance p)
-    ^ "\n" ^ " Stock Holding: "
+    ^ "\n" ^ " Stock holding: "
     ^ string_of_float (get_stock_holdings p)
-    ^ "\n" ^ " Followed Stocks: "
+    ^ "\n" ^ " Bank accounts: "
+    ^ List.fold_left
+        (fun a b -> a ^ string_of_int b ^ "; ")
+        "" (get_bank_accounts p)
+    ^ "\n" ^ " Stocks bought: "
+    ^ List.fold_left
+        (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+        "" (get_bought_stocks p)
+    ^ "\n" ^ " Followed stocks: "
     ^ List.fold_left
         (fun a b -> if a = "" then Stock.name b else Stock.name b ^ ", " ^ a)
         "" (get_followed_stocks p)
@@ -227,7 +235,9 @@ module Portfolio : PortfolioType = struct
           let inserted = Stock.make tkr in
           ([ inserted ], inserted)
       | h :: t ->
-          let cmp = String.compare (Stock.ticker h) tkr in
+          let cmp =
+            String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
+          in
 
           if cmp = 0 then
             let inserted = Stock.update h in
@@ -272,11 +282,7 @@ module Portfolio : PortfolioType = struct
       exception. *)
   let update_balance amount p =
     if p.balance +. amount >= 0.0 then { p with balance = p.balance +. amount }
-    else
-      raise
-        (Out_of_balance
-           ("Out of balance: still need "
-           ^ string_of_float (0.0 -. p.balance -. amount)))
+    else raise (Out_of_balance "Out of balance.")
 
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
       [amount]. Private method.*)
@@ -301,7 +307,7 @@ module Portfolio : PortfolioType = struct
     | Some old_quantity ->
         let new_quantity = old_quantity +. quantity in
         if new_quantity < 0.0 then
-          invalid_arg "New quantity cannot be less than 0."
+          invalid_arg "You tried to sell more stocks than you currently own."
         else
           let updated_stocks =
             List.map
@@ -312,7 +318,7 @@ module Portfolio : PortfolioType = struct
     | None ->
         let new_quantity = quantity in
         if new_quantity < 0.0 then
-          invalid_arg "New quantity cannot be less than 0."
+          invalid_arg "You tried to sell more stocks than you currently own."
         else
           let new_stocks = (ticker, new_quantity) :: bought_stocks in
           let sorted_stocks =
@@ -352,7 +358,7 @@ module Portfolio : PortfolioType = struct
         |> update_history record
     | Sell ->
         p |> update_balance amount
-        |> update_bought_stocks (Stock.ticker stock) quantity
+        |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
         |> update_stock_holding (-1. *. amount)
         |> update_history record
 
@@ -361,9 +367,10 @@ module Portfolio : PortfolioType = struct
       Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
     if opt_str = "" || ticker = "" || quantity = "" then
-      raise (Invalid_argument "Arguments should not be empty");
+      raise (Invalid_argument "Input should not be empty.");
     let stock = Stock.make ticker in
-    let opt = opt_of_string opt_str in
+    let opt = opt_of_string (String.lowercase_ascii opt_str) in
+    (* ^ changed*)
     let amt = float_of_string quantity in
     stock_transact opt stock amt p
 end
