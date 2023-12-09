@@ -22,6 +22,8 @@ module L = Layout
     - #6) Stock_list displays in reverse order [EDIT: RESOLVED - rw]
     - #7) Stock_list doesn't update [EDIT: RESOLVED - rw]
     - #8) Selecting which stock to inspect takes a while (hitreg or delay?)
+    - #9) Follow list is not scroll able
+    - #10) Main menu shrinks
     - #n) *)
 
 let port = ref (SaveWrite.load ()) (* Global Portfolio State. *)
