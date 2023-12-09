@@ -156,7 +156,9 @@ let main () =
         port := port_updated;
         update_layout followed_stocks (!port |> Portfolio.get_followed_stocks);
         Stock.to_string stock
-      with e -> "Invalid Ticker / Error Parsing"
+      with
+      | DaySum.MalformedFile -> "Something went wrong with parsing!"
+      | Stock.UnretrievableStock s -> s
     in
     W.set_text portfolio_stocks output
   in
