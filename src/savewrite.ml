@@ -89,7 +89,7 @@ let rec load_FS (input : in_channel) (port : Portfolio.t) : Portfolio.t =
             (Date.of_string date, Date.t_of_string time)
             (float_of_string mc) (int_of_string volume)
         in
-        Portfolio.follow ticker (load_FS input port) |> fst
+        Portfolio.follow_lazy stock (load_FS input port)
     | _ -> raise (Failure "File reading failed.")
   end
 
@@ -107,7 +107,6 @@ let rec load_TH (input : in_channel) (port : Portfolio.t) : Portfolio.t =
         time = Date.of_string (List.nth data 4);
       }
     in
-
     Portfolio.update_history transaction (load_TH input port)
 
 (*____________________________________________________________________________*)
@@ -151,7 +150,10 @@ module SaveWrite : SaveWriteType = struct
       within [data/savedata.txt]. If no data is present, returns an empty
       portfolio.*)
   let load () : Portfolio.t =
+    (* try*)
+    (*Try to open file. If doesn't exist, return empty portfolio and clear()*)
     let ic = open_in "data/savedata.txt" in
+
     let port = Portfolio.new_portfolio () in
 
     try
@@ -171,5 +173,6 @@ module SaveWrite : SaveWriteType = struct
       print_string "closed";
       close_in ic;
       port
+  (* with e -> clear (); Portfolio.new_portfolio ()*)
 end
 (* of Save_write *)
