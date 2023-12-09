@@ -150,29 +150,31 @@ module SaveWrite : SaveWriteType = struct
       within [data/savedata.txt]. If no data is present, returns an empty
       portfolio.*)
   let load () : Portfolio.t =
-    (* try*)
-    (*Try to open file. If doesn't exist, return empty portfolio and clear()*)
-    let ic = open_in "data/savedata.txt" in
-
-    let port = Portfolio.new_portfolio () in
-
     try
-      let line_one = float_of_string (input_line ic) in
-      let line_two = float_of_string (input_line ic) in
-      let line_three = input_line ic in
+      (*Try to open file. If doesn't exist, return empty portfolio and clear()*)
+      let ic = open_in "data/savedata.txt" in
 
-      let port =
+      let port = Portfolio.new_portfolio () in
+
+      try
+        let line_one = float_of_string (input_line ic) in
+        let line_two = float_of_string (input_line ic) in
+        let line_three = input_line ic in
+
+        let port =
+          port
+          |> Portfolio.update_balance line_one
+          |> Portfolio.update_stock_holding line_two
+          |> load_BA line_three |> load_FS ic |> load_TH ic
+        in
+        close_in ic;
         port
-        |> Portfolio.update_balance line_one
-        |> Portfolio.update_stock_holding line_two
-        |> load_BA line_three |> load_FS ic |> load_TH ic
-      in
-      close_in ic;
-      port
-    with End_of_file ->
-      print_string "closed";
-      close_in ic;
-      port
-  (* with e -> clear (); Portfolio.new_portfolio ()*)
+      with End_of_file ->
+        print_string "closed";
+        close_in ic;
+        port
+    with e ->
+      clear ();
+      Portfolio.new_portfolio ()
 end
 (* of Save_write *)

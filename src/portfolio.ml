@@ -225,7 +225,8 @@ module Portfolio : PortfolioType = struct
 
   (**Follows the ticker without updating the stock with current information.
      Used to make save/write faster*)
-  let follow_lazy tkr p = { p with followed_stocks = tkr :: p.followed_stocks }
+  let follow_lazy tkr p =
+    { p with followed_stocks = p.followed_stocks @ [ tkr ] }
 
   (** [update_stocks portfolio] returns a pair of
       [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
