@@ -81,6 +81,14 @@ let main () =
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
   (* Prompt for the trade tab. *)
+  let holdings_label =
+    W.text_display
+      ("Balance: "
+      ^ string_of_float (Portfolio.get_balance !port)
+      ^ "\n" ^ "Stock Holdings: "
+      ^ string_of_float (Portfolio.get_stock_holdings !port))
+  in
+
   let trade_opt_message = W.label "Input Option Below: buy/sell" in
   let trade_ticker_message = W.label "Input Ticker Below" in
   let trade_amt_message = W.label "Input Quantity Below" in
@@ -203,6 +211,7 @@ let main () =
   let trade_stocks =
     L.tower ~name:"followed_stocks"
       [
+        L.resident holdings_label;
         L.resident trade_opt_message;
         L.resident trade_opt_input;
         L.resident trade_ticker_message;
