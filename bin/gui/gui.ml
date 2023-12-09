@@ -90,12 +90,17 @@ let main () =
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
   (* Prompt for the trade tab. *)
-  let holdings_label =
+  let trade_label =
     W.text_display
       ("Balance: "
       ^ string_of_float (Portfolio.get_balance !port)
-      ^ "\n" ^ "Stock Holdings: "
-      ^ string_of_float (Portfolio.get_stock_holdings !port))
+      ^ "\n" ^ "Total Stock Holdings: "
+      ^ string_of_float (Portfolio.get_stock_holdings !port)
+      ^ "\n" ^ "Holdings in each stock: "
+      ^ List.fold_left
+          (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+          ""
+          (Portfolio.get_bought_stocks !port))
   in
 
   let trade_opt_message = W.label "Input Option Below: buy/sell" in
@@ -111,6 +116,7 @@ let main () =
     W.text_display ~w:250 ~h:75 (Portfolio.stock_detail !port)
   in
   let portfolio_stocks = W.label "" in
+  let trade_output_message = W.label "" in
 
   (* create main containers *)
   let heading_container =
@@ -129,7 +135,7 @@ let main () =
   let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
   let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
 
-  (*Add button for new stocks, adds to portfolio*)
+  (* Add button for new stocks, adds to portfolio*)
   let button_add = W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Add" in
   let click _ =
     let text = String.uppercase_ascii (W.get_text text_input |> String.trim) in
@@ -166,27 +172,33 @@ let main () =
   (* Button that trades stocks. *)
   let button_trade = W.button ~border_radius:10 "Trade" in
   let click _ =
-    let text_opt =
-      String.lowercase_ascii (W.get_text trade_opt_input |> String.trim)
-    in
-    let text_ticker =
-      String.uppercase_ascii (W.get_text trade_ticker_input |> String.trim)
-    in
-    let text_amt = W.get_text trade_amt_input |> String.trim in
     let output =
       try
+        let text_opt =
+          String.lowercase_ascii (W.get_text trade_opt_input |> String.trim)
+        in
+        let text_ticker =
+          String.uppercase_ascii (W.get_text trade_ticker_input |> String.trim)
+        in
+        let text_amt = W.get_text trade_amt_input |> String.trim in
         let port_updated =
           Portfolio.ticker_transact text_opt text_ticker text_amt !port
         in
         port := port_updated;
-        text_opt ^ " " ^ text_amt ^ " stocks of " ^ text_ticker
-      with e -> "Invalid Input"
+        match text_opt with
+        | "buy" -> "Bought " ^ text_amt ^ " stock(s) of " ^ text_ticker
+        | "sell" -> "Sold " ^ text_amt ^ " stock(s) of " ^ text_ticker
+        | _ -> raise (Invalid_argument "Impossible")
+      with
+      | Portfolio.Out_of_balance m -> m
+      | Invalid_argument m -> m
+      | _ -> "Error: Empty input / Out of balance / Out of stock holding"
     in
-    W.set_text portfolio_stocks output
+    W.set_text trade_output_message output
   in
   W.on_click ~click button_trade;
 
-  (*Row of buttons*)
+  (* Row of buttons*)
   let buttons =
     L.flat ~name:"button row"
       [
@@ -224,7 +236,7 @@ let main () =
   let trade_stocks =
     L.tower ~name:"followed_stocks"
       [
-        L.resident holdings_label;
+        L.resident trade_label;
         L.resident trade_opt_message;
         L.resident trade_opt_input;
         L.resident trade_ticker_message;
@@ -232,6 +244,7 @@ let main () =
         L.resident trade_amt_message;
         L.resident trade_amt_input;
         L.resident ~w:200 button_trade;
+        L.resident ~w:200 trade_output_message;
       ]
   in
 

@@ -79,8 +79,8 @@ let portfolio_tests =
                p |> update_balance 100. |> update_balance (-50.) |> get_balance)
          );
          ( "Update balance: insufficient balance" >:: fun _ ->
-           assert_raises (Portfolio.Out_of_balance "Out of balance. ")
-             (fun () -> Portfolio.(p |> update_balance (-100.0))) );
+           assert_raises (Portfolio.Out_of_balance "Out of balance.") (fun () ->
+               Portfolio.(p |> update_balance (-100.0))) );
          ( "Update stock_holdings" >:: fun _ ->
            assert_equal 100.
              Portfolio.(
@@ -103,19 +103,21 @@ let portfolio_tests =
                p1 |> update_bought_stocks "B" 21.2 |> get_bought_stocks) );
          ( "Update bought_stocks: raise error" >:: fun _ ->
            assert_raises
-             (Invalid_argument "New quantity cannot be less than 0.") (fun () ->
-               Portfolio.(update_bought_stocks "AAPL" (-50.) p1)) );
+             (Invalid_argument
+                "You tried to sell more stocks than you currently own.")
+             (fun () -> Portfolio.(update_bought_stocks "AAPL" (-50.) p1)) );
          (* Testing transaction *)
          ( "Transaction: empty input" >:: fun _ ->
-           assert_raises (Invalid_argument "Arguments should not be empty.")
+           assert_raises (Invalid_argument "Input should not be empty.")
              (fun () -> Portfolio.(ticker_transact "" "A" "12.6") p) );
          ( "Transaction: out of stock holding" >:: fun _ ->
            assert_raises
-             (Invalid_argument "New quantity cannot be less than 0.") (fun () ->
-               Portfolio.(ticker_transact "sell" "A" "99999999") p) );
+             (Invalid_argument
+                "You tried to sell more stocks than you currently own.")
+             (fun () -> Portfolio.(ticker_transact "sell" "A" "99999999") p) );
          ( "Transaction: out of balance" >:: fun _ ->
-           assert_raises (Portfolio.Out_of_balance "Out of balance. ")
-             (fun () -> Portfolio.(ticker_transact "buy" "A" "999999.9") p) );
+           assert_raises (Portfolio.Out_of_balance "Out of balance.") (fun () ->
+               Portfolio.(ticker_transact "buy" "A" "999999.9") p) );
        ]
 
 let _ = run_test_tt_main portfolio_tests

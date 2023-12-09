@@ -280,7 +280,7 @@ module Portfolio : PortfolioType = struct
       exception. *)
   let update_balance amount p =
     if p.balance +. amount >= 0.0 then { p with balance = p.balance +. amount }
-    else raise (Out_of_balance "Out of balance. ")
+    else raise (Out_of_balance "Out of balance.")
 
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
       [amount]. Private method.*)
@@ -305,7 +305,7 @@ module Portfolio : PortfolioType = struct
     | Some old_quantity ->
         let new_quantity = old_quantity +. quantity in
         if new_quantity < 0.0 then
-          invalid_arg "New quantity cannot be less than 0."
+          invalid_arg "You tried to sell more stocks than you currently own."
         else
           let updated_stocks =
             List.map
@@ -316,7 +316,7 @@ module Portfolio : PortfolioType = struct
     | None ->
         let new_quantity = quantity in
         if new_quantity < 0.0 then
-          invalid_arg "New quantity cannot be less than 0."
+          invalid_arg "You tried to sell more stocks than you currently own."
         else
           let new_stocks = (ticker, new_quantity) :: bought_stocks in
           let sorted_stocks =
@@ -365,7 +365,7 @@ module Portfolio : PortfolioType = struct
       Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
     if opt_str = "" || ticker = "" || quantity = "" then
-      raise (Invalid_argument "Arguments should not be empty.");
+      raise (Invalid_argument "Input should not be empty.");
     let stock = Stock.make ticker in
     let opt = opt_of_string (String.lowercase_ascii opt_str) in
     (* ^ changed*)
