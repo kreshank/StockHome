@@ -198,11 +198,19 @@ module Portfolio : PortfolioType = struct
 
   (** Returns a human-readable string of information of a portfolio*)
   let to_string p =
-    "\n" ^ " Balance: "
+    " Balance: "
     ^ string_of_float (get_balance p)
-    ^ "\n" ^ " Stock Holding: "
+    ^ "\n" ^ " Stock holding: "
     ^ string_of_float (get_stock_holdings p)
-    ^ "\n" ^ " Followed Stocks: "
+    ^ "\n" ^ " Bank accounts: "
+    ^ List.fold_left
+        (fun a b -> a ^ string_of_int b ^ "; ")
+        "" (get_bank_accounts p)
+    ^ "\n" ^ " Stocks bought: "
+    ^ List.fold_left
+        (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+        "" (get_bought_stocks p)
+    ^ "\n" ^ " Followed stocks: "
     ^ List.fold_left
         (fun a b -> if a = "" then Stock.name b else Stock.name b ^ ", " ^ a)
         "" (get_followed_stocks p)
@@ -272,11 +280,7 @@ module Portfolio : PortfolioType = struct
       exception. *)
   let update_balance amount p =
     if p.balance +. amount >= 0.0 then { p with balance = p.balance +. amount }
-    else
-      raise
-        (Out_of_balance
-           ("Out of balance: still need "
-           ^ string_of_float (0.0 -. p.balance -. amount)))
+    else raise (Out_of_balance "Out of balance. ")
 
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
       [amount]. Private method.*)
@@ -352,7 +356,7 @@ module Portfolio : PortfolioType = struct
         |> update_history record
     | Sell ->
         p |> update_balance amount
-        |> update_bought_stocks (Stock.ticker stock) quantity
+        |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
         |> update_stock_holding (-1. *. amount)
         |> update_history record
 
@@ -361,9 +365,10 @@ module Portfolio : PortfolioType = struct
       Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
     if opt_str = "" || ticker = "" || quantity = "" then
-      raise (Invalid_argument "Arguments should not be empty");
+      raise (Invalid_argument "Arguments should not be empty.");
     let stock = Stock.make ticker in
-    let opt = opt_of_string opt_str in
+    let opt = opt_of_string (String.lowercase_ascii opt_str) in
+    (* ^ changed*)
     let amt = float_of_string quantity in
     stock_transact opt stock amt p
 end
