@@ -99,6 +99,10 @@ module type PortfolioType = sig
   val stock_transact : opt -> Stock.t -> float -> t -> t
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. *)
+
+  val ticker_transact : opt -> string -> float -> t -> t
+  (** [ticker_transact option stock quantity portfolio] trades [quantity] amount
+      of [stock] by the type of option [option].*)
 end
 
 module Portfolio : PortfolioType = struct
@@ -279,8 +283,8 @@ module Portfolio : PortfolioType = struct
     let updated = transaction :: p.history in
     { p with history = updated }
 
-  (** [stock_transaction option stock quantity portfolio] trades [quantity]
-      amount of [stock] by the type of option [option].*)
+  (** [stock_transact option stock quantity portfolio] trades [quantity] amount
+      of [stock] by the type of option [option].*)
   let stock_transact option stock quantity p =
     let record = new_transaction stock option quantity (11, 11, 2023) in
     let amount = Stock.price stock *. quantity in
@@ -291,4 +295,10 @@ module Portfolio : PortfolioType = struct
     | Sell ->
         update_history record
           (update_stock_holding (-1. *. amount) (update_balance amount p))
+
+  (** [stock_ticker_transact option ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [option].*)
+  let ticker_transact option ticker quantity p =
+    let stock = Stock.make ticker in
+    stock_transact option stock quantity p
 end

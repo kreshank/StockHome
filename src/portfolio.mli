@@ -97,8 +97,12 @@ module type PortfolioType = sig
       [amount] indicates the amount traded, [price] is the price when traded. *)
 
   val stock_transact : opt -> Stock.t -> float -> t -> t
-  (** [stock_transaction option stock quantity portfolio] trades [quantity]
+  (** [stock_transact option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. *)
+
+  val ticker_transact : opt -> string -> float -> t -> t
+  (** [ticker_transact option stock quantity portfolio] trades [quantity]
+      amount of [stock] by the type of option [option].*)
 end
 
 module Portfolio : PortfolioType
