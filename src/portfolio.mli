@@ -1,4 +1,5 @@
-(* Portfolio.mli - Intended to store portfolio data *)
+(** Portfolio.mli - Module that stores stock data as well as any other forms of
+    information relevant to the user *)
 
 open Stock
 open Date

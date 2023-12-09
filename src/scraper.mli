@@ -1,4 +1,4 @@
-(** Scraper.mli, intended for web-scraping and processing Yahoo Finance for
+(** Scraper.mli - intended for web-scraping and processing Yahoo Finance for
     stock information *)
 
 open Date

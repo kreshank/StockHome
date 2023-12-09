@@ -1,6 +1,8 @@
+(** Savewrite.mli - A module that contains functionality regarding the saving
+    and writing of portfolios. Used to ensure data can be saved when the program
+    is closed. *)
+
 open Portfolio
-(** A module that conatins functionality regarding the saving and writing of
-    portfolios. Used to ensure data can be saved when the program is closed. *)
 
 module type SaveWriteType = sig
   val save : Portfolio.t -> unit

@@ -1,5 +1,6 @@
-(** A module that conatins functionality regarding the saving and writing of
-    portfolios. Used to ensure data can be saved when the program is closed. *)
+(** Savewrite.ml - A module that contains functionality regarding the saving and
+    writing of portfolios. Used to ensure data can be saved when the program is
+    closed. *)
 
 open Portfolio
 open Stock

@@ -1,3 +1,6 @@
+(**Slice.mli - Holds a datatype relevant to processing stock data after its been
+   parsed.*)
+
 open Date
 
 module type SliceType = sig

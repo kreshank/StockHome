@@ -1,4 +1,4 @@
-(** Scraper.ml, intended for web-scraping Yahoo Finance for stock information,
+(** Scraper.ml - intended for web-scraping Yahoo Finance for stock information,
     and writing it into a file*)
 
 open Date
