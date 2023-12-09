@@ -27,7 +27,7 @@ let port = ref (SaveWrite.load ())
 
 (** Return list of List.t for followed stocks. Enables toggle between different
     display details. *)
-let clickable_stock_list () =
+let clickable_stock_list =
   let following = Portfolio.get_followed_stocks !port in
   let rec stock_to_resident stk =
     let show_simple = Var.create true in
@@ -54,6 +54,42 @@ let clickable_stock_list () =
     |> L.make_clip ~h:75 ~scrollbar:false
   in
   List.rev (List.map stock_to_resident following)
+
+module Toggles = Map.Make (String)
+
+let toggled_follow = Var.create Toggles.empty
+
+let make_stk_simp stk =
+  let view_ =
+    let tkr = Stock.ticker stk in
+    let unwrapped = Var.get toggled_follow in
+
+    if (not (Toggles.mem tkr unwrapped)) || Toggles.find tkr unwrapped then begin
+      Var.set toggled_follow (Toggles.add tkr false unwrapped);
+      match Stock.cur_data stk with
+      | None -> "Detailed Summary Unavailable"
+      | Some s -> DaySum.to_string s
+    end
+    else begin
+      Var.set toggled_follow (Toggles.add tkr true unwrapped);
+      Stock.to_string_detailed stk
+    end
+  in
+  print_endline view_;
+  W.text_display ~w:400 ~h:75 view_
+
+let create_widgets stk_list = List.map make_stk_simp stk_list
+
+let rec make_connection layout portstuff obj stk =
+  let action src dst ev = update_layout layout portstuff in
+  W.connect_main obj obj action Trigger.buttons_up |> W.add_connection obj
+
+and update_layout layout portstuff =
+  let widgets = create_widgets portstuff in
+  let tower = L.tower_of_w ~w:400 widgets in
+  L.set_rooms layout [ tower ];
+  Sync.push (fun () -> L.fit_content ~sep:0 layout);
+  List.iter2 (make_connection layout portstuff) widgets portstuff
 
 (** Button that updates all stocks in the follow_list of given portfolio. *)
 let button_update pf =
@@ -115,6 +151,9 @@ let main () =
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
 
+  let followed_stocks = L.empty ~w:150 ~h:400 ~name:"followed_stocks" () in
+  update_layout followed_stocks (!port |> Portfolio.get_followed_stocks);
+  
   (* Text input for trade tab. *)
   let trade_opt_input = W.text_input ~text:"" ~prompt:"Enter Option Type" () in
   let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
@@ -132,11 +171,13 @@ let main () =
         W.set_text followed_stocks_label (Portfolio.to_string port_updated);
         W.set_text stock_details (Portfolio.stock_detail port_updated);
         port := port_updated;
+        update_layout followed_stocks (!port |> Portfolio.get_followed_stocks);
         Stock.to_string stock
-      with e -> "Invalid Ticker / Error Parsing"
+      with
+      | DaySum.MalformedFile -> "Something went wrong with parsing!"
+      | Stock.UnretrievableStock s -> s
     in
-    W.set_text portfolio_stocks output;
-    ignore (clickable_stock_list ())
+    W.set_text portfolio_stocks output
   in
   W.on_click ~click button_add;
 
@@ -145,9 +186,9 @@ let main () =
   let click _ =
     SaveWrite.clear ();
     port := Portfolio.new_portfolio ();
+    update_layout followed_stocks (!port |> Portfolio.get_followed_stocks);
     W.set_text followed_stocks_label (Portfolio.to_string !port);
-    W.set_text stock_details (Portfolio.stock_detail !port);
-    ignore (clickable_stock_list ())
+    W.set_text stock_details (Portfolio.stock_detail !port)
   in
   W.on_click ~click button_clear;
 
@@ -200,13 +241,6 @@ let main () =
       [ heading_container; second_tier_container; portfolio_container ]
   in
 
-  (*let stock_list = L.tower ~name:"stock_list" [ L.resident ~w:400
-    stock_details ] in*)
-  let followed_stocks =
-    L.tower ~clip:true ~scale_content:true ~name:"followed_stocks"
-      [ L.resident ~w:400 stock_details ]
-  in
-
   (* The trade tab. *)
   let trade_stocks =
     L.tower ~name:"followed_stocks"
@@ -221,7 +255,7 @@ let main () =
         L.resident ~w:200 button_trade;
       ]
   in
-
+  
   let tabs =
     Tabs.create ~slide:Avar.Right ~name:"StockHome"
       [
