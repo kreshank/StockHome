@@ -1,4 +1,5 @@
-(** Data.ml - Holds Date functions. *)
+(** Date.mli - Holds a datatype and functions used to represent the date and
+    time. *)
 
 type date = int * int * int
 (* Representation type of a date: MM-DD-YYYY format. *)

@@ -1,3 +1,0 @@
-(executable
- (name parser_test)
- (libraries stockhome ounit2))

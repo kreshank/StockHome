@@ -1,7 +1,9 @@
-(* Portfolio.ml - Intended to store portfolio data *)
+(** Portfolio.ml - Module that stores stock data as well as any other forms of
+    information relevant to the user *)
 
 open Stock
 open Date
+open Unix
 
 module type PortfolioType = sig
   type t
@@ -71,7 +73,7 @@ module type PortfolioType = sig
       between new states of each [stock] and old state of each [stock]. *)
 
   val isempty : t -> bool
-  (**Checks if a port is empty*)
+  (**Checks if a portfolio is empty.*)
 
   val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
@@ -98,6 +100,11 @@ module type PortfolioType = sig
   val stock_transact : opt -> Stock.t -> float -> t -> t
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. *)
+
+  val ticker_transact : string -> string -> string -> t -> t
+  (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [opt_str].
+      Requires: no input should be empty. *)
 end
 
 module Portfolio : PortfolioType = struct
@@ -135,7 +142,7 @@ module Portfolio : PortfolioType = struct
     match str with
     | "buy" -> Buy
     | "sell" -> Sell
-    | _ -> raise (Invalid_argument "Input not defined.")
+    | _ -> raise (Invalid_argument "Option should only be buy/sell")
 
   (** [new_portfolio ()] creates a new portfolio with initialized fields.*)
   let new_portfolio () =
@@ -225,7 +232,8 @@ module Portfolio : PortfolioType = struct
 
   (**Follows the ticker without updating the stock with current information.
      Used to make save/write faster*)
-  let follow_lazy tkr p = { p with followed_stocks = tkr :: p.followed_stocks }
+  let follow_lazy tkr p =
+    { p with followed_stocks = p.followed_stocks @ [ tkr ] }
 
   (** [update_stocks portfolio] returns a pair of
       [(updated_portfolio, delta_price)]. Updates portfolio and logs changes
@@ -239,7 +247,7 @@ module Portfolio : PortfolioType = struct
     let new_p, diff_list = List.fold_left generate (p, []) stocks in
     (new_p, List.rev diff_list)
 
-  (**Checks if port is empty*)
+  (**Checks if a portfolio is empty.*)
   let isempty p = p.followed_stocks = []
 
   (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
@@ -277,10 +285,21 @@ module Portfolio : PortfolioType = struct
     let updated = transaction :: p.history in
     { p with history = updated }
 
-  (** [stock_transaction option stock quantity portfolio] trades [quantity]
-      amount of [stock] by the type of option [option].*)
+  (* [get_current_date ()] returns the system date in format (MM, DD, YYYY)*)
+  let get_current_date () =
+    let current_time = time () in
+    let tm = localtime current_time in
+    let month =
+      tm.tm_mon + 1 (* Adding 1 to match conventional month numbers *)
+    in
+    let day = tm.tm_mday in
+    let year = tm.tm_year + 1900 (* Year is the number of years since 1900 *) in
+    (month, day, year)
+
+  (** [stock_transact option stock quantity portfolio] trades [quantity] amount
+      of [stock] by the type of option [option].*)
   let stock_transact option stock quantity p =
-    let record = new_transaction stock option quantity (11, 11, 2023) in
+    let record = new_transaction stock option quantity (get_current_date ()) in
     let amount = Stock.price stock *. quantity in
     match option with
     | Buy ->
@@ -289,4 +308,15 @@ module Portfolio : PortfolioType = struct
     | Sell ->
         update_history record
           (update_stock_holding (-1. *. amount) (update_balance amount p))
+
+  (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [opt_str].
+      Requires: no input should be empty. *)
+  let ticker_transact opt_str ticker quantity p =
+    if opt_str = "" || ticker = "" || quantity = "" then
+      raise (Invalid_argument "Arguments should not be empty");
+    let stock = Stock.make ticker in
+    let opt = opt_of_string opt_str in
+    let amt = float_of_string quantity in
+    stock_transact opt stock amt p
 end

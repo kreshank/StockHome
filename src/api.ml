@@ -1,3 +1,5 @@
+(** API.ml - Contains all code relevant to the API. *)
+
 (** Most code is referencing data from yahoo_fin python API. *)
 
 module type APIType = sig

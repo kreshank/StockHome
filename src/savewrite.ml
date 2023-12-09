@@ -1,5 +1,6 @@
-(** A module that conatins functionality regarding the saving and writing of
-    portfolios. Used to ensure data can be saved when the program is closed. *)
+(** Savewrite.ml - A module that contains functionality regarding the saving and
+    writing of portfolios. Used to ensure data can be saved when the program is
+    closed. *)
 
 open Portfolio
 open Stock
@@ -89,7 +90,7 @@ let rec load_FS (input : in_channel) (port : Portfolio.t) : Portfolio.t =
             (Date.of_string date, Date.t_of_string time)
             (float_of_string mc) (int_of_string volume)
         in
-        Portfolio.follow ticker (load_FS input port) |> fst
+        Portfolio.follow_lazy stock (load_FS input port)
     | _ -> raise (Failure "File reading failed.")
   end
 
@@ -107,7 +108,6 @@ let rec load_TH (input : in_channel) (port : Portfolio.t) : Portfolio.t =
         time = Date.of_string (List.nth data 4);
       }
     in
-
     Portfolio.update_history transaction (load_TH input port)
 
 (*____________________________________________________________________________*)
@@ -151,25 +151,31 @@ module SaveWrite : SaveWriteType = struct
       within [data/savedata.txt]. If no data is present, returns an empty
       portfolio.*)
   let load () : Portfolio.t =
-    let ic = open_in "data/savedata.txt" in
-    let port = Portfolio.new_portfolio () in
-
     try
-      let line_one = float_of_string (input_line ic) in
-      let line_two = float_of_string (input_line ic) in
-      let line_three = input_line ic in
+      (*Try to open file. If doesn't exist, return empty portfolio and clear()*)
+      let ic = open_in "data/savedata.txt" in
 
-      let port =
+      let port = Portfolio.new_portfolio () in
+
+      try
+        let line_one = float_of_string (input_line ic) in
+        let line_two = float_of_string (input_line ic) in
+        let line_three = input_line ic in
+
+        let port =
+          port
+          |> Portfolio.update_balance line_one
+          |> Portfolio.update_stock_holding line_two
+          |> load_BA line_three |> load_FS ic |> load_TH ic
+        in
+        close_in ic;
         port
-        |> Portfolio.update_balance line_one
-        |> Portfolio.update_stock_holding line_two
-        |> load_BA line_three |> load_FS ic |> load_TH ic
-      in
-      close_in ic;
-      port
-    with End_of_file ->
-      print_string "closed";
-      close_in ic;
-      port
+      with End_of_file ->
+        print_string "closed";
+        close_in ic;
+        port
+    with e ->
+      clear ();
+      Portfolio.new_portfolio ()
 end
 (* of Save_write *)

@@ -1,7 +1,9 @@
-(* Portfolio.mli - Intended to store portfolio data *)
+(** Portfolio.mli - Module that stores stock data as well as any other forms of
+    information relevant to the user *)
 
 open Stock
 open Date
+open Unix
 
 module type PortfolioType = sig
   type t
@@ -71,7 +73,7 @@ module type PortfolioType = sig
       between new states of each [stock] and old state of each [stock]. *)
 
   val isempty : t -> bool
-  (**Checks if a port is empty*)
+  (**Checks if a portfolio is empty.*)
 
   val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
@@ -96,8 +98,13 @@ module type PortfolioType = sig
       [amount] indicates the amount traded, [price] is the price when traded. *)
 
   val stock_transact : opt -> Stock.t -> float -> t -> t
-  (** [stock_transaction option stock quantity portfolio] trades [quantity]
-      amount of [stock] by the type of option [option]. *)
+  (** [stock_transact option stock quantity portfolio] trades [quantity] amount
+      of [stock] by the type of option [option]. *)
+
+  val ticker_transact : string -> string -> string -> t -> t
+  (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
+      amount of [stock] of ticker [ticker] by the type of option [opt_str].
+      Requires: no input should be empty. *)
 end
 
 module Portfolio : PortfolioType

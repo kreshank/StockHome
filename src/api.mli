@@ -1,4 +1,4 @@
-(** API.mli - Any API information *)
+(** API.mli - Contains all code relevant to the API. *)
 
 module type APIType = sig
   val historical : string list -> int

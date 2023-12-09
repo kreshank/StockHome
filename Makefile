@@ -26,9 +26,6 @@ test-api:
 test-date:
 	OCAMLRUNPARAM=b dune exec test/date_test/date_test.exe
 
-test-parser:
-	OCAMLRUNPARAM=b dune exec test/parser_test/parser_test.exe
-
 test-portfolio:
 	OCAMLRUNPARAM=b dune exec test/portfolio_test/portfolio_test.exe
 
@@ -42,7 +39,6 @@ test-save-write:
 	OCAMLRUNPARAM=b dune exec test/savewrite_test/savewrite_test.exe -- -runner sequential
 
 test:
-	make test-parser
 	make test-portfolio
 	make test-stock
 	make test-slice
@@ -50,9 +46,6 @@ test:
 	make test-api
 	make test-daysum
 	make test-date
-
-display:
-	OCAMLRUNPARAM=b dune exec bin/display/display.exe
 
 gui:
 	OCAMLRUNPARAM=b dune exec bin/gui/gui.exe

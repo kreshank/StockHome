@@ -4,7 +4,6 @@ open Stockhome
 open Stock
 open Portfolio
 open Date
-open Parser
 open Savewrite
 open Daysum
 module W = Widget
@@ -117,6 +116,19 @@ let main () =
   let prompt_message = W.label "Input Ticker Below" in
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
+  (* Prompt for the trade tab. *)
+  let holdings_label =
+    W.text_display
+      ("Balance: "
+      ^ string_of_float (Portfolio.get_balance !port)
+      ^ "\n" ^ "Stock Holdings: "
+      ^ string_of_float (Portfolio.get_stock_holdings !port))
+  in
+
+  let trade_opt_message = W.label "Input Option Below: buy/sell" in
+  let trade_ticker_message = W.label "Input Ticker Below" in
+  let trade_amt_message = W.label "Input Quantity Below" in
+
   (*fix*)
   let portfolio_lst_label = W.label "My Portfolio:" in
   let followed_stocks_label =
@@ -139,8 +151,13 @@ let main () =
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
 
-  let followed_stocks = L.empty ~w:150 ~h:400 ~name:"followed_stocks 2" () in
+  let followed_stocks = L.empty ~w:150 ~h:400 ~name:"followed_stocks" () in
   update_layout followed_stocks (!port |> Portfolio.get_followed_stocks);
+  
+  (* Text input for trade tab. *)
+  let trade_opt_input = W.text_input ~text:"" ~prompt:"Enter Option Type" () in
+  let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
+  let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
 
   (*Add button for new stocks, adds to portfolio*)
   let button_add = W.button ~border_radius:10 "Add" in
@@ -175,6 +192,29 @@ let main () =
   in
   W.on_click ~click button_clear;
 
+  (* Button that trades stocks. *)
+  let button_trade = W.button ~border_radius:10 "Trade" in
+  let click _ =
+    let text_opt =
+      String.lowercase_ascii (W.get_text trade_opt_input |> String.trim)
+    in
+    let text_ticker =
+      String.uppercase_ascii (W.get_text trade_ticker_input |> String.trim)
+    in
+    let text_amt = W.get_text trade_amt_input |> String.trim in
+    let output =
+      try
+        let port_updated =
+          Portfolio.ticker_transact text_opt text_ticker text_amt !port
+        in
+        port := port_updated;
+        text_opt ^ " " ^ text_amt ^ " stocks of " ^ text_ticker
+      with e -> "Invalid Input"
+    in
+    W.set_text portfolio_stocks output
+  in
+  W.on_click ~click button_trade;
+
   (*Row of buttons*)
   let buttons =
     L.flat ~name:"button row"
@@ -182,6 +222,7 @@ let main () =
         L.resident ~w:100 button_add;
         L.resident ~w:100 (button_update port);
         L.resident ~w:100 button_clear;
+        (* L.resident ~w:100 button_trade; *)
       ]
   in
 
@@ -200,9 +241,28 @@ let main () =
       [ heading_container; second_tier_container; portfolio_container ]
   in
 
+  (* The trade tab. *)
+  let trade_stocks =
+    L.tower ~name:"followed_stocks"
+      [
+        L.resident holdings_label;
+        L.resident trade_opt_message;
+        L.resident trade_opt_input;
+        L.resident trade_ticker_message;
+        L.resident trade_ticker_input;
+        L.resident trade_amt_message;
+        L.resident trade_amt_input;
+        L.resident ~w:200 button_trade;
+      ]
+  in
+  
   let tabs =
     Tabs.create ~slide:Avar.Right ~name:"StockHome"
-      [ ("Add Stocks", main_container); ("Followed Stocks", followed_stocks) ]
+      [
+        ("Add Stocks", main_container);
+        ("Followed Stocks", followed_stocks);
+        ("Trade Stocks", trade_stocks);
+      ]
   in
 
   let board = Bogue.make [] [ tabs ] in

@@ -1,6 +1,6 @@
 open Date
 
-(** DaySum is a module that contains the values from parsing a file
+(** DaySum.mli - A module that contains the values from parsing a file
     [data/stock/ticker/ticker_cur.csv]. Contains a loader, to_string, and
     getters for all relevant values. *)
 

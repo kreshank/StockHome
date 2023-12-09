@@ -26,10 +26,8 @@ desc: >
   Our project is an interactive stock trading app. This is a program that pulls 
   real stock data from Yahoo Finance that allows the user to track and add 
   stocks to their portfolio. The user will be able to track real time stock 
-  prices, save their current portfolios locally, and view analytic data. There 
-  will be a default trading algorithm that can give a rough recommendation of 
-  what to buy.
+  prices, save their current portfolios locally, and view analytic data. 
 
-  Standard visual I/O is supported. In the future, there will be a smoother 
-  graphical interface that allows a graphical representation of the stock price
-  history.
+  We have implemented a GUI that retrieves and shows users relevant information
+  about the stocks they are interested in, as well as save their personal 
+  configurations.

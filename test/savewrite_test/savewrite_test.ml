@@ -3,7 +3,6 @@
 open OUnit2
 open Stockhome
 open Portfolio
-open Parser
 open Scraper
 open Stock
 open Savewrite
@@ -12,15 +11,9 @@ open Savewrite
 
 (* SAVEWRITE TESTS *)
 
-(*Example Maps*)
-let simple_map = Parser.of_csv "data/stock_info_simple.csv"
-let full_map = Parser.of_csv "data/stock_info.csv"
-
 (* Example Stocks *)
-let msft =
-  Stock.of_input "MSFT" "Microsoft, Inc." 220.11
-    ((10, 19, 2023), (0, 0, 0))
-    698627000000. 169685075
+let msft = Stock.make "msft"
+let a = Stock.make "a"
 
 let cock =
   Stock.of_input "cock" "cock, Inc." 220.11
@@ -52,8 +45,8 @@ let port2 = Portfolio.update_stock_holding 200.00 port1
 let port3 = Portfolio.add_bank_account 1 port2
 let port4 = Portfolio.add_bank_account 2 port3
 let port5 = Portfolio.add_bank_account 3 port4
-let port6 = Portfolio.follow "msft" port5 |> fst
-let port7 = Portfolio.follow "a" port6 |> fst
+let port6 = Portfolio.follow_lazy msft port5
+let port7 = Portfolio.follow_lazy a port6
 let port8 = Portfolio.update_history buy port7
 let port9 = Portfolio.update_history sell port8
 
@@ -82,12 +75,18 @@ let save_write_tests =
            SaveWrite.save port5;
            assert_equal [ 1; 2; 3 ]
              (Portfolio.get_bank_accounts (SaveWrite.load ())) );
-         (* port6, port7 cases break when updating*)
-         (* ( "Port6 save/load" >:: fun _ -> SaveWrite.save port6; assert_equal
-            msft (List.nth (Portfolio.get_followed_stocks (SaveWrite.load ()))
-            0) ); ( "Port7 save/load" >:: fun _ -> SaveWrite.save port7;
-            assert_equal cock (List.nth (Portfolio.get_followed_stocks
-            (SaveWrite.load ())) 1) );*)
+         ( "Port6 save/load" >:: fun _ ->
+           SaveWrite.save port6;
+           assert_equal "MSFT"
+             (Stock.ticker
+                (List.nth (Portfolio.get_followed_stocks (SaveWrite.load ())) 0))
+         );
+         ( "Port7 save/load" >:: fun _ ->
+           SaveWrite.save port7;
+           assert_equal "A"
+             (Stock.ticker
+                (List.nth (Portfolio.get_followed_stocks (SaveWrite.load ())) 1))
+         );
          ( "Port8 save/load" >:: fun _ ->
            SaveWrite.save port8;
            assert_equal buy
@@ -96,7 +95,7 @@ let save_write_tests =
            SaveWrite.save port9;
            assert_equal sell
              (List.nth (Portfolio.get_history (SaveWrite.load ())) 1) );
-         ("Clear" >:: fun _ -> SaveWrite.clear ());
+         (*("Clear" >:: fun _ -> SaveWrite.clear ());*)
        ]
 
 let _ = run_test_tt_main save_write_tests
