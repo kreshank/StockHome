@@ -21,13 +21,14 @@ module L = Layout
     - #4) Barebone interface
     - #5) Detailed summary doesn't fit completely on gui space... make dynamic!
     - #6) Stock_list displays in reverse order
+    - #7) Stock_list doesn't update
     - #n) *)
 
 let port = ref (SaveWrite.load ())
 
 (** Return list of List.t for followed stocks. Enables toggle between different
     display details. *)
-let clickable_stock_list =
+let clickable_stock_list () =
   let following = Portfolio.get_followed_stocks !port in
   let rec stock_to_resident stk =
     let show_simple = Var.create true in
@@ -53,11 +54,11 @@ let clickable_stock_list =
     L.resident ~name:(Stock.ticker stk) txt
     |> L.make_clip ~h:75 ~scrollbar:false
   in
-  List.map stock_to_resident following
+  List.rev (List.map stock_to_resident following)
 
 (** Button that updates all stocks in the follow_list of given portfolio. *)
 let button_update pf =
-  let button = W.button ~border_radius:10 "update" in
+  let button = W.button ~border_radius:10 "Update" in
   let click _ = port := Portfolio.update_stocks !port |> fst in
   W.on_click ~click button;
   button
@@ -117,7 +118,8 @@ let main () =
         Stock.to_string stock
       with e -> "Invalid Ticker / Error Parsing"
     in
-    W.set_text portfolio_stocks output
+    W.set_text portfolio_stocks output;
+    ignore (clickable_stock_list ())
   in
   W.on_click ~click button_add;
 
@@ -125,9 +127,10 @@ let main () =
   let button_clear = W.button ~border_radius:10 "Clear" in
   let click _ =
     SaveWrite.clear ();
-    let port = SaveWrite.load () in
-    W.set_text followed_stocks_label (Portfolio.to_string port);
-    W.set_text stock_details (Portfolio.stock_detail port)
+    port := Portfolio.new_portfolio ();
+    W.set_text followed_stocks_label (Portfolio.to_string !port);
+    W.set_text stock_details (Portfolio.stock_detail !port);
+    ignore (clickable_stock_list ())
   in
   W.on_click ~click button_clear;
 
@@ -158,14 +161,14 @@ let main () =
 
   (*let stock_list = L.tower ~name:"stock_list" [ L.resident ~w:400
     stock_details ] in*)
-  let stock_list =
-    L.tower ~clip:true ~scale_content:true ~name:"stock_list"
-      clickable_stock_list
+  let followed_stocks =
+    L.tower ~clip:true ~scale_content:true ~name:"followed_stocks"
+      [ L.resident ~w:400 stock_details ]
   in
 
   let tabs =
     Tabs.create ~slide:Avar.Right ~name:"StockHome"
-      [ ("Add Stocks", main_container); ("Stock List", stock_list) ]
+      [ ("Add Stocks", main_container); ("Followed Stocks", followed_stocks) ]
   in
 
   let board = Bogue.make [] [ tabs ] in
