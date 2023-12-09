@@ -41,6 +41,9 @@ module type PortfolioType = sig
   val get_stock_holdings : t -> float
   (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
 
+  val get_bank_accounts : t -> int list
+  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
+
   val get_followed_stocks : t -> Stock.t list
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
 
@@ -87,6 +90,10 @@ module type PortfolioType = sig
   val update_stock_holding : float -> t -> t
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
       [amount].*)
+
+  val add_bank_account : int -> t -> t
+  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
+      [portfolio]. *)
 
   val update_bought_stocks : string -> float -> t -> t
   (** [update_bought_stocks ticker quantity portfolio] updates [bought_stocks].

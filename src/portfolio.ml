@@ -41,6 +41,9 @@ module type PortfolioType = sig
   val get_stock_holdings : t -> float
   (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
 
+  val get_bank_accounts : t -> int list
+  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
+
   val get_followed_stocks : t -> Stock.t list
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
 
@@ -88,6 +91,10 @@ module type PortfolioType = sig
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
       [amount].*)
 
+  val add_bank_account : int -> t -> t
+  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
+      [portfolio]. *)
+
   val update_bought_stocks : string -> float -> t -> t
   (** [update_bought_stocks ticker quantity portfolio] updates [bought_stocks].
       If [ticker] is not in [bought_stocks], it will be added into the list. If
@@ -127,6 +134,7 @@ module Portfolio : PortfolioType = struct
   type t = {
     balance : float;
     stock_holding : float;
+    bank_accounts : int list;
     bought_stocks : (string * float) list;
     followed_stocks : Stock.t list;
     history : transaction list;
@@ -153,6 +161,7 @@ module Portfolio : PortfolioType = struct
     {
       balance = 0.0;
       stock_holding = 0.0;
+      bank_accounts = [];
       bought_stocks = [];
       followed_stocks = [];
       history = [];
@@ -174,6 +183,9 @@ module Portfolio : PortfolioType = struct
 
   (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
   let get_stock_holdings p = p.stock_holding
+
+  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
+  let get_bank_accounts p = p.bank_accounts
 
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
   let get_followed_stocks p = p.followed_stocks
@@ -271,6 +283,12 @@ module Portfolio : PortfolioType = struct
   let update_stock_holding amount p =
     let updated = p.stock_holding +. amount in
     { p with stock_holding = updated }
+
+  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
+      [portfolio]. *)
+  let add_bank_account x p =
+    let updated = x :: p.bank_accounts in
+    { p with bank_accounts = updated }
 
   (** [update_bought_stocks ticker quantity portfolio] updates [bought_stocks].
       If [ticker] is not in [bought_stocks], it will be added sinto the list,
