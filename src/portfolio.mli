@@ -41,11 +41,11 @@ module type PortfolioType = sig
   val get_stock_holdings : t -> float
   (** [get_stock_holdings portfolio] returns [stock_holding] of [portfolio]. *)
 
-  val get_bank_accounts : t -> int list
-  (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
-
   val get_followed_stocks : t -> Stock.t list
   (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
+
+  val get_bought_stocks : t -> string * float list
+  (** [get_bought_stocks portfolio] returns [bought_stocks] of [portfolio]. *)
 
   val get_history : t -> transaction list
   (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
@@ -86,11 +86,14 @@ module type PortfolioType = sig
 
   val update_stock_holding : float -> t -> t
   (** [update_stock_holding amount portfolio] updates [stock_holding] by
-      [amount]. Private method.*)
+      [amount].*)
 
-  val add_bank_account : int -> t -> t
-  (** [add_bank_account bank_account portfolio] adds [bank_account] to the
-      [portfolio]. *)
+  val update_bought_stocks : string -> float -> t -> t
+  (** [update_bought_stocks ticker quantity portfolio] updates [bought_stocks].
+      If [ticker] is not in [bought_stocks], it will be added into the list. If
+      [ticker] is already in [bought_stocks], its [quantity] will change
+      accordingly. The updated [quantity] should always be not less than 0, and
+      the list is sorted based off [ticker].*)
 
   val update_history : transaction -> t -> t
   (** [add_history stock buy amount price date portfolio] adds a transaction to
@@ -98,8 +101,9 @@ module type PortfolioType = sig
       [amount] indicates the amount traded, [price] is the price when traded. *)
 
   val stock_transact : opt -> Stock.t -> float -> t -> t
-  (** [stock_transact option stock quantity portfolio] trades [quantity] amount
-      of [stock] by the type of option [option]. *)
+  (** [stock_transaction option stock quantity portfolio] trades [quantity]
+      amount of [stock] by the type of option [option]. Raises error if: the
+      portfolio is out of balance, or out of stock holdings*)
 
   val ticker_transact : string -> string -> string -> t -> t
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
