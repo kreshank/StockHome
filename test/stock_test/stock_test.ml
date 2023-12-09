@@ -3,7 +3,6 @@
 open OUnit2
 open Stockhome
 open Portfolio
-open Parser
 open Scraper
 open Stock
 

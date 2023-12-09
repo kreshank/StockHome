@@ -15,7 +15,6 @@ The Makefile has several commands that can be used, such as:
 
 - `make dependencies` : Downloads all releveant dependencies from the terminal
 - `make gui`: Executes gui.ml to create a GUI window running the application
-- `make display`: Executes display.ml to create a UI in the terminal for testing and demonstration purposes
 - `make lines` : Returns line count of project (run `sudo apt install cloc` first)
 
 And others.

@@ -4,7 +4,6 @@ open Stockhome
 open Stock
 open Portfolio
 open Date
-open Parser
 open Savewrite
 open Daysum
 module W = Widget

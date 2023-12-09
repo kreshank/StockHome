@@ -3,13 +3,10 @@
 open OUnit2
 open Stockhome
 open Portfolio
-open Parser
 open Scraper
 open Stock
 
 (* Helper Functions and Printers*)
-
-let simple_map = Parser.of_csv "data/stock_info_simple.csv"
 
 let tsla =
   Stock.of_input "TSLA" "Tesla, Inc." 220.11

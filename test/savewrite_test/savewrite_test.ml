@@ -3,7 +3,6 @@
 open OUnit2
 open Stockhome
 open Portfolio
-open Parser
 open Scraper
 open Stock
 open Savewrite
@@ -11,10 +10,6 @@ open Savewrite
 (* Helper Functions and Printers*)
 
 (* SAVEWRITE TESTS *)
-
-(*Example Maps*)
-let simple_map = Parser.of_csv "data/stock_info_simple.csv"
-let full_map = Parser.of_csv "data/stock_info.csv"
 
 (* Example Stocks *)
 let msft =
