@@ -48,6 +48,8 @@ let port6 = Portfolio.follow_lazy msft port5
 let port7 = Portfolio.follow_lazy a port6
 let port8 = Portfolio.update_history buy port7
 let port9 = Portfolio.update_history sell port8
+let port10 = Portfolio.update_bought_stocks "A" 1. port9
+let port11 = Portfolio.update_bought_stocks "B" 2.2 port10
 
 let save_write_tests =
   "savewrite.ml Test Suite"
@@ -94,6 +96,14 @@ let save_write_tests =
            SaveWrite.save port9;
            assert_equal sell
              (List.nth (Portfolio.get_history (SaveWrite.load ())) 1) );
+         ( "Port10 save/load" >:: fun _ ->
+           SaveWrite.save port10;
+           assert_equal ("A", 1.)
+             (List.nth (Portfolio.get_bought_stocks (SaveWrite.load ())) 0) );
+         ( "Port11 save/load" >:: fun _ ->
+           SaveWrite.save port11;
+           assert_equal ("B", 2.2)
+             (List.nth (Portfolio.get_bought_stocks (SaveWrite.load ())) 1) );
          ("Clear" >:: fun _ -> SaveWrite.clear ());
        ]
 
