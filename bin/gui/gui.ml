@@ -194,7 +194,9 @@ let main () =
       ]
   in
 
-  let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
+  let text_input =
+    W.text_input ~text:"" ~prompt:"Enter Stock Ticker (ex. AAPL)" ()
+  in
 
   let followed_stocks =
     L.empty ~w:150 ~h:400 ~name:"followed_stocks" () |> L.make_clip ~h:200
