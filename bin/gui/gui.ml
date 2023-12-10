@@ -11,12 +11,10 @@ module L = Layout
 
 (** Issue thread -
     - #1) Calling savewrite every action is lazy... [EDIT: RESOLVED - rw]
-    - #2) Heavy front loading is annoying...
-
-    -------- Use promises to not stall everything
+    - #2) Heavy front loading is annoying... -------- Use promises to not stall
+      everything
     - #3) Front loads twice because of updating [EDIT: SEMI-RESOLVED - rw]...
-
-    -------- Perhaps fill with placeholders, only update when necessary
+      -------- Perhaps fill with placeholders, only update when necessary
     - #4) Barebone interface
     - #5) Detailed summary doesn't fit [EDIT: RESOLVED - rw]
     - #6) Stock_list displays in reverse order [EDIT: RESOLVED - rw]
@@ -187,17 +185,6 @@ let main () =
   let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
   let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
 
-  (* Button that adds $100 to the balance everytime it is pressed. *)
-  let button_deposit =
-    let button =
-      W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
-    in
-    let click _ = port := Portfolio.update_balance 100. !port in
-    W.set_text followed_stocks_label (Portfolio.to_string !port);
-    W.on_click ~click button;
-    button
-  in
-
   (*Add button for new stocks, adds to portfolio*)
   let button_add =
     let add_stock _ =
@@ -340,7 +327,7 @@ let main () =
       ]
   in
   let trade_menu =
-    L.tower ~name:"trade menu" ~align:Draw.Center
+    L.tower ~name:"trade menu"
       [
         L.resident trade_opt_message;
         L.resident trade_opt_input;
@@ -354,7 +341,7 @@ let main () =
   in
   (* The trade tab. *)
   let trade_stocks =
-    L.tower ~name:"trading" ~align:Draw.Center
+    L.tower ~name:"followed_stocks"
       [ trade_labels; trade_menu; L.resident ~w:500 trade_output_message ]
   in
 
