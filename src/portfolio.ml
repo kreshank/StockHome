@@ -292,22 +292,24 @@ module Portfolio : PortfolioType = struct
       will remove said stock and return the ticker in output. If [stock] isn't
       in follow list, will return a relevant output. *)
   let unfollow tkr p =
-    let rec new_watch followed_stocks =
-      match followed_stocks with
-      | [] -> ([], "Not Here")
-      | h :: t ->
-          let cmp =
-            String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
-          in
+    if tkr = "_EMPTY" then (p, "Not Here")
+    else
+      let rec new_watch followed_stocks =
+        match followed_stocks with
+        | [] -> ([], "Not Here")
+        | h :: t ->
+            let cmp =
+              String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
+            in
 
-          if cmp = 0 then (t, Stock.ticker h)
-          else if cmp > 0 then
-            let lst, value = new_watch t in
-            (h :: lst, value)
-          else (h :: t, "Not Here")
-    in
-    let followed_stocks, removed = new_watch p.followed_stocks in
-    ({ p with followed_stocks }, removed)
+            if cmp = 0 then (t, Stock.ticker h)
+            else if cmp > 0 then
+              let lst, value = new_watch t in
+              (h :: lst, value)
+            else (h :: t, "Not Here")
+      in
+      let followed_stocks, removed = new_watch p.followed_stocks in
+      ({ p with followed_stocks }, removed)
 
   (** [update_balance portfolio amount] updates [balance] of [portfolio] by
       [amount]. If the updated balance is negative, it raises [Out_of_balance]

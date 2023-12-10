@@ -282,7 +282,7 @@ let main () =
       W.text_display ~h:200
         "Welcome to STOCKHOME! Here, you can follow any stock, which adds it \
          to your watchlist, which can be viewed in the [WATCHLIST] tab. The \
-         clear button clears all information in your portfolio, and the update \
+         reset button clears all information in your portfolio, and the update \
          buttons updates all stocks in your watchlist with current data.\n\n\
          In the [WATCHLIST] tab, you can click on any stock to view more \
          details about that stock.\n\n\
@@ -355,10 +355,11 @@ let main () =
             (Portfolio.get_bought_stocks !port));
 
       W.set_text trade_output_message "";
+      W.set_text portfolio_stocks "Portfolio has been cleared.";
       L.hide_window stock_detail_l
     in
     W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:clear_following
-      "Clear"
+      "Reset"
   in
 
   let button_remove =
