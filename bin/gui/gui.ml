@@ -22,7 +22,7 @@ module L = Layout
     - #6) Stock_list displays in reverse order [EDIT: RESOLVED - rw]
     - #7) Stock_list doesn't update [EDIT: RESOLVED - rw]
     - #8) Selecting which stock to inspect takes a while (hitreg or delay?)
-    - #9) Follow list is not scroll able
+    - #9) Follow list is not scroll able [EDIT: RESOLVED - rw]
     - #10) Main menu shrinks
     - #n) *)
 
@@ -47,7 +47,7 @@ let update_button =
   W.button ~action:refresh "Refresh?"
 
 let stock_detail_l =
-  L.tower_of_w ~w:200 ~scale_content:true [ stock_info; update_button ]
+  L.tower_of_w ~w:400 ~scale_content:true [ stock_info; update_button ]
 
 let stock_window =
   let hide (elem : L.t) = Some (fun _ -> L.hide_window elem) in
@@ -80,7 +80,7 @@ and update_followed_stocks layout =
   let create_widgets stk_list =
     let make_stk_simp stk =
       let view_ = Stock.to_string_detailed stk in
-      let elem = W.text_display ~w:400 ~h:75 view_ in
+      let elem = W.text_display ~w:550 ~h:75 view_ in
       elem
     in
     List.map make_stk_simp stk_list
@@ -88,8 +88,8 @@ and update_followed_stocks layout =
   (* Make new tower and apply. *)
   let stock_list = Portfolio.get_followed_stocks !port |> List.rev in
   let widgets = create_widgets stock_list in
-  let tower = L.tower_of_w ~w:400 widgets in
-  L.set_rooms layout [ tower ];
+  let tower = L.tower_of_w ~w:600 widgets in
+  L.set_rooms layout [ L.make_clip ~w:550 ~h:400 tower ];
   Sync.push (fun () -> L.fit_content ~sep:0 layout);
   List.iter2 (create_stk_listener layout) widgets stock_list
 
@@ -154,10 +154,10 @@ let main () =
   (*fix*)
   let portfolio_lst_label = W.label "My Portfolio:" in
   let followed_stocks_label =
-    W.text_display ~w:250 ~h:75 (Portfolio.to_string !port)
+    W.text_display ~w:400 ~h:100 (Portfolio.to_string !port)
   in
   let stock_details =
-    W.text_display ~w:250 ~h:75 (Portfolio.stock_detail !port)
+    W.text_display ~w:400 ~h:75 (Portfolio.stock_detail !port)
   in
   let portfolio_stocks = W.label "" in
 
@@ -167,16 +167,23 @@ let main () =
   (* create main containers *)
   let heading_container =
     L.flat ~name:"heading container" ~hmargin:30 ~align:Draw.Center
-      [ L.resident title_label; L.resident date_label ]
+      [
+        L.resident ~h:50 ~w:300 title_label; L.resident ~h:50 ~w:150 date_label;
+      ]
   in
   let second_tier_container =
     L.flat ~name:"second tier container"
-      [ L.resident portfolio_lst_label; L.resident followed_stocks_label ]
+      [
+        L.resident ~h:150 portfolio_lst_label;
+        L.resident ~h:150 followed_stocks_label;
+      ]
   in
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
 
-  let followed_stocks = L.empty ~w:150 ~h:400 ~name:"followed_stocks" () in
+  let followed_stocks =
+    L.empty ~w:150 ~h:400 ~name:"followed_stocks" () |> L.make_clip ~h:400
+  in
   update_followed_stocks followed_stocks;
 
   (* Text input for trade tab. *)
@@ -203,6 +210,7 @@ let main () =
         with
         | DaySum.MalformedFile -> "Something went wrong with parsing!"
         | Stock.UnretrievableStock s -> s
+        | e -> "Unexpected error... Did not add."
       in
       W.set_text portfolio_stocks output
     in
@@ -295,7 +303,7 @@ let main () =
   in
 
   let main_container =
-    L.tower ~name:"main_container"
+    L.tower ~sep:0 ~name:"main_container"
       [ heading_container; second_tier_container; portfolio_container ]
   in
 
