@@ -1,5 +1,5 @@
-(** Portfolio.mli - Module that stores stock data as well as any other forms of
-    information relevant to the user *)
+(** Portfolio.ml - Module that stores stocks that the user has added to their
+    portfolio as well as any other forms of information relevant to the user *)
 
 open Stock
 open Date
@@ -9,11 +9,14 @@ val _DEFAULT_EMPTY_COUNT : int
 (** Number of [Stock.empty ()] entries that populate [follow_stocks] by default. *)
 
 module type PortfolioType = sig
+  (**Portfolio type signature. *)
+
   type t
+  (** Representation type. *)
 
   type opt =
     | Buy
-    | Sell  (** Stock options . *)
+    | Sell  (** Stock options buy/sell. *)
 
   type transaction = {
     ticker : string;
@@ -79,7 +82,7 @@ module type PortfolioType = sig
       between new states of each [stock] and old state of each [stock]. *)
 
   val isempty : t -> bool
-  (**Checks if a portfolio is empty.*)
+  (**[isempty portfolio] returns whether or not [portfolio] is empty*)
 
   val unfollow : Stock.t -> t -> t
   (** Remove a stock from the watchlist. Required: the stock is in the
@@ -123,3 +126,4 @@ module type PortfolioType = sig
 end
 
 module Portfolio : PortfolioType
+(** Implementation of PortfolioType. *)
