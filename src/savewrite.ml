@@ -7,6 +7,8 @@ open Stock
 open Date
 
 module type SaveWriteType = sig
+  (** SaveWrite type signature containing all functions and values required to
+      save and write portfolios. *)
   val save : Portfolio.t -> unit
   (** Given a [Portfolio.t], writes to data/savedata.txt the information stored
       within the portfolio. Overwrites any existing data.*)
@@ -141,6 +143,8 @@ let rec load_TH (input : in_channel) (port : Portfolio.t) : Portfolio.t =
 (*____________________________________________________________________________*)
 
 module SaveWrite : SaveWriteType = struct
+  (** Implementation of SaveWriteType. *)
+
   (** Can be called to clear the saved data within [data/savedata.txt],
       Essentially removes the save.*)
   let clear () =

@@ -5,6 +5,9 @@
 open Portfolio
 
 module type SaveWriteType = sig
+  (** SaveWrite type signature containing all functions and values required to
+      save and write portfolios. *)
+
   val save : Portfolio.t -> unit
   (** Given a [Portfolio.t], writes to data/savedata.txt the information stored
       within the portfolio. Overwrites any existing data.*)
@@ -20,3 +23,4 @@ module type SaveWriteType = sig
 end
 
 module SaveWrite : SaveWriteType
+(** Implementation of SaveWriteType *)
