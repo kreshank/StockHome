@@ -371,9 +371,8 @@ let main () =
         port := port_updated;
         update_followed_stocks followed_stocks;
         match stock with
-        | "None" -> "Cannot remove stocks from an empty watchlist."
         | "Not Here" -> "Stock does not exist in the watchlist."
-        | v -> "Removed ticker: " ^ v
+        | v -> "Removed stock from watchlist: " ^ v
       in
 
       W.set_text portfolio_stocks output
