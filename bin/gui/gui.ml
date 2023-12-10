@@ -101,20 +101,11 @@ let _ = L.hide_window stock_detail_l
 
 (* ------------------- Main ------------------- *)
 
-(** Button that adds $100 to the balance everytime it is pressed. *)
-let button_deposit =
-  let button =
-    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
-  in
-  let click _ = port := Portfolio.update_balance 100. !port in
-  W.on_click ~click button;
-  button
-
 let main () =
   (* create label widgets for heading *)
-  let title_label = W.label ~size:30 "OCAML STOCKS" in
+  let title_label = W.label ~align:Min ~size:30 "STOCKHOME" in
 
-  let date_label = W.label ~size:30 "Date Time" in
+  let date_label = W.label ~align:Min ~size:25 "Date Time" in
 
   let _ =
     let now = Unix.time () |> Unix.localtime in
@@ -130,32 +121,44 @@ let main () =
 
   (* Prompt for the trade tab. *)
   let balance_label =
-    W.text_display ("Balance: " ^ string_of_float (Portfolio.get_balance !port))
+    W.label ~align:Min ~size:30
+      (Printf.sprintf "Balance: $%.2f" (Portfolio.get_balance !port))
   in
 
   let total_holding_label =
-    W.text_display
-      ("Total Stock Holdings: "
-      ^ string_of_float (Portfolio.get_stock_holdings !port))
+    W.label ~align:Min ~size:30
+      (Printf.sprintf "Total Stock Holdings: $%.2f"
+         (Portfolio.get_stock_holdings !port))
   in
   let each_holding_label =
     W.text_display
-      ("Holdings in each stock: "
+      ("Holdings Per Stock: "
       ^ List.fold_left
-          (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+          (fun acc (t, a) ->
+            let s = Printf.sprintf "[%s - %.2f]" t a in
+            if acc = "" then s else acc ^ ", " ^ s)
           ""
           (Portfolio.get_bought_stocks !port))
+  in
+
+  (* Button that adds $100 to the balance everytime it is pressed. *)
+  let button_deposit =
+    let button =
+      W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
+    in
+    let click _ =
+      port := Portfolio.update_balance 100. !port;
+      W.set_text balance_label
+        (Printf.sprintf "Balance: $%.2f" (Portfolio.get_balance !port))
+    in
+    W.on_click ~click button;
+    button
   in
 
   let trade_opt_message = W.label "Input Option Below: buy/sell" in
   let trade_ticker_message = W.label "Input Ticker Below" in
   let trade_amt_message = W.label "Input Quantity Below" in
 
-  (*fix*)
-  let portfolio_lst_label = W.label "My Portfolio:" in
-  let followed_stocks_label =
-    W.text_display ~w:250 ~h:75 (Portfolio.to_string !port)
-  in
   let stock_details =
     W.text_display ~w:250 ~h:75 (Portfolio.stock_detail !port)
   in
@@ -166,12 +169,8 @@ let main () =
 
   (* create main containers *)
   let heading_container =
-    L.flat ~name:"heading container" ~hmargin:30 ~align:Draw.Center
+    L.tower ~name:"heading container" ~hmargin:30 ~align:Min
       [ L.resident title_label; L.resident date_label ]
-  in
-  let second_tier_container =
-    L.flat ~name:"second tier container"
-      [ L.resident portfolio_lst_label; L.resident followed_stocks_label ]
   in
 
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
@@ -195,7 +194,6 @@ let main () =
           (*let port_from_file = SaveWrite.load () in*)
           let port_updated, stock = Portfolio.follow text !port in
           (*SaveWrite.save port_updated;*)
-          W.set_text followed_stocks_label (Portfolio.to_string port_updated);
           W.set_text stock_details (Portfolio.stock_detail port_updated);
           port := port_updated;
           update_followed_stocks followed_stocks;
@@ -206,12 +204,12 @@ let main () =
       in
       W.set_text portfolio_stocks output
     in
-    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:add_stock "Add"
+    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:add_stock "Follow"
   in
 
   (* Button that updates all stocks in the follow_list of given portfolio. *)
   let button_update =
-    let button = W.button ~border_radius:10 "Update" in
+    let button = W.button ~fg:(255, 255, 255, 0) ~border_radius:10 "Update" in
     let click _ = port := Portfolio.update_stocks !port |> fst in
     W.on_click ~click button;
     button
@@ -223,8 +221,22 @@ let main () =
       SaveWrite.clear ();
       port := Portfolio.new_portfolio ();
       update_followed_stocks followed_stocks;
-      W.set_text followed_stocks_label (Portfolio.to_string !port);
       W.set_text stock_details (Portfolio.stock_detail !port);
+      W.set_text balance_label
+        (Printf.sprintf "Balance: $%.2f" (Portfolio.get_balance !port));
+
+      W.set_text total_holding_label
+        (Printf.sprintf "Total Stock Holdings: $%.2f"
+           (Portfolio.get_stock_holdings !port));
+
+      W.set_text each_holding_label
+        ("Holdings Per Stock: "
+        ^ List.fold_left
+            (fun acc (t, a) ->
+              let s = Printf.sprintf "[%s - %.2f]" t a in
+              if acc = "" then s else acc ^ ", " ^ s)
+            ""
+            (Portfolio.get_bought_stocks !port));
       L.hide_window stock_detail_l
     in
     W.button ~border_radius:10 ~fg:(255, 255, 255, 0) ~action:clear_following
@@ -232,7 +244,9 @@ let main () =
   in
 
   (* Button that trades stocks. *)
-  let button_trade = W.button ~border_radius:10 "Trade" in
+  let button_trade =
+    W.button ~fg:(255, 255, 255, 0) ~border_radius:10 "Trade"
+  in
   let click _ =
     let output =
       try
@@ -259,14 +273,18 @@ let main () =
 
     W.set_text trade_output_message output;
     W.set_text balance_label
-      ("Balance: " ^ string_of_float (Portfolio.get_balance !port));
+      (Printf.sprintf "Balance: $%.2f" (Portfolio.get_balance !port));
+
     W.set_text total_holding_label
-      ("Total Stock Holdings: "
-      ^ string_of_float (Portfolio.get_stock_holdings !port));
+      (Printf.sprintf "Total Stock Holdings: $%.2f"
+         (Portfolio.get_stock_holdings !port));
+
     W.set_text each_holding_label
-      ("Holdings in each stock: "
+      ("Holdings Per Stock: "
       ^ List.fold_left
-          (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+          (fun acc (t, a) ->
+            let s = Printf.sprintf "[%s - %.2f]" t a in
+            if acc = "" then s else acc ^ ", " ^ s)
           ""
           (Portfolio.get_bought_stocks !port))
   in
@@ -279,13 +297,11 @@ let main () =
         L.resident ~w:100 button_add;
         L.resident ~w:100 button_update;
         L.resident ~w:100 button_clear;
-        L.resident ~w:100 button_deposit;
-        (* L.resident ~w:100 button_trade; *)
       ]
   in
 
   let portfolio_container =
-    L.tower ~name:"portfolio container" ~align:Draw.Center
+    L.tower ~name:"portfolio container" ~align:Min
       [
         prompt;
         L.resident ~w:400 text_input;
@@ -295,16 +311,15 @@ let main () =
   in
 
   let main_container =
-    L.tower ~name:"main_container"
-      [ heading_container; second_tier_container; portfolio_container ]
+    L.tower ~name:"main_container" [ heading_container; portfolio_container ]
   in
 
   let trade_labels =
     L.tower ~name:"trade labels"
       [
-        L.resident ~h:20 balance_label;
-        L.resident ~h:20 total_holding_label;
-        L.resident ~w:500 ~h:20 each_holding_label;
+        L.resident ~w:500 balance_label;
+        L.resident ~w:500 total_holding_label;
+        L.resident each_holding_label;
       ]
   in
   let trade_menu =
@@ -316,7 +331,8 @@ let main () =
         L.resident trade_ticker_input;
         L.resident trade_amt_message;
         L.resident trade_amt_input;
-        L.resident ~w:200 button_trade;
+        L.flat ~name:"trade button row"
+          [ L.resident ~w:100 button_trade; L.resident ~w:100 button_deposit ];
       ]
   in
   (* The trade tab. *)
