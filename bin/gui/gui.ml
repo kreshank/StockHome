@@ -86,8 +86,8 @@ and update_followed_stocks layout =
   (* Make new tower and apply. *)
   let stock_list = Portfolio.get_followed_stocks !port |> List.rev in
   let widgets = create_widgets stock_list in
-  let tower = L.tower_of_w ~w:600 widgets in
-  L.set_rooms layout [ L.make_clip ~w:550 ~h:400 tower ];
+  let tower = L.tower_of_w widgets in
+  L.set_rooms layout [ L.make_clip ~h:200 tower ];
   Sync.push (fun () -> L.fit_content ~sep:0 layout);
   List.iter2 (create_stk_listener layout) widgets stock_list
 
@@ -176,7 +176,7 @@ let main () =
   let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
 
   let followed_stocks =
-    L.empty ~w:150 ~h:400 ~name:"followed_stocks" () |> L.make_clip ~h:400
+    L.empty ~w:150 ~h:400 ~name:"followed_stocks" () |> L.make_clip ~h:200
   in
   update_followed_stocks followed_stocks;
 
@@ -360,6 +360,7 @@ let main () =
   in
 
   let main_window = Window.create ?on_close:(Some end_pgrm) tabs in
+  Sync.push (fun () -> Window.set_size ~w:350 ~h:500 stock_window);
   let board = Main.create [ main_window; stock_window ] in
   Bogue.run board
 
