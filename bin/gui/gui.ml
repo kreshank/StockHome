@@ -100,16 +100,6 @@ and update_followed_stocks layout =
 let _ = L.hide_window stock_detail_l
 
 (* ------------------- Main ------------------- *)
-
-(** Button that adds $100 to the balance everytime it is pressed. *)
-let button_deposit =
-  let button =
-    W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
-  in
-  let click _ = port := Portfolio.update_balance 100. !port in
-  W.on_click ~click button;
-  button
-
 let main () =
   (* create label widgets for heading *)
   let title_label = W.label ~size:30 "OCAML STOCKS" in
@@ -154,7 +144,7 @@ let main () =
   (*fix*)
   let portfolio_lst_label = W.label "My Portfolio:" in
   let followed_stocks_label =
-    W.text_display ~w:250 ~h:75 (Portfolio.to_string !port)
+    W.text_display ~w:250 ~h:100 (Portfolio.to_string !port)
   in
   let stock_details =
     W.text_display ~w:250 ~h:75 (Portfolio.stock_detail !port)
@@ -183,6 +173,17 @@ let main () =
   let trade_opt_input = W.text_input ~text:"" ~prompt:"Enter Option Type" () in
   let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
   let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
+
+  (* Button that adds $100 to the balance everytime it is pressed. *)
+  let button_deposit =
+    let button =
+      W.button ~border_radius:10 ~fg:(255, 255, 255, 0) "Deposit $100"
+    in
+    let click _ = port := Portfolio.update_balance 100. !port in
+    W.set_text followed_stocks_label (Portfolio.to_string !port);
+    W.on_click ~click button;
+    button
+  in
 
   (*Add button for new stocks, adds to portfolio*)
   let button_add =
@@ -280,7 +281,6 @@ let main () =
         L.resident ~w:100 button_update;
         L.resident ~w:100 button_clear;
         L.resident ~w:100 button_deposit;
-        (* L.resident ~w:100 button_trade; *)
       ]
   in
 
@@ -308,7 +308,7 @@ let main () =
       ]
   in
   let trade_menu =
-    L.tower ~name:"trade menu"
+    L.tower ~name:"trade menu" ~align:Draw.Center
       [
         L.resident trade_opt_message;
         L.resident trade_opt_input;
@@ -321,7 +321,7 @@ let main () =
   in
   (* The trade tab. *)
   let trade_stocks =
-    L.tower ~name:"followed_stocks"
+    L.tower ~name:"trading" ~align:Draw.Center
       [ trade_labels; trade_menu; L.resident ~w:500 trade_output_message ]
   in
 
