@@ -1,7 +1,7 @@
 # CS-3110 Final Project - StockHome
 This is a OCaml/Python program that pulls stock data from the Yahoo Finance API for a user to manipulate or track. Using data from the API, a user can build a portfolio, track stock data, save and write configurations, and more. 
 -----------------------------------
-![Screenshot](https://media.github.coecis.cornell.edu/user/15874/files/305d40b0-78d7-404e-9523-9967292e382a)
+![image](https://media.github.coecis.cornell.edu/user/15874/files/1009cfa8-d54a-4d89-9d52-cc20aeb0bcbf)
 
 ## Install 
 First, download the source code. 
