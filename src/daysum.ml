@@ -275,7 +275,7 @@ module DaySum : DaySumType = struct
         quote_price;
         volume;
       }
-    with e -> raise e
+    with e -> raise MalformedFile
 
   (** [ticker ds] returns the ticker val associated with [ds]. *)
   let ticker ds = ds.tkr
