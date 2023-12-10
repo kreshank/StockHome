@@ -80,19 +80,21 @@ let save_write_tests =
            SaveWrite.save port6;
            assert_equal "MSFT"
              (Stock.ticker
-                (List.nth (Portfolio.get_followed_stocks (SaveWrite.load ())) 0))
-         );
+                (List.nth
+                   (Portfolio.get_followed_stocks (SaveWrite.load ()))
+                   (0 + _DEFAULT_EMPTY_COUNT))) );
          ( "Port7 save/load" >:: fun _ ->
            SaveWrite.save port7;
            assert_equal "A"
              (Stock.ticker
-                (List.nth (Portfolio.get_followed_stocks (SaveWrite.load ())) 1))
-         );
+                (List.nth
+                   (Portfolio.get_followed_stocks (SaveWrite.load ()))
+                   (1 + _DEFAULT_EMPTY_COUNT))) );
          ( "Port8 save/load" >:: fun _ ->
            SaveWrite.save port8;
            assert_equal buy
              (List.nth (Portfolio.get_history (SaveWrite.load ())) 0) );
-         ( "Port9 save/load" >:: fun _ ->
+         ( "Port9\n            save/load" >:: fun _ ->
            SaveWrite.save port9;
            assert_equal sell
              (List.nth (Portfolio.get_history (SaveWrite.load ())) 1) );

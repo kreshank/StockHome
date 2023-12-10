@@ -19,6 +19,11 @@ module type StockType = sig
 
   exception UnretrievableStock of string
 
+  val empty : unit -> t
+  (** [empty] returns a special empty stock type. Should not be created by the
+      user ever. [to_string empty] should be the empty string [""]. Using
+      [empty] as argument to a function will almost always lead to errors. *)
+
   val of_input : string -> string -> float -> date * time -> float -> int -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
       on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
@@ -114,10 +119,13 @@ module type StockType = sig
 
   val to_string : t -> string
   (** [to_string s] returns a single-line brief string representation of a given
-      stock. *)
+      stock. Special case is if [s = empty], where empty string [""] is
+      returned. *)
 
   val to_string_detailed : t -> string
-  (** Returns a string of a more in-depth summary of a given stock. *)
+  (** [to_string_detailed s] returns a string of a more in-depth summary of a
+      given stock. Special case is if [s = empty], where empty string [""] is
+      returned. *)
 end
 
 module Stock : StockType

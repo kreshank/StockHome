@@ -5,6 +5,9 @@ open Stock
 open Date
 open Unix
 
+(** Number of [Stock.empty ()] entries that populate [follow_stocks] by default. *)
+let _DEFAULT_EMPTY_COUNT : int = 5
+
 module type PortfolioType = sig
   type t
 
@@ -163,7 +166,7 @@ module Portfolio : PortfolioType = struct
       stock_holding = 0.0;
       bank_accounts = [];
       bought_stocks = [];
-      followed_stocks = [];
+      followed_stocks = List.init _DEFAULT_EMPTY_COUNT (fun _ -> Stock.empty ());
       history = [];
     }
 
@@ -187,11 +190,14 @@ module Portfolio : PortfolioType = struct
   (** [get_bank_accounts portfolio] returns [bank_accounts] of [portfolio]. *)
   let get_bank_accounts p = p.bank_accounts
 
-  (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio]. *)
+  (** [get_followed_stocks portfolio] returns [followed_stocks] of [portfolio].
+      WARNING: Will not exclude entries of [Stock.empty ()]. MUST PROCESS THEM. *)
   let get_followed_stocks p = p.followed_stocks
 
-  (** [get_bought_stocks portfolio] returns [bought_stocks] of [portfolio]. *)
-  let get_bought_stocks p = p.bought_stocks
+  (** [get_bought_stocks portfolio] returns [bought_stocks] of [portfolio].
+      WARNING: Excludes entries of [Stock.empty ()]. *)
+  let get_bought_stocks p =
+    List.filter (fun (tkr, _) -> tkr <> "_EMPTY") p.bought_stocks
 
   (** [get_history portfolio] returns [followed_stocks] of [portfolio]. *)
   let get_history p = p.history
@@ -208,11 +214,14 @@ module Portfolio : PortfolioType = struct
         "" (get_bank_accounts p)
     ^ "\n" ^ " Stocks bought: "
     ^ List.fold_left
-        (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+        (fun acc (tkr, qt) -> acc ^ tkr ^ ": " ^ string_of_float qt ^ "; ")
         "" (get_bought_stocks p)
     ^ "\n" ^ " Followed stocks: "
     ^ List.fold_left
-        (fun a b -> if a = "" then Stock.name b else Stock.name b ^ ", " ^ a)
+        (fun acc x ->
+          if x = Stock.empty () then acc
+          else if acc = "" then Stock.name x
+          else Stock.name x ^ ", " ^ acc)
         "" (get_followed_stocks p)
     ^ "\n"
 
@@ -220,7 +229,9 @@ module Portfolio : PortfolioType = struct
   let stock_detail p =
     List.fold_left
       (fun acc x ->
-        if acc = "" then Stock.to_string x else Stock.to_string x ^ "\n" ^ acc)
+        if x = Stock.empty () then acc
+        else if acc = "" then Stock.to_string x
+        else Stock.to_string x ^ "\n" ^ acc)
       "" (get_followed_stocks p)
     ^ "\n"
 
@@ -269,8 +280,10 @@ module Portfolio : PortfolioType = struct
     let new_p, diff_list = List.fold_left generate (p, []) stocks in
     (new_p, List.rev diff_list)
 
-  (**Checks if a portfolio is empty.*)
-  let isempty p = p.followed_stocks = []
+  (** Checks if a portfolio is empty. That is there are no stocks that are not
+      equal to [Stock.empty ()]. *)
+  let isempty p =
+    List.filter (fun a -> a <> Stock.empty ()) p.followed_stocks = []
 
   (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
   let unfollow stock p =
@@ -373,6 +386,7 @@ module Portfolio : PortfolioType = struct
       amount of [stock] of ticker [ticker] by the type of option [opt_str].
       Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
+    if ticker = "_EMPTY" then invalid_arg "Input cannot be _EMPTY";
     if opt_str = "" || ticker = "" || quantity = "" then
       invalid_arg "Input should not be empty.";
     let new_p, stock = follow ticker p in

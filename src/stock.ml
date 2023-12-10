@@ -20,6 +20,11 @@ module type StockType = sig
 
   exception UnretrievableStock of string
 
+  val empty : unit -> t
+  (** [empty] returns a special empty stock type. Should not be created by the
+      user ever. [to_string empty] should be the empty string [""]. Using
+      [empty] as argument to a function will almost always lead to errors. *)
+
   val of_input : string -> string -> float -> date * time -> float -> int -> t
   (** [of_input ticker name price date market_cap volume] creates a stock based
       on input. Mainly used for testing purposes. Raises [Date.InvalidDate] if
@@ -115,10 +120,13 @@ module type StockType = sig
 
   val to_string : t -> string
   (** [to_string s] returns a single-line brief string representation of a given
-      stock. *)
+      stock. Special case is if [s = empty], where empty string [""] is
+      returned. *)
 
   val to_string_detailed : t -> string
-  (** Returns a string of a more in-depth summary of a given stock. *)
+  (** [to_string_detailed s] returns a string of a more in-depth summary of a
+      given stock. Special case is if [s = empty], where empty string [""] is
+      returned. *)
 end
 
 module Stock = struct
@@ -149,6 +157,21 @@ module Stock = struct
 
   exception UnretrievableStock of string
 
+  (** [empty] returns a special empty stock type. Should not be created by the
+      user ever. [to_string empty] should be the empty string [""]. Using
+      [empty] as argument to a function will almost always lead to errors. *)
+  let empty () : t =
+    {
+      ticker = "_EMPTY";
+      name = "EMPTY STOCK";
+      price = 0.;
+      time = ((1, 1, 2000), (0, 0, 0));
+      cur_data = None;
+      market_cap = 0.;
+      volume = 0;
+      historical = [];
+    }
+
   (** Make Stock.t from inputs. *)
   let of_input (ticker : string) (name : string) (price : float)
       (time : date * time) (market_cap : float) (volume : int) : t =
@@ -168,7 +191,8 @@ module Stock = struct
       grabbing stock info, will return an unmodified [stk]. *)
   let update (stk : t) : t =
     let tkr_lower = String.lowercase_ascii stk.ticker in
-    if try API.current tkr_lower = 0 with e -> raise e then
+    if tkr_lower = "_empty" then empty ()
+    else if try API.current tkr_lower = 0 with e -> raise e then
       let cur_data =
         DaySum.load_from
           (Printf.sprintf "data/stock_info/%s/%s_cur.csv" tkr_lower tkr_lower)
@@ -231,7 +255,8 @@ module Stock = struct
   let make (ticker : string) : t =
     let tkr_lower = String.lowercase_ascii ticker in
     let tkr_upper = String.uppercase_ascii ticker in
-    if
+    if tkr_upper = "_EMPTY" then empty ()
+    else if
       (tkr_lower
       <> Str.(global_replace (regexp {|[\$\^\\\.\*\+\?\{\}-]+|}) "" tkr_lower))
       || tkr_lower = ""
@@ -452,25 +477,30 @@ module Stock = struct
   (** [to_string s] returns a single-line brief string representation of a given
       stock. *)
   let to_string (stk : t) : string =
-    Printf.sprintf "%s (%s, %s): $%.5f" stk.ticker
-      (fst stk.time |> Date.to_string)
-      (snd stk.time |> Date.t_to_string)
-      stk.price
+    if stk = empty () then ""
+    else
+      Printf.sprintf "%s (%s, %s): $%.5f" stk.ticker
+        (fst stk.time |> Date.to_string)
+        (snd stk.time |> Date.t_to_string)
+        stk.price
 
-  (** Returns a string of a more in-depth summary of a given stock. *)
+  (** Returns a string of a more in-depth summary of a given stock. Special case
+      is if [stk = empty], where empty string is returned. *)
   let to_string_detailed (stk : t) : string =
-    Printf.sprintf
-      "\n\
-       %s - %s (%s, %s): \n\
-       \tCurrent Price: $%#.7f \n\
-       \tVolume: %#i \n\
-       \tMarket Cap: $%#i" stk.ticker stk.name
-      (fst stk.time |> Date.to_string)
-      (snd stk.time |> Date.t_to_string)
-      stk.price stk.volume
-      (stk.market_cap |> int_of_float)
-    |> String.map (function
-         | '_' -> ','
-         | char -> char)
+    if stk = empty () then ""
+    else
+      Printf.sprintf
+        "\n\
+         %s - %s (%s, %s): \n\
+         \tCurrent Price: $%#.7f \n\
+         \tVolume: %#i \n\
+         \tMarket Cap: $%#i" stk.ticker stk.name
+        (fst stk.time |> Date.to_string)
+        (snd stk.time |> Date.t_to_string)
+        stk.price stk.volume
+        (stk.market_cap |> int_of_float)
+      |> String.map (function
+           | '_' -> ','
+           | char -> char)
 end
 (* of Stock*)

@@ -50,17 +50,19 @@ let save_FS (input : Portfolio.t) : string =
   else
     List.fold_left
       (fun acc x ->
-        Stock.ticker x ^ ";" ^ Stock.name x ^ ";"
-        ^ string_of_float (Stock.price x)
-        ^ ";"
-        ^ Date.to_string (Stock.time x |> fst)
-        ^ ";"
-        ^ Date.t_to_string (Stock.time x |> snd)
-        ^ ";"
-        ^ string_of_float (Stock.market_cap x)
-        ^ ";"
-        ^ string_of_int (Stock.volume x)
-        ^ "\n" ^ acc)
+        if x = Stock.empty () then acc
+        else
+          Stock.ticker x ^ ";" ^ Stock.name x ^ ";"
+          ^ string_of_float (Stock.price x)
+          ^ ";"
+          ^ Date.to_string (Stock.time x |> fst)
+          ^ ";"
+          ^ Date.t_to_string (Stock.time x |> snd)
+          ^ ";"
+          ^ string_of_float (Stock.market_cap x)
+          ^ ";"
+          ^ string_of_int (Stock.volume x)
+          ^ "\n" ^ acc)
       ""
       (Portfolio.get_followed_stocks input)
     ^ "end\n"

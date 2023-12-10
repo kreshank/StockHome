@@ -31,6 +31,10 @@ let stock_tests =
            print_string (Stock.to_string_detailed aapl) );
          ( "aapl update" >:: fun _ ->
            print_string (Stock.update aapl |> Stock.to_string_detailed) );
+         ( "empty print" >:: fun _ ->
+           assert_equal "" (Stock.empty () |> Stock.to_string) );
+         ( "empty print_detailed" >:: fun _ ->
+           assert_equal "" (Stock.empty () |> Stock.to_string_detailed) );
        ]
 
 let _ = run_test_tt_main stock_tests
