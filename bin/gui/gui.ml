@@ -281,13 +281,12 @@ let main () =
     let instruct =
       W.text_display ~h:200
         "Welcome to STOCKHOME! Here, you can follow any stock, which adds it \
-         to your watchlist, which can be viewed in the [Followed Stocks] tab. \
-         The clear button clears all information in your portfolio, and the \
-         update buttons updates all stocks in your watchlist with current \
-         data.\n\n\
-         In the [Followed Stocks] tab, you can click on any stock to view more \
+         to your watchlist, which can be viewed in the [WATCHLIST] tab. The \
+         clear button clears all information in your portfolio, and the update \
+         buttons updates all stocks in your watchlist with current data.\n\n\
+         In the [WATCHLIST] tab, you can click on any stock to view more \
          details about that stock.\n\n\
-         In the [Trade Stocks] tab, you can simulate a trading enviroment \
+         In the [TRADE STOCKS] tab, you can simulate a trading enviroment \
          where you can buy/sell stocks in relation to their current time data. \
          Finally, feel free to come back anytime, as the application saves all \
          information stored in your portfolio."
