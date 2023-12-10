@@ -374,10 +374,13 @@ module Portfolio : PortfolioType = struct
       Requires: no input should be empty. *)
   let ticker_transact opt_str ticker quantity p =
     if opt_str = "" || ticker = "" || quantity = "" then
-      raise (Invalid_argument "Input should not be empty.");
+      invalid_arg "Input should not be empty.";
     let new_p, stock = follow ticker p in
     let opt = opt_of_string (String.lowercase_ascii opt_str) in
     (* ^ changed*)
-    let amt = float_of_string quantity in
+    let amt =
+      try float_of_string quantity
+      with e -> invalid_arg "Quantity should be numbers."
+    in
     stock_transact opt stock amt new_p
 end

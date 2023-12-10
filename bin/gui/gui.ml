@@ -127,10 +127,10 @@ let main () =
     W.set_text date_label (Printf.sprintf "%s" (Date.to_string date))
   in
 
-  let prompt_message = W.label "Input Ticker Below" in
+  let prompt_message = W.label ~size:20 "Input Ticker Below" in
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
-  (* Prompt for the trade tab. *)
+  (* Info and prompt for the trade tab. *)
   let balance_label =
     W.label ~align:Min ~size:30
       (Printf.sprintf "Balance: $%.2f" (Portfolio.get_balance !port))
@@ -166,17 +166,18 @@ let main () =
     button
   in
 
-  let trade_opt_message = W.label "Input Option Below: buy/sell" in
-  let trade_ticker_message = W.label "Input Ticker Below" in
-  let trade_amt_message = W.label "Input Quantity Below" in
+  (* Prompt and input boxes for the trade tab. *)
+  let trade_opt_message = W.label ~size:20 "Input Option Below: buy/sell" in
+  let trade_ticker_message = W.label ~size:20 "Input Ticker Below" in
+  let trade_amt_message = W.label ~size:20 "Input Quantity Below" in
 
   let stock_details =
     W.text_display ~w:400 ~h:75 (Portfolio.stock_detail !port)
   in
-  let portfolio_stocks = W.label ~align:Min "" in
+  let portfolio_stocks = W.label ~size:20 ~align:Min "" in
 
   (* trade tab message*)
-  let trade_output_message = W.label "" in
+  let trade_output_message = W.label ~size:20 "" in
 
   (* create main containers *)
   let heading_container =
@@ -188,7 +189,9 @@ let main () =
       ]
   in
 
-  let text_input = W.text_input ~text:"" ~prompt:"Enter Stock Ticker" () in
+  let add_stock_input =
+    W.text_input ~size:20 ~text:"" ~prompt:"Enter Stock Ticker" ()
+  in
 
   let followed_stocks =
     L.empty ~w:150 ~h:400 ~name:"followed_stocks" () |> L.make_clip ~h:200
@@ -196,15 +199,19 @@ let main () =
   update_followed_stocks followed_stocks;
 
   (* Text input for trade tab. *)
-  let trade_opt_input = W.text_input ~text:"" ~prompt:"Enter Option Type" () in
-  let trade_ticker_input = W.text_input ~text:"" ~prompt:"Enter Ticker" () in
-  let trade_amt_input = W.text_input ~text:"" ~prompt:"Enter Quantity" () in
+  let trade_opt_input = W.text_input ~size:20 ~text:"" ~prompt:"buy/sell" () in
+  let trade_ticker_input =
+    W.text_input ~size:20 ~text:"" ~prompt:"Enter Ticker" ()
+  in
+  let trade_amt_input =
+    W.text_input ~size:20 ~text:"" ~prompt:"Enter Quantity" ()
+  in
 
   (*Add button for new stocks, adds to portfolio*)
   let button_add =
     let add_stock _ =
       let text =
-        String.uppercase_ascii (W.get_text text_input |> String.trim)
+        String.uppercase_ascii (W.get_text add_stock_input |> String.trim)
       in
       let output =
         try
@@ -285,8 +292,9 @@ let main () =
         | "sell" -> "Sold " ^ text_amt ^ " stock(s) of " ^ text_ticker
         | _ -> raise (Invalid_argument "Impossible")
       with
-      | Portfolio.Out_of_balance m -> m
       | Invalid_argument m -> m
+      | Portfolio.Out_of_balance m -> m
+      | Stock.UnretrievableStock m -> m
       | _ -> "Unknown error"
     in
 
@@ -313,9 +321,9 @@ let main () =
   let buttons =
     L.flat ~align:Center ~name:"button row"
       [
-        L.resident ~w:100 button_add;
-        L.resident ~w:100 button_update;
-        L.resident ~w:100 button_clear;
+        L.resident ~h:40 ~w:125 button_add;
+        L.resident ~h:40 ~w:125 button_update;
+        L.resident ~h:40 ~w:125 button_clear;
       ]
   in
 
@@ -323,9 +331,9 @@ let main () =
     L.tower ~name:"portfolio container" ~hmargin:30 ~align:Center
       [
         prompt;
-        L.resident ~w:400 text_input;
+        L.resident add_stock_input;
         buttons;
-        L.resident ~w:400 portfolio_stocks;
+        L.resident ~w:550 portfolio_stocks;
       ]
   in
 
@@ -335,15 +343,15 @@ let main () =
   in
 
   let trade_labels =
-    L.tower ~name:"trade labels"
+    L.tower ~name:"trade labels" ~align:Min
       [
         L.resident ~w:500 balance_label;
         L.resident ~w:500 total_holding_label;
-        L.resident ~w:500 ~h:80 each_holding_label;
+        L.resident ~w:500 ~h:100 each_holding_label;
       ]
   in
   let trade_menu =
-    L.tower ~name:"trade menu"
+    L.tower ~name:"trade menu" ~align:Min
       [
         L.resident trade_opt_message;
         L.resident trade_opt_input;
@@ -352,13 +360,16 @@ let main () =
         L.resident trade_amt_message;
         L.resident trade_amt_input;
         L.flat ~name:"trade button row"
-          [ L.resident ~w:100 button_trade; L.resident ~w:100 button_deposit ];
+          [
+            L.resident ~h:40 ~w:150 button_trade;
+            L.resident ~h:40 ~w:150 button_deposit;
+          ];
       ]
   in
   (* The trade tab. *)
   let trade_stocks =
-    L.tower ~name:"followed_stocks"
-      [ trade_labels; trade_menu; L.resident ~w:500 trade_output_message ]
+    L.tower ~name:"followed_stocks" ~align:Min
+      [ trade_labels; trade_menu; L.resident ~w:550 trade_output_message ]
   in
 
   let tabs =
