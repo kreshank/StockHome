@@ -104,7 +104,7 @@ let save_write_tests =
            SaveWrite.save port11;
            assert_equal ("B", 2.2)
              (List.nth (Portfolio.get_bought_stocks (SaveWrite.load ())) 1) );
-         (* ("Clear" >:: fun _ -> SaveWrite.clear ());*)
+         ("Clear" >:: fun _ -> SaveWrite.clear ());
        ]
 
 let _ = run_test_tt_main save_write_tests
