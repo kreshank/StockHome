@@ -311,7 +311,7 @@ let main () =
 
   (* Row of buttons*)
   let buttons =
-    L.flat ~name:"button row"
+    L.flat ~align:Center ~name:"button row"
       [
         L.resident ~w:100 button_add;
         L.resident ~w:100 button_update;
@@ -320,7 +320,7 @@ let main () =
   in
 
   let portfolio_container =
-    L.tower ~name:"portfolio container" ~hmargin:30 ~align:Min
+    L.tower ~name:"portfolio container" ~hmargin:30 ~align:Center
       [
         prompt;
         L.resident ~w:400 text_input;
@@ -330,7 +330,7 @@ let main () =
   in
 
   let main_container =
-    L.tower ~sep:0 ~name:"main_container"
+    L.tower ~sep:0 ~align:Center ~name:"main_container"
       [ heading_container; portfolio_container ]
   in
 
