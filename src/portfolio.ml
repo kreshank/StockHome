@@ -9,7 +9,8 @@ open Unix
 let _DEFAULT_EMPTY_COUNT : int = 5
 
 module type PortfolioType = sig
-  (**Portfolio type signature.*)
+  (**Portfolio type signature that contains all the functions and values
+     necessary to represent a portfolio. *)
 
   type t
   (** Representation type. *)

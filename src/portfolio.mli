@@ -9,7 +9,8 @@ val _DEFAULT_EMPTY_COUNT : int
 (** Number of [Stock.empty ()] entries that populate [follow_stocks] by default. *)
 
 module type PortfolioType = sig
-  (**Portfolio type signature. *)
+  (**Portfolio type signature that contains all the functions and values
+     necessary to represent a portfolio. *)
 
   type t
   (** Representation type. *)
