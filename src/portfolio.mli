@@ -110,7 +110,8 @@ module type PortfolioType = sig
   val stock_transact : opt -> Stock.t -> float -> t -> t
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. Raises error if: the
-      portfolio is out of balance, or out of stock holdings*)
+      portfolio is out of balance, out of stock holdings, or [quantity] is
+      negative. *)
 
   val ticker_transact : string -> string -> string -> t -> t
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]

@@ -344,23 +344,29 @@ module Portfolio : PortfolioType = struct
     let year = tm.tm_year + 1900 (* Year is the number of years since 1900 *) in
     (month, day, year)
 
-  (** [stock_transact option stock quantity portfolio] trades [quantity] amount
-      of [stock] by the type of option [option].*)
+  (** [stock_transaction option stock quantity portfolio] trades [quantity]
+      amount of [stock] by the type of option [option]. Raises error if: the
+      portfolio is out of balance, out of stock holdings, or [quantity] is
+      negative. *)
   let stock_transact option stock quantity p =
-    let record = new_transaction stock option quantity (get_current_date ()) in
-    let amount = Stock.price stock *. quantity in
-    match option with
-    | Buy ->
-        p
-        |> update_balance (-1. *. amount)
-        |> update_bought_stocks (Stock.ticker stock) quantity
-        |> update_stock_holding amount
-        |> update_history record
-    | Sell ->
-        p |> update_balance amount
-        |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
-        |> update_stock_holding (-1. *. amount)
-        |> update_history record
+    if quantity < 0. then invalid_arg "Quantity cannot be negative."
+    else
+      let record =
+        new_transaction stock option quantity (get_current_date ())
+      in
+      let amount = Stock.price stock *. quantity in
+      match option with
+      | Buy ->
+          p
+          |> update_balance (-1. *. amount)
+          |> update_bought_stocks (Stock.ticker stock) quantity
+          |> update_stock_holding amount
+          |> update_history record
+      | Sell ->
+          p |> update_balance amount
+          |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
+          |> update_stock_holding (-1. *. amount)
+          |> update_history record
 
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
       amount of [stock] of ticker [ticker] by the type of option [opt_str].
