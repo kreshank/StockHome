@@ -362,12 +362,12 @@ module Portfolio : PortfolioType = struct
           |> update_balance (-1. *. amount)
           |> update_bought_stocks ticker quantity
           |> update_stock_holding amount
-          |> update_history record |> follow ticker |> fst
+          |> update_history record
       | Sell ->
           p |> update_balance amount
           |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
           |> update_stock_holding (-1. *. amount)
-          |> update_history record |> follow ticker |> fst
+          |> update_history record
 
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
       amount of [stock] of ticker [ticker] by the type of option [opt_str].
@@ -375,9 +375,9 @@ module Portfolio : PortfolioType = struct
   let ticker_transact opt_str ticker quantity p =
     if opt_str = "" || ticker = "" || quantity = "" then
       raise (Invalid_argument "Input should not be empty.");
-    let stock = Stock.make ticker in
+    let new_p, stock = follow ticker p in
     let opt = opt_of_string (String.lowercase_ascii opt_str) in
     (* ^ changed*)
     let amt = float_of_string quantity in
-    stock_transact opt stock amt p
+    stock_transact opt stock amt new_p
 end

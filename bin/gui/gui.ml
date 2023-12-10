@@ -34,9 +34,9 @@ let instruct =
      your watchlist, which can be viewed in the [Followed Stocks] tab. The \
      clear button clears all information in your portfolio, and the update \
      buttons updates all stocks in your watchlist with current data.\n\n\
-    \ In the [Followed Stocks] tab, you can click on any stock to view more \
+     In the [Followed Stocks] tab, you can click on any stock to view more \
      details about that stock.\n\n\
-    \ In the [Trade Stocks] tab, you can simulate a trading enviroment where \
+     In the [Trade Stocks] tab, you can simulate a trading enviroment where \
      you can buy/sell stocks in relation to their current time data. Finally, \
      feel free to come back anytime, as the application saves all information \
      stored in your portfolio."
@@ -279,6 +279,7 @@ let main () =
           Portfolio.ticker_transact text_opt text_ticker text_amt !port
         in
         port := port_updated;
+        update_followed_stocks followed_stocks;
         match text_opt with
         | "buy" -> "Bought " ^ text_amt ^ " stock(s) of " ^ text_ticker
         | "sell" -> "Sold " ^ text_amt ^ " stock(s) of " ^ text_ticker
@@ -338,7 +339,7 @@ let main () =
       [
         L.resident ~w:500 balance_label;
         L.resident ~w:500 total_holding_label;
-        L.resident each_holding_label;
+        L.resident ~w:500 ~h:100 each_holding_label;
       ]
   in
   let trade_menu =
