@@ -1,12 +1,17 @@
-(** Stock.ml - Stores stock information, tickers, current information *)
+(** [Stock] module holds all the relevant stock functionality and representation
+    type. This module can generate a special [empty] value, [update] a stock,
+    [make] a fresh stock, and make queries on historical volume and price
+    information. *)
 
 open Date
 open Slice
 open Daysum
 open Api
 
+(** Type signature of [Stock] module. *)
 module type StockType = sig
   type query = Slice.t list
+  (** Representation of historical data. *)
 
   type cfg =
     | DEFAULT
@@ -14,11 +19,20 @@ module type StockType = sig
     | LINEAR
     | AVERAGE
     | ERROR
+        (** Holds the different type of querying options of [volume] and
+            [price].
+            - [DEFAULT] is default method.
+            - [PREVIOUS] is to grab the previous close date.
+            - [LINEAR] performs a Euler step approximation.
+            - [AVERAGE] takes the average of two dates.
+            - [ERROR] would simply raise an exception. *)
 
   type t
   (** Representation type. *)
 
   exception UnretrievableStock of string
+  (** Thrown when unable to retrieve a stock, most likely due to failure to
+      parse historical and/or current day data. *)
 
   val empty : unit -> t
   (** [empty] returns a special empty stock type. Should not be created by the
@@ -128,7 +142,9 @@ module type StockType = sig
       given stock. Special case is if [s = empty], where empty string [""] is
       returned. *)
 end
+(* of [StockType]. *)
 
+(** Implementation of [Stock] module. *)
 module Stock = struct
   type query = Slice.t list
 
