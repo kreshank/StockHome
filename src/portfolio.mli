@@ -81,7 +81,7 @@ module type PortfolioType = sig
   val isempty : t -> bool
   (**Checks if a portfolio is empty.*)
 
-  val unfollow : Stock.t -> t -> t
+  val unfollow : string -> t -> t * string
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
 

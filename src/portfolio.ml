@@ -81,7 +81,7 @@ module type PortfolioType = sig
   val isempty : t -> bool
   (**Checks if a portfolio is empty.*)
 
-  val unfollow : Stock.t -> t -> t
+  val unfollow : string -> t -> t * string
   (** Remove a stock from the watchlist. Required: the stock is in the
       watchlist. *)
 
@@ -286,9 +286,23 @@ module Portfolio : PortfolioType = struct
     List.filter (fun a -> a <> Stock.empty ()) p.followed_stocks = []
 
   (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
-  let unfollow stock p =
-    let updated = List.filter (fun x -> x <> stock) p.followed_stocks in
-    { p with followed_stocks = updated }
+  let unfollow tkr p =
+    let rec new_watch followed_stocks =
+      match followed_stocks with
+      | [] -> ([], "None")
+      | h :: t ->
+          let cmp =
+            String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
+          in
+
+          if cmp = 0 then (t, Stock.ticker h)
+          else if cmp > 0 then
+            let lst, value = new_watch t in
+            (h :: lst, value)
+          else (h :: t, "Not Here")
+    in
+    let followed_stocks, removed = new_watch p.followed_stocks in
+    ({ p with followed_stocks }, removed)
 
   (** [update_balance portfolio amount] updates [balance] of [portfolio] by
       [amount]. If the updated balance is negative, it raises [Out_of_balance]
