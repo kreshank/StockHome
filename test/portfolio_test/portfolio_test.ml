@@ -34,7 +34,7 @@ let p1 =
   Portfolio.(
     new_portfolio () |> update_balance 1000000. |> update_balance (-500000.)
     |> add_bank_account 430410204567
-    |> follow "TSLA" |> fst |> follow "AAPL" |> fst |> follow "A" |> fst
+    |> follow "TSLA" |> fst
     |> ticker_transact "buy" "AAPL" "45.5"
     |> ticker_transact "sell" "AAPL" "20.2"
     |> ticker_transact "buy" "TSLA" "62.7"

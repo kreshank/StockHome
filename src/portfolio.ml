@@ -355,18 +355,19 @@ module Portfolio : PortfolioType = struct
         new_transaction stock option quantity (get_current_date ())
       in
       let amount = Stock.price stock *. quantity in
+      let ticker = Stock.ticker stock in
       match option with
       | Buy ->
           p
           |> update_balance (-1. *. amount)
-          |> update_bought_stocks (Stock.ticker stock) quantity
+          |> update_bought_stocks ticker quantity
           |> update_stock_holding amount
-          |> update_history record
+          |> update_history record |> follow ticker |> fst
       | Sell ->
           p |> update_balance amount
           |> update_bought_stocks (Stock.ticker stock) (-1. *. quantity)
           |> update_stock_holding (-1. *. amount)
-          |> update_history record
+          |> update_history record |> follow ticker |> fst
 
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
       amount of [stock] of ticker [ticker] by the type of option [opt_str].

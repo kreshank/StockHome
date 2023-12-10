@@ -27,7 +27,7 @@ test-date:
 	OCAMLRUNPARAM=b dune exec test/date_test/date_test.exe
 
 test-portfolio:
-	OCAMLRUNPARAM=b dune exec test/portfolio_test/portfolio_test.exe
+	OCAMLRUNPARAM=b dune exec test/portfolio_test/portfolio_test.exe -- -runner sequential
 
 test-stock:
 	OCAMLRUNPARAM=b dune exec test/stock_test/stock_test.exe -- -runner sequential
