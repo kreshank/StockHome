@@ -6,7 +6,7 @@ which means there is no "main file" to put the test plan comment in.
 Therefore, we have included a text file in the test folder which explains
 the reasoning behind the tests instead. 
 
-There are a total of 52 test cases as of now, which can be seen by 
+There are a total of 67 test cases as of now, which can be seen by 
 running [make test] then adding the test cases together. Since a lot of
 the code deals with real time information, there are instances where we
 opt to display the information instead of asserting it to some value.
@@ -48,8 +48,11 @@ proves that it also works within the program.
 PORTFOLIO TESTS
 
 The [portfolio] module implements a datatype that is designed to store
-stocks and other information relevant to the user. This modules is
-tested using ????
+stocks and other information relevant to the user. This module is
+tested using OUnit and glass box testing, which checks if the portfolio
+accurately stores information that it is given. This demonstrates the 
+correctness of the system since each function present within portfolio is
+checked at least once by some OUnit test. 
 
 SAVEWRITE TESTS
 

@@ -185,29 +185,46 @@ module Stock = struct
       }
     else stk
 
-  (** Read a line into a slice. *)
-  let parse_line str : Slice.t =
+  (** Read a line into a slice. If improper format, we skip the line. *)
+  let parse_line str : Slice.t option =
     let splitted = Str.(split (regexp ",") str) in
     match splitted with
-    | [ dt; op; hi; lo; cl; adcl; vol; ticker ] ->
+    | [ dt; op; hi; lo; cl; adcl; vol; ticker ] -> (
         let temp = Str.(split (regexp "-") dt) in
         let date =
           match temp with
           | [ y; m; d ] -> (int_of_string m, int_of_string m, int_of_string y)
           | _ -> raise (UnretrievableStock "Historical is misformatted")
         in
-        let open_price = float_of_string op in
-        let high = float_of_string hi in
-        let low = float_of_string lo in
-        let close_price = float_of_string cl in
-        let adjclose = float_of_string adcl in
-        let volume = int_of_string vol in
-        Slice.make ticker ~open_price ~high ~low ~close_price ~adjclose ~volume
-          date
+        try
+          let open_price = float_of_string op in
+          let high = float_of_string hi in
+          let low = float_of_string lo in
+          let close_price = float_of_string cl in
+          let adjclose = float_of_string adcl in
+          let volume = int_of_string vol in
+          Some
+            (Slice.make ticker ~open_price ~high ~low ~close_price ~adjclose
+               ~volume date)
+        with e -> None)
     | _ -> raise (UnretrievableStock "Historical is misformatted.")
 
-  (* Current issues: can throw in a valid ticker (for a currency or market),
-     will result in an error. *)
+  (** Loads history from a given file *)
+  let load_hist file_addr =
+    let ic = open_in file_addr in
+    (* ignore csv labels *)
+    let _ = input_line ic in
+    let rec create_hist acc =
+      try
+        let res = parse_line (input_line ic) in
+        match res with
+        | None -> create_hist acc
+        | Some res -> create_hist (res :: acc)
+      with End_of_file ->
+        close_in ic;
+        acc
+    in
+    create_hist []
 
   (** [make ticker] returns a new stock type, loading both historical and
       current data fresh for the first time. *)
@@ -215,29 +232,19 @@ module Stock = struct
     let tkr_lower = String.lowercase_ascii ticker in
     let tkr_upper = String.uppercase_ascii ticker in
     if
-      tkr_lower
-      <> Str.(global_replace (regexp {|[\$\^\\\.\*\+\?\{\}-]+|}) "" tkr_lower)
+      (tkr_lower
+      <> Str.(global_replace (regexp {|[\$\^\\\.\*\+\?\{\}-]+|}) "" tkr_lower))
+      || tkr_lower = ""
     then
       raise
         (UnretrievableStock
-           (Printf.sprintf "%s is not a valid ticker." tkr_upper))
+           (Printf.sprintf "\"%s\" is not a valid ticker." tkr_upper))
     else if try API.historical [ tkr_lower ] = 0 with e -> raise e then
       try
-        let ic =
-          open_in
+        let historical =
+          load_hist
             (Printf.sprintf "data/stock_info/%s/%s_hist.csv" tkr_lower tkr_lower)
         in
-        (* ignore csv labels *)
-        let _ = input_line ic in
-        let rec create_hist acc =
-          try
-            let res = parse_line (input_line ic) in
-            create_hist (res :: acc)
-          with End_of_file ->
-            close_in ic;
-            acc
-        in
-        let historical = create_hist [] in
         let temp =
           {
             ticker = tkr_upper;
