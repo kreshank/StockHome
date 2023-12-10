@@ -1,12 +1,14 @@
-(** Savewrite.ml - A module that contains functionality regarding the saving and
-    writing of portfolios. Used to ensure data can be saved when the program is
-    closed. *)
+(** [Savewrite] module contains all the functionality regarding the saving,
+    writing, and loading portfolios. Used to ensure data can be saved when the
+    program is closed. *)
 
 open Portfolio
 open Stock
 open Date
 
 module type SaveWriteType = sig
+  (** Type signature of [SaveWrite] module containing all functions and values
+      required to save and write portfolios. *)
   val save : Portfolio.t -> unit
   (** Given a [Portfolio.t], writes to data/savedata.txt the information stored
       within the portfolio. Overwrites any existing data.*)
@@ -141,6 +143,8 @@ let rec load_TH (input : in_channel) (port : Portfolio.t) : Portfolio.t =
 (*____________________________________________________________________________*)
 
 module SaveWrite : SaveWriteType = struct
+  (** Implementation of SaveWriteType. *)
+
   (** Can be called to clear the saved data within [data/savedata.txt],
       Essentially removes the save.*)
   let clear () =

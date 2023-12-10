@@ -1,9 +1,13 @@
-(**Slice.ml - Holds a datatype relevant to processing stock data after its been
-   parsed.*)
+(** [Slice] module holds a "slice" of time in the historical information for a
+    stock. Is primarily used as a tool for processing historical data of a
+    stock. *)
 
 open Date
 
 module type SliceType = sig
+  (** Type signature of [Slice] module that contains all functions and values
+      necessary to represent a datatype that can hold stock data. *)
+
   type t
   (** Representation type. *)
 
@@ -61,6 +65,8 @@ module type SliceType = sig
 end
 
 module Slice = struct
+  (** Implementation of SliceType. *)
+
   type t = {
     ticker : string;
     open_price : float;

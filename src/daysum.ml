@@ -1,14 +1,17 @@
 open Date
 
-(** DaySum.ml - A module that contains the values from parsing a file
-    [data/stock/ticker/ticker_cur.csv]. Contains a loader, to_string, and
-    getters for all relevant values. *)
+(** [DaySum] module is responsible for anything related to parsing and
+    representing the current data of a stock; that is, the "summary" tab on the
+    front page of Yahoo Finance. Contains a loader, getter for all fields, and a
+    to_string function. *)
 
+(** Type signature of [DaySum] module. *)
 module type DaySumType = sig
   type t
   (** Representation type *)
 
   exception MalformedFile
+  (** Thrown if File is incorrectly formmatted. *)
 
   val load_from : string -> t
   (** [load_from file_addr] processes a file_addr into a day summary value.
@@ -34,8 +37,8 @@ module type DaySumType = sig
       stockholder is willing to sell this stock at a particular [quantity]. *)
 
   val avg_day_vol : t -> int option
-  (** [avg_day_vol] returns the average day volume of the stock associated with
-      [ds]. *)
+  (** [avg_day_vol ds] returns the average day volume of the stock associated
+      with [ds]. *)
 
   val beta_5y_mly : t -> float option
   (** [beta_5y_mly ds] returns the beta (5y monthly) of the stock associated
@@ -86,8 +89,9 @@ module type DaySumType = sig
   val to_string : t -> string
   (** [to_string ds] returns a string format of the data. *)
 end
-(* end of DaySumType *)
+(* of [DaySumType]. *)
 
+(** Implementation of [DaySum] module. *)
 module DaySum : DaySumType = struct
   type t = {
     tkr : string;
