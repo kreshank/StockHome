@@ -4,8 +4,8 @@
 open Date
 
 module type SliceType = sig
-  (** Slice type signature that contains all functions necessary to represent a
-      datatype that can hold stock data. *)
+  (** Slice type signature that contains all functions and values necessary to
+      represent a datatype that can hold stock data. *)
 
   type t
   (** Representation type. *)
