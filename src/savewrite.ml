@@ -33,6 +33,18 @@ let save_BA (input : Portfolio.t) : string =
 
     String.sub bank_accounts 0 (String.length bank_accounts - 1) ^ "\n"
 
+let save_BS (input : Portfolio.t) : string =
+  if Portfolio.get_bought_stocks input = [] then "empty\n"
+  else
+    let bought_stocks =
+      List.fold_left
+        (fun acc (t, v) -> (t ^ ";" ^ string_of_float v) ^ " " ^ acc)
+        ""
+        (Portfolio.get_bought_stocks input)
+    in
+
+    String.sub bought_stocks 0 (String.length bought_stocks - 1) ^ "\n"
+
 let save_FS (input : Portfolio.t) : string =
   if Portfolio.get_followed_stocks input = [] then "end\n"
   else
@@ -77,6 +89,20 @@ let load_BA (input : string) (port : Portfolio.t) : Portfolio.t =
     in
     List.fold_left (fun acc x -> Portfolio.add_bank_account x acc) port line
 
+let load_BS (input : string) (port : Portfolio.t) : Portfolio.t =
+  if input = "empty" then port
+  else
+    let line =
+      List.rev
+        (String.split_on_char ' ' input
+        |> List.map (fun x ->
+               let t_v = String.split_on_char ';' x in
+               (List.hd t_v, float_of_string (List.nth t_v 1))))
+    in
+    List.fold_left
+      (fun acc (t, v) -> Portfolio.update_bought_stocks t v acc)
+      port line
+
 let rec load_FS (input : in_channel) (port : Portfolio.t) : Portfolio.t =
   let line = input_line input in
   if line = "end" then port
@@ -120,6 +146,7 @@ module SaveWrite : SaveWriteType = struct
     Printf.fprintf oc "%s\n" "0.0";
     Printf.fprintf oc "%s\n" "0.0";
     output_string oc "empty\n";
+    output_string oc "empty\n";
     output_string oc "end\n";
     output_string oc "end\n";
 
@@ -135,12 +162,14 @@ module SaveWrite : SaveWriteType = struct
     let balance = Printf.sprintf "%f\n" (Portfolio.get_balance input) in
     let holdings = Printf.sprintf "%f\n" (Portfolio.get_stock_holdings input) in
     let bank_accounts = save_BA input in
+    let bought_stocks = save_BS input in
     let stocks = save_FS input in
     let trans = save_TH input in
 
     output_string oc balance;
     output_string oc holdings;
     output_string oc bank_accounts;
+    output_string oc bought_stocks;
     output_string oc stocks;
     output_string oc trans;
 
@@ -161,12 +190,13 @@ module SaveWrite : SaveWriteType = struct
         let line_one = float_of_string (input_line ic) in
         let line_two = float_of_string (input_line ic) in
         let line_three = input_line ic in
+        let line_four = input_line ic in
 
         let port =
           port
           |> Portfolio.update_balance line_one
           |> Portfolio.update_stock_holding line_two
-          |> load_BA line_three |> load_FS ic |> load_TH ic
+          |> load_BA line_three |> load_BS line_four |> load_FS ic |> load_TH ic
         in
         close_in ic;
         port
