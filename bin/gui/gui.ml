@@ -325,10 +325,12 @@ let main () =
   in
   (* Update all stocks in follow list. *)
   let button_update =
-    let button = W.button ~fg:(255, 255, 255, 0) ~border_radius:10 "Update" in
-    let click _ = port := Portfolio.update_stocks !port |> fst in
-    W.on_click ~click button;
-    button
+    let update_stocks _ =
+      port := Portfolio.update_stocks !port |> fst;
+      update_followed_stocks followed_stocks
+    in
+    W.button ~fg:(255, 255, 255, 0) ~border_radius:10 ~action:update_stocks
+      "Update All"
   in
   (* Empties out portfolio. *)
   let button_clear =
