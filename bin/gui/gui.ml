@@ -28,6 +28,19 @@ let port = ref (SaveWrite.load ()) (* Global Portfolio State. *)
 let obs_stk_tkr = Var.create "AAPL"
 let stock_info = W.text_display "Hey, something went wrong!"
 
+let instruct =
+  W.text_display
+    "Welcome to STOCKHOME! Here, you can follow any stock, which adds it to \
+     your watchlist, which can be viewed in the [Followed Stocks] tab. The \
+     clear button clears all information in your portfolio, and the update \
+     buttons updates all stocks in your watchlist with current data.\n\n\
+    \ In the [Followed Stocks] tab, you can click on any stock to view more \
+     details about that stock.\n\n\
+    \ In the [Trade Stocks] tab, you can simulate a trading enviroment where \
+     you can buy/sell stocks in relation to their current time data. Finally, \
+     feel free to come back anytime, as the application saves all information \
+     stored in your portfolio."
+
 (* ------------------- Start of Follow List Display ------------------- *)
 
 let update_button =
@@ -101,9 +114,9 @@ let _ = L.hide_window stock_detail_l
 
 let main () =
   (* create label widgets for heading *)
-  let title_label = W.label ~align:Min ~size:30 "STOCKHOME" in
+  let title_label = W.label ~align:Center ~size:40 "STOCKHOME" in
 
-  let date_label = W.label ~align:Min ~size:25 "Date Time" in
+  let date_label = W.label ~align:Center ~size:25 "Date Time" in
 
   let _ =
     let now = Unix.time () |> Unix.localtime in
@@ -160,7 +173,7 @@ let main () =
   let stock_details =
     W.text_display ~w:400 ~h:75 (Portfolio.stock_detail !port)
   in
-  let portfolio_stocks = W.label "" in
+  let portfolio_stocks = W.label ~align:Min "" in
 
   (* trade tab message*)
   let trade_output_message = W.label "" in
@@ -169,7 +182,9 @@ let main () =
   let heading_container =
     L.tower ~name:"heading container" ~hmargin:30 ~align:Draw.Center
       [
-        L.resident ~h:50 ~w:300 title_label; L.resident ~h:50 ~w:150 date_label;
+        L.resident ~h:50 ~w:300 title_label;
+        L.resident ~h:50 ~w:150 date_label;
+        L.resident ~h:200 ~w:500 instruct;
       ]
   in
 
@@ -305,7 +320,7 @@ let main () =
   in
 
   let portfolio_container =
-    L.tower ~name:"portfolio container" ~align:Min
+    L.tower ~name:"portfolio container" ~hmargin:30 ~align:Min
       [
         prompt;
         L.resident ~w:400 text_input;
