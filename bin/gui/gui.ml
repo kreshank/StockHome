@@ -41,6 +41,8 @@ let instruct =
      feel free to come back anytime, as the application saves all information \
      stored in your portfolio."
 
+let no_followed_stocks_message = W.label "YOU AREN'T FOLLOWING ANY STOCKS!"
+
 (* ------------------- Start of Follow List Display ------------------- *)
 
 let update_button =
@@ -99,7 +101,11 @@ and update_followed_stocks layout =
   (* Make new tower and apply. *)
   let stock_list = Portfolio.get_followed_stocks !port |> List.rev in
   let widgets = create_widgets stock_list in
-  let tower = L.tower_of_w widgets in
+  let tower =
+    if List.length (Portfolio.get_followed_stocks !port) <> 0 then
+      L.tower_of_w widgets
+    else L.flat [ L.resident no_followed_stocks_message ]
+  in
   L.set_rooms layout [ L.make_clip ~h:200 tower ];
   Sync.push (fun () -> L.fit_content ~sep:0 layout);
   List.iter2 (create_stk_listener layout) widgets stock_list
