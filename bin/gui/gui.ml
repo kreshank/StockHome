@@ -339,7 +339,7 @@ let main () =
       [
         L.resident ~w:500 balance_label;
         L.resident ~w:500 total_holding_label;
-        L.resident ~w:500 ~h:100 each_holding_label;
+        L.resident ~w:500 ~h:80 each_holding_label;
       ]
   in
   let trade_menu =
