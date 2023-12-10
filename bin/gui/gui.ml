@@ -196,9 +196,7 @@ let main () =
   in
 
   let add_stock_input =
-   
     W.text_input ~size:20 ~text:"" ~prompt:"Enter Stock Ticker (ex. AAPL)" ()
- 
   in
 
   let followed_stocks =
@@ -362,11 +360,11 @@ let main () =
     L.tower ~name:"trade menu" ~align:Min
       [
         L.resident trade_opt_message;
-        L.resident trade_opt_input;
+        L.resident ~h:50 trade_opt_input;
         L.resident trade_ticker_message;
-        L.resident trade_ticker_input;
+        L.resident ~h:50 trade_ticker_input;
         L.resident trade_amt_message;
-        L.resident trade_amt_input;
+        L.resident ~h:50 trade_amt_input;
         L.flat ~name:"trade button row"
           [
             L.resident ~h:40 ~w:150 button_trade;
