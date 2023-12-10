@@ -173,7 +173,7 @@ let main () =
   let stock_details =
     W.text_display ~w:400 ~h:75 (Portfolio.stock_detail !port)
   in
-  let portfolio_stocks = W.label ~align:Min "" in
+  let portfolio_stocks = W.label ~align:Center "" in
 
   (* trade tab message*)
   let trade_output_message = W.label "" in
