@@ -1,7 +1,8 @@
-(** API.ml - Contains all code relevant to the API. *)
+(** [API] module is what makes the connection between the python Yahoo Finance
+    API and OCaml work. Currently supports grabbing historical information,
+    current stock summary, statistics, and stat valuations of a given stock. *)
 
-(** Most code is referencing data from yahoo_fin python API. *)
-
+(** Type signature of the [API] module. *)
 module type APIType = sig
   val historical : string list -> int
   (** [historical tickers] runs [scripts/scrape_historical.py] with arguments
@@ -57,7 +58,9 @@ module type APIType = sig
       [ticker]. This gathers "valuation measure" data off the statistics page
       for the ticker and writes to a file. *)
 end
+(* of [APIType]. *)
 
+(** Implementation of [API] module.*)
 module API = struct
   let historical (tickers : string list) =
     let unique = List.sort_uniq String.compare tickers in
