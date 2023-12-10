@@ -1,5 +1,6 @@
-(** Portfolio.ml - Module that stores stocks that the user has added to their
-    portfolio as well as any other forms of information relevant to the user *)
+(** [Portfolio] module keeps track and is in charge of manipulating of all the
+    user information: their followed stocks, transactions, bought stocks,
+    balance, etc. *)
 
 open Stock
 open Date
@@ -9,14 +10,17 @@ val _DEFAULT_EMPTY_COUNT : int
 (** Number of [Stock.empty ()] entries that populate [follow_stocks] by default. *)
 
 module type PortfolioType = sig
-  (**Portfolio type signature. *)
+  (** Type signature of [PortfolioType] module. *)
 
   type t
   (** Representation type. *)
 
   type opt =
     | Buy
-    | Sell  (** Stock options buy/sell. *)
+    | Sell
+        (** Represents the different type of options.
+            - [Buy] is a Call option
+            - [Sell] is a Put option *)
 
   type transaction = {
     ticker : string;
@@ -25,8 +29,8 @@ module type PortfolioType = sig
     quantity : float;
     time : date;
   }
-  (** The type of a transaction. Includes formation (ticker, option, price,
-      quantity, time). *)
+  (** Representation type of a transaction. Includes information:
+      [(ticker, option, price, quantity, time)]. *)
 
   exception Out_of_balance of string
   (** [Out_of_balance] is raised when [portfolio] attempts to spend amount of
@@ -126,6 +130,7 @@ module type PortfolioType = sig
       amount of [stock] of ticker [ticker] by the type of option [opt_str].
       Requires: no input should be empty. *)
 end
+(* of [PortfolioType]. *)
 
 module Portfolio : PortfolioType
-(** Implementation of PortfolioType. *)
+(** Implementation of [Portfolio]. *)

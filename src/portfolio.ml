@@ -1,5 +1,6 @@
-(** Portfolio.ml - Module that stores stocks that the user has added to their
-    portfolio as well as any other forms of information relevant to the user *)
+(** [Portfolio] module keeps track and is in charge of manipulating of all the
+    user information: their followed stocks, transactions, bought stocks,
+    balance, etc. *)
 
 open Stock
 open Date
@@ -9,14 +10,17 @@ open Unix
 let _DEFAULT_EMPTY_COUNT : int = 5
 
 module type PortfolioType = sig
-  (**Portfolio type signature.*)
+  (** Type signature of [PortfolioType] module. *)
 
   type t
   (** Representation type. *)
 
   type opt =
     | Buy
-    | Sell  (** Stock options buy/sell. *)
+    | Sell
+        (** Represents the different type of options.
+            - [Buy] is a Call option
+            - [Sell] is a Put option *)
 
   type transaction = {
     ticker : string;
@@ -25,8 +29,8 @@ module type PortfolioType = sig
     quantity : float;
     time : date;
   }
-  (** The type of a transaction. Includes formation (ticker, option, price,
-      quantity, time). *)
+  (** Representation type of a transaction. Includes information:
+      [(ticker, option, price, quantity, time)]. *)
 
   exception Out_of_balance of string
   (** [Out_of_balance] is raised when [portfolio] attempts to spend amount of
@@ -118,16 +122,18 @@ module type PortfolioType = sig
   val stock_transact : opt -> Stock.t -> float -> t -> t
   (** [stock_transaction option stock quantity portfolio] trades [quantity]
       amount of [stock] by the type of option [option]. Raises error if: the
-      portfolio is out of balance, or out of stock holdings*)
+      portfolio is out of balance, out of stock holdings, or [quantity] is
+      negative. *)
 
   val ticker_transact : string -> string -> string -> t -> t
   (** [ticker_transact opt_str ticker quantity portfolio] trades [quantity]
       amount of [stock] of ticker [ticker] by the type of option [opt_str].
       Requires: no input should be empty. *)
 end
+(* of [PortfolioType]. *)
 
 module Portfolio : PortfolioType = struct
-  (** Implementation of PortfolioType. *)
+  (** Implementation of [Portfolio] module. *)
 
   type opt =
     | Buy
