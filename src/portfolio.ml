@@ -294,7 +294,7 @@ module Portfolio : PortfolioType = struct
   let unfollow tkr p =
     let rec new_watch followed_stocks =
       match followed_stocks with
-      | [] -> ([], "None")
+      | [] -> ([], "Not Here")
       | h :: t ->
           let cmp =
             String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
