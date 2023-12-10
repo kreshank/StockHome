@@ -129,13 +129,18 @@ let main () =
   let prompt = L.flat ~name:"Prompt" [ L.resident prompt_message ] in
 
   (* Prompt for the trade tab. *)
-  let trade_label =
+  let balance_label =
+    W.text_display ("Balance: " ^ string_of_float (Portfolio.get_balance !port))
+  in
+
+  let total_holding_label =
     W.text_display
-      ("Balance: "
-      ^ string_of_float (Portfolio.get_balance !port)
-      ^ "\n" ^ "Total Stock Holdings: "
-      ^ string_of_float (Portfolio.get_stock_holdings !port)
-      ^ "\n" ^ "Holdings in each stock: "
+      ("Total Stock Holdings: "
+      ^ string_of_float (Portfolio.get_stock_holdings !port))
+  in
+  let each_holding_label =
+    W.text_display
+      ("Holdings in each stock: "
       ^ List.fold_left
           (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
           ""
@@ -155,6 +160,8 @@ let main () =
     W.text_display ~w:250 ~h:75 (Portfolio.stock_detail !port)
   in
   let portfolio_stocks = W.label "" in
+
+  (* trade tab message*)
   let trade_output_message = W.label "" in
 
   (* create main containers *)
@@ -247,9 +254,21 @@ let main () =
       with
       | Portfolio.Out_of_balance m -> m
       | Invalid_argument m -> m
-      | _ -> "Error: Empty input / Out of balance / Out of stock holding"
+      | _ -> "Unknown error"
     in
-    W.set_text trade_output_message output
+
+    W.set_text trade_output_message output;
+    W.set_text balance_label
+      ("Balance: " ^ string_of_float (Portfolio.get_balance !port));
+    W.set_text total_holding_label
+      ("Total Stock Holdings: "
+      ^ string_of_float (Portfolio.get_stock_holdings !port));
+    W.set_text each_holding_label
+      ("Holdings in each stock: "
+      ^ List.fold_left
+          (fun c (a, b) -> c ^ a ^ ": " ^ string_of_float b ^ "; ")
+          ""
+          (Portfolio.get_bought_stocks !port))
   in
   W.on_click ~click button_trade;
 
@@ -280,11 +299,17 @@ let main () =
       [ heading_container; second_tier_container; portfolio_container ]
   in
 
-  (* The trade tab. *)
-  let trade_stocks =
-    L.tower ~name:"followed_stocks"
+  let trade_labels =
+    L.tower ~name:"trade labels"
       [
-        L.resident trade_label;
+        L.resident ~h:20 balance_label;
+        L.resident ~h:20 total_holding_label;
+        L.resident ~w:500 ~h:20 each_holding_label;
+      ]
+  in
+  let trade_menu =
+    L.tower ~name:"trade menu"
+      [
         L.resident trade_opt_message;
         L.resident trade_opt_input;
         L.resident trade_ticker_message;
@@ -292,8 +317,12 @@ let main () =
         L.resident trade_amt_message;
         L.resident trade_amt_input;
         L.resident ~w:200 button_trade;
-        L.resident ~w:200 trade_output_message;
       ]
+  in
+  (* The trade tab. *)
+  let trade_stocks =
+    L.tower ~name:"followed_stocks"
+      [ trade_labels; trade_menu; L.resident ~w:500 trade_output_message ]
   in
 
   let tabs =
