@@ -81,9 +81,11 @@ module type PortfolioType = sig
   val isempty : t -> bool
   (**Checks if a portfolio is empty.*)
 
-  val unfollow : Stock.t -> t -> t
-  (** Remove a stock from the watchlist. Required: the stock is in the
-      watchlist. *)
+  val unfollow : string -> t -> t * string
+  (** [unfollow tkr p] returns [(follow_list, output)]. Searches follow list for
+      [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
+      will remove said stock and return the ticker in output. If [stock] isn't
+      in follow list, will return a relevant output. *)
 
   val update_balance : float -> t -> t
   (** [update_balance amount portfolio] updates [balance] of [portfolio] by
@@ -285,10 +287,27 @@ module Portfolio : PortfolioType = struct
   let isempty p =
     List.filter (fun a -> a <> Stock.empty ()) p.followed_stocks = []
 
-  (** Remove a stock from the watchlist. Requires [stock] in the watchlist. *)
-  let unfollow stock p =
-    let updated = List.filter (fun x -> x <> stock) p.followed_stocks in
-    { p with followed_stocks = updated }
+  (** [unfollow tkr p] returns [(follow_list, output)]. Searches follow list for
+      [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
+      will remove said stock and return the ticker in output. If [stock] isn't
+      in follow list, will return a relevant output. *)
+  let unfollow tkr p =
+    let rec new_watch followed_stocks =
+      match followed_stocks with
+      | [] -> ([], "None")
+      | h :: t ->
+          let cmp =
+            String.compare (Stock.ticker h) (tkr |> String.uppercase_ascii)
+          in
+
+          if cmp = 0 then (t, Stock.ticker h)
+          else if cmp > 0 then
+            let lst, value = new_watch t in
+            (h :: lst, value)
+          else (h :: t, "Not Here")
+    in
+    let followed_stocks, removed = new_watch p.followed_stocks in
+    ({ p with followed_stocks }, removed)
 
   (** [update_balance portfolio amount] updates [balance] of [portfolio] by
       [amount]. If the updated balance is negative, it raises [Out_of_balance]

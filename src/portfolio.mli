@@ -81,9 +81,11 @@ module type PortfolioType = sig
   val isempty : t -> bool
   (**Checks if a portfolio is empty.*)
 
-  val unfollow : Stock.t -> t -> t
-  (** Remove a stock from the watchlist. Required: the stock is in the
-      watchlist. *)
+  val unfollow : string -> t -> t * string
+  (** [unfollow tkr p] returns [(follow_list, output)]. Searches follow list for
+      [tkr]. If [stock] corresponding to [ticker] is already in the follow list,
+      will remove said stock and return the ticker in output. If [stock] isn't
+      in follow list, will return a relevant output. *)
 
   val update_balance : float -> t -> t
   (** [update_balance amount portfolio] updates [balance] of [portfolio] by
