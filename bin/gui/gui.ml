@@ -11,12 +11,10 @@ module L = Layout
 
 (** Issue thread -
     - #1) Calling savewrite every action is lazy... [EDIT: RESOLVED - rw]
-    - #2) Heavy front loading is annoying...
-
-    -------- Use promises to not stall everything
+    - #2) Heavy front loading is annoying... -------- Use promises to not stall
+      everything
     - #3) Front loads twice because of updating [EDIT: SEMI-RESOLVED - rw]...
-
-    -------- Perhaps fill with placeholders, only update when necessary
+      -------- Perhaps fill with placeholders, only update when necessary
     - #4) Barebone interface
     - #5) Detailed summary doesn't fit [EDIT: RESOLVED - rw]
     - #6) Stock_list displays in reverse order [EDIT: RESOLVED - rw]
