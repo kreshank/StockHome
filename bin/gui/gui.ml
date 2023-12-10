@@ -264,6 +264,7 @@ let main () =
           Portfolio.ticker_transact text_opt text_ticker text_amt !port
         in
         port := port_updated;
+        update_followed_stocks followed_stocks;
         match text_opt with
         | "buy" -> "Bought " ^ text_amt ^ " stock(s) of " ^ text_ticker
         | "sell" -> "Sold " ^ text_amt ^ " stock(s) of " ^ text_ticker
