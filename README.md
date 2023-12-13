@@ -6,12 +6,11 @@ This is a OCaml/Python program that pulls stock data from the Yahoo Finance API 
 ![Trade](https://media.github.coecis.cornell.edu/user/14972/files/4b012a1f-0820-485e-9af7-377378c62076)
 
 
-## Install s
-First, download the source code. 
-Then, run `make dependencies`. 
-Then, run `make gui`. 
+## Setup and Dependencies
+Requires Python 3.6+, pip3, and Pandas 1.5.3 (yahoo_fin dependencies).
+After downloading source code, run `make dependencies` in command line. After everything sucessfully downloads, you can run `make gui` in the command line to run the actual program.
 
-*For more details, check `INSTALL.md`.*
+*For more detailed instructions, check `INSTALL.md`.*
 
 ## Makefile
 The Makefile has several commands that can be used, such as:
